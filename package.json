@@ -9,7 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -40,6 +40,7 @@
     "typescript-eslint": "^8.46.3"
   },
   "dependencies": {
+    "22": "^0.0.0",
     "@langchain/core": "^1.1.1",
     "@langchain/google-genai": "^2.0.1",
     "@langchain/openai": "^1.1.3",
