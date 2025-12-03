@@ -1,0 +1,1 @@
+//styling function (color by file/folder)
