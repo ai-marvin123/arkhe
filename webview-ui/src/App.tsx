@@ -70,7 +70,7 @@ function App() {
       </div>
 
       <h1 className='text-5xl font-extrabold mb-8 bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent text-center'>
-        Vite + React + Tailwind
+        Marvin Team
       </h1>
 
       <div className='bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-lg flex flex-col gap-6'>
