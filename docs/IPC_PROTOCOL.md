@@ -1,50 +1,50 @@
 # 🔌 IPC Protocol: Frontend ↔ Backend
 
-**Definition:** Defines the JSON message contract between the React Webview (Frontend) and the VS Code Extension Host (Backend).
+**Definition:** Message contract between React Webview (Frontend) and Extension Host (Backend).
 
 **Core Principle:**
 
-- **Architecture:** Asynchronous Message Passing.
-- **Context:** The **Backend** maintains the LLM conversation history mapped by a **`sessionId`**. The Frontend generates and manages this ID (e.g., using `crypto.randomUUID()`).
+- **Architecture:** Async Message Passing.
+- **Context:** Backend maintains history by `sessionId`. Frontend manages this ID.
+
+---
 
 ## 1. Shared Data Structures
 
-These structures define the payload format for file trees.
+Schema for file tree data.
 
 ### `StructureNode`
 
-Represents a single item in the project structure (can be a file or a folder).
+Represents a project item.
 
-```typescript
-interface StructureNode {
-  id: string; // Unique ID (e.g., "src-components-button")
-  label: string; // Display name (e.g., "Button.tsx")
-  type: 'file' | 'folder'; // Determines icon (Paper vs Folder)
-  level: number; // Hierarchy depth (0, 1, 2...) for coloring
-  path: string; // Relative path (e.g., "/src/components/Button.tsx")
-  parentId?: string; // (Optional) ID of the parent folder
-}
-```
+| Key        | Type                 | Description                     |
+| :--------- | :------------------- | :------------------------------ |
+| `id`       | `string`             | Unique ID (e.g., "src-btn").    |
+| `label`    | `string`             | Display name (e.g., "App.tsx"). |
+| `type`     | `'FILE' \| 'FOLDER'` | UI Icon type (Upper case).      |
+| `level`    | `number`             | Depth (0, 1, 2) for styling.    |
+| `path`     | `string`             | Relative path for actions.      |
+| `parentId` | `string?`            | (Optional) Parent Node ID.      |
 
 ### `StructureEdge`
 
-Represents the hierarchical relationship between nodes.
+Represents hierarchy.
 
-```typescript
-interface StructureEdge {
-  source: string; // ID of the parent node
-  target: string; // ID of the child node
-}
-```
+| Key      | Type     | Description     |
+| :------- | :------- | :-------------- |
+| `source` | `string` | Parent Node ID. |
+| `target` | `string` | Child Node ID.  |
 
-## 2\. Frontend → Backend (Commands)
+---
 
-_Direction: User Interface triggers Backend actions._
+## 2. Frontend → Backend (Commands)
 
-| Command                  | Payload                                     | Description                                                                                                                    |
-| :----------------------- | :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
-| **`GENERATE_STRUCTURE`** | `{ "sessionId": string, "prompt": string }` | **Updated:** Includes `sessionId`. Backend uses this ID to retrieve or create the conversation history context.                |
-| **`RESET_SESSION`**      | `{ "sessionId": string }`                   | Explicitly tells Backend to delete history for this ID (Memory cleanup). Frontend should generate a NEW ID after sending this. |
+_Direction: UI triggers Backend._
+
+| Command              | Payload               | Description                 |
+| :------------------- | :-------------------- | :-------------------------- |
+| `GENERATE_STRUCTURE` | `{sessionId, prompt}` | Sends prompt & triggers AI. |
+| `RESET_SESSION`      | `{sessionId}`         | Clears backend history.     |
 
 #### Example Request:
 
@@ -52,65 +52,77 @@ _Direction: User Interface triggers Backend actions._
 {
   "command": "GENERATE_STRUCTURE",
   "payload": {
-    "sessionId": "uuid-v4-123456789",
-    "prompt": "Add a Redux store folder to the previous structure"
+    "sessionId": "uuid-v4-12345",
+    "prompt": "Create NestJS structure"
   }
 }
 ```
 
+---
+
 ## 3\. Backend → Frontend (Events)
 
-_Direction: Backend updates the UI._
+_Direction: Backend updates UI._
 
-| Command                   | Payload                                                                                                | Description                                                        |
-| :------------------------ | :----------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | --------- | ------------------------- |
-| **`STRUCTURE_GENERATED`** | `{ "mermaidSyntax": string, "jsonStructure": { "nodes": StructureNode[], "edges": StructureEdge[] } }` | Successful generation. Frontend redraws the graph using this data. |
-| **`PROCESSING_STATUS`**   | `{ "step": "analyzing"                                                                                 | "generating"                                                       | "done" }` | Updates UI loading state. |
-| **`ERROR`**               | `{ "message": string }`                                                                                | LLM failure or parsing error.                                      |
+### A. The Wrapper (`AI_RESPONSE`)
 
-#### Example Response (`STRUCTURE_GENERATED`):
+Standard response for Chat & Diagrams.
+
+| Key       | Type                  | Description                        |
+| :-------- | :-------------------- | :--------------------------------- |
+| `type`    | `'TEXT' \| 'DIAGRAM'` | Controls UI mode.                  |
+| `message` | `string`              | AI text explanation.               |
+| `data`    | `object?`             | Diagram payload (if type=DIAGRAM). |
+
+#### Example 1: Text Only
 
 ```json
 {
-  "command": "STRUCTURE_GENERATED",
+  "command": "AI_RESPONSE",
   "payload": {
-    "mermaidSyntax": "graph TD; root-->src;",
-    "jsonStructure": {
-      "nodes": [
-        {
-          "id": "root",
-          "label": "root",
-          "type": "folder",
-          "level": 0,
-          "path": "/"
-        },
-        {
-          "id": "src",
-          "label": "src",
-          "type": "folder",
-          "level": 1,
-          "path": "/src"
-        }
-      ],
-      "edges": [{ "source": "root", "target": "src" }]
+    "type": "TEXT",
+    "message": "Please clarify?",
+    "data": null
+  }
+}
+```
+
+#### Example 2: Diagram
+
+```json
+{
+  "command": "AI_RESPONSE",
+  "payload": {
+    "type": "DIAGRAM",
+    "message": "Done.",
+    "data": {
+      "mermaidSyntax": "graph TD...",
+      "jsonStructure": { "nodes": [], "edges": [] }
     }
   }
 }
 ```
 
-## 4\. TypeScript Implementation (Draft)
+### B. Other Events
 
-_Note: Frontend usage is optional but recommended for type safety._
+| Command             | Payload     | Description            |
+| :------------------ | :---------- | :--------------------- | ------------ | ------ |
+| `PROCESSING_STATUS` | `{step}`    | `analyzing`            | `generating` | `done` |
+| `ERROR`             | `{message}` | System/Parsing errors. |
 
-Use these types in `src/types.ts` (Backend) and optionally in `webview-ui/src/types.ts` (Frontend).
+---
+
+## 4\. TypeScript Implementation
+
+Copy to `src/types.ts` (Backend) and `webview-ui/src/types.ts` (Frontend).
 
 ```typescript
-// --- Shared Types ---
+// --- 1. Shared Data Models ---
 
 export interface StructureNode {
   id: string;
   label: string;
-  type: 'file' | 'folder';
+  type: 'FILE' | 'FOLDER';
   level: number;
   path: string;
   parentId?: string;
@@ -121,7 +133,21 @@ export interface StructureEdge {
   target: string;
 }
 
-// --- Message Types ---
+export interface DiagramData {
+  mermaidSyntax: string;
+  jsonStructure: {
+    nodes: StructureNode[];
+    edges: StructureEdge[];
+  };
+}
+
+// --- 2. Message Payloads ---
+
+export type AiResponsePayload =
+  | { type: 'TEXT'; message: string; data?: never }
+  | { type: 'DIAGRAM'; message: string; data: DiagramData };
+
+// --- 3. VS Code Message Definitions ---
 
 export type FrontendMessage =
   | {
@@ -131,13 +157,7 @@ export type FrontendMessage =
   | { command: 'RESET_SESSION'; payload: { sessionId: string } };
 
 export type BackendMessage =
-  | {
-      command: 'STRUCTURE_GENERATED';
-      payload: {
-        mermaidSyntax: string;
-        jsonStructure: { nodes: StructureNode[]; edges: StructureEdge[] };
-      };
-    }
+  | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
   | {
       command: 'PROCESSING_STATUS';
       payload: { step: 'analyzing' | 'generating' | 'done' };
