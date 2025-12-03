@@ -1,5 +1,7 @@
 # Arkhe - Developer Guide
 
+[**VS Code API**](https://code.visualstudio.com/api)
+
 ## 1\. Project Structure
 
 This project is a **Monorepo** containing two distinct parts:
