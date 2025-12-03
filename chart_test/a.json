@@ -1,0 +1,82 @@
+{
+  "mermaidSyntax": "graph TD;  root(root/)-->src(src/);  root-->package(package.json);  src-->components(components/);  src-->app(App.tsx);  components-->button(Button.tsx);  components-->header(Header.tsx);",
+  "jsonStructure": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "root",
+        "type": "folder",
+        "level": 0,
+        "path": "/"
+      },
+      {
+        "id": "src",
+        "label": "src",
+        "type": "folder",
+        "level": 1,
+        "path": "/src"
+      },
+      {
+        "id": "package",
+        "label": "package.json",
+        "type": "file",
+        "level": 1,
+        "path": "/package.json"
+      },
+      {
+        "id": "components",
+        "label": "components",
+        "type": "folder",
+        "level": 2,
+        "path": "/src/components"
+      },
+      {
+        "id": "app",
+        "label": "App.tsx",
+        "type": "file",
+        "level": 2,
+        "path": "/src/App.tsx"
+      },
+      {
+        "id": "button",
+        "label": "Button.tsx",
+        "type": "file",
+        "level": 3,
+        "path": "/src/components/Button.tsx"
+      },
+      {
+        "id": "header",
+        "label": "Header.tsx",
+        "type": "file",
+        "level": 3,
+        "path": "/src/components/Header.tsx"
+      }
+    ],
+    "edges": [
+      {
+        "source": "root",
+        "target": "src"
+      },
+      {
+        "source": "root",
+        "target": "package"
+      },
+      {
+        "source": "src",
+        "target": "components"
+      },
+      {
+        "source": "src",
+        "target": "app"
+      },
+      {
+        "source": "components",
+        "target": "button"
+      },
+      {
+        "source": "components",
+        "target": "header"
+      }
+    ]
+  }
+}
