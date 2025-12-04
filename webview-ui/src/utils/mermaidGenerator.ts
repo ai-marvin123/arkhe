@@ -43,13 +43,13 @@ export function applyMermaidStyling(
 ) {
   const COLORS = {
     folder: {
-      fill: "#OF2D8C",
-      text: "#000000",
+      fill: "#0F2D8C",
+      text: "#FFFFFF",
       stroke: "#333",
     },
     file: {
       fill: "#366EC2",
-      text: "#000000",
+      text: "#FFFFFF",
       stroke: "#666",
     },
   };
