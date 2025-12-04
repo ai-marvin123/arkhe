@@ -17,11 +17,12 @@ async function test() {
   const parse = NodeSchema.safeParse({
     id: 'Button',
     label: 'Button.tsx',
-    type: 'FILEE',
+    type: 'FILEEEEEEEEEEE',
     level: 3,
     path: '/src/components/Button.tsx',
     parentId: 'components',
-    abc: 'test',
+    abc: 'testfsdf dsfsdfds',
+    sdfsdfsdkfjldsjlk: 'dsfdsd',
   });
 
   if (parse.success) {
@@ -40,6 +41,6 @@ async function test() {
 
 // 3 - Create a TypeScript interface automatically
 
-type NodeSchema = z.infer<typeof NodeSchema>;
+export type NodeSchema = z.infer<typeof NodeSchema>;
 
 test();
