@@ -5,7 +5,7 @@ export type DiagramDispatch = (action: DiagramAction) => void;
 
 export type DiagramAction =
   | { type: 'set_userInput'; payload: string }
-  | { type: 'send_userInput' }
+  | { type: 'send_userInput'; payload?: void }
   | {
       type: 'load_newDiagram';
       payload: {
@@ -70,5 +70,9 @@ export interface TextEntry {
   text: string;
   timestamp: number;
 }
+
+export type AiResponsePayload =
+  | { type: 'TEXT'; message: string; data?: never }
+  | { type: 'DIAGRAM'; message: string; data: DiagramData };
 
 export type ChatLog = (TextEntry | DiagramEntry)[];
