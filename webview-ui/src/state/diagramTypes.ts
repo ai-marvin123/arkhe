@@ -1,0 +1,74 @@
+import { initialState } from './initialState';
+
+export type DiagramState = typeof initialState;
+export type DiagramDispatch = (action: DiagramAction) => void;
+
+export type DiagramAction =
+  | { type: 'set_userInput'; payload: string }
+  | { type: 'send_userInput' }
+  | {
+      type: 'load_newDiagram';
+      payload: {
+        message: string;
+        data: DiagramData;
+      };
+    }
+  | { type: 'load_textOnly'; payload: { message: string } }
+  | {
+      type: 'update_logEntry';
+      payload: { id: string; zoomLevel?: number; panX?: number; panY?: number };
+    };
+export type ViewSettings = {
+  zoomLevel: number;
+  panX: number;
+  panY: number;
+  isFullscreen: boolean;
+  isLoading: boolean;
+  lastLLMMessage: string;
+  activeEntryId: string;
+};
+export type Node = {
+  id: string;
+  label: string;
+  type: 'FILE' | 'FOLDER';
+  level: number;
+  path: string;
+  parentId?: string;
+};
+
+export type Edge = {
+  source: string;
+  target: string;
+};
+
+export type DiagramData = {
+  mermaidSyntax: string;
+  jsonStructure: {
+    nodes: Node[];
+    edges: Edge[];
+  };
+};
+
+type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
+type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
+
+export interface DiagramEntry {
+  id: string;
+  role: string;
+  type: DiagramEntryType;
+  text: string;
+  diagramData: DiagramData | null;
+  viewSettings: ViewSettings;
+  contentRefId: string | null;
+  timestamp: number;
+}
+
+export interface TextEntry {
+  id: string;
+  role: string;
+  type: TextEntryType;
+  text: string;
+  timestamp: number;
+}
+
+export type ChatLog = (TextEntry | DiagramEntry)[];
