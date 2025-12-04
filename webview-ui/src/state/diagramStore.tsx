@@ -24,13 +24,12 @@ function chatReducer(state: DiagramState, action: DiagramAction): DiagramState {
     }
     //dispatched on submit: save latest user input in log
     case 'send_userInput': {
-      if (!state.view.activeEntryId) return state;
       const archivedUserInput = {
         id: generateId(),
         role: 'user',
         type: 'TEXT_INPUT' as const,
         text: state.chat.currentInput,
-        timestamp: Date.now() + 1,
+        timestamp: Date.now(),
       };
       return {
         ...state,
