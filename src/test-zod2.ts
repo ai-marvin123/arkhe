@@ -22,7 +22,7 @@ async function mockCallToLLM(prompt: string): Promise<string> {
       "mermaidSyntax": "graph TD; ...",
       "jsonStructure": {
         "nodes": [
-          { "id": "1", "label": "App.tsx", "type": "document" } 
+          { "id": "1", "label": "App.tsx", "type": "FILE" } 
         ],
         "edges": []
       }

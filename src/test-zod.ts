@@ -17,7 +17,7 @@ async function test() {
   const parse = NodeSchema.safeParse({
     id: 'Button',
     label: 'Button.tsx',
-    type: 'FILEEEEEEEEEEE',
+    type: 'FILE',
     level: 3,
     path: '/src/components/Button.tsx',
     parentId: 'components',
