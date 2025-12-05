@@ -1,6 +1,6 @@
 import { useDiagramState } from '../../state/diagramContext';
-import type { ChatLog } from '../../state/diagramTypes';
 import UserBubble from './UserBubble';
+import AIBubble from './AIBubble';
 
 export default function ChatLogContainer() {
   const state = useDiagramState();
@@ -14,7 +14,7 @@ export default function ChatLogContainer() {
           return <UserBubble key={key} text={entry.text} />;
         }
         if (entry.type === 'DIAGRAM_CONTENT') {
-          return <DiagramFrame key={key} diagram={entry} />;
+          return <DiagramFrame key={key} entry={entry} />;
         }
         if (entry.type === 'TEXT_RESPONSE') {
           return <AIBubble key={key} text={entry.text} />;
