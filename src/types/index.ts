@@ -1,34 +1,59 @@
-// --- 1. Shared Data Models ---
+import { z } from 'zod';
 
-export interface StructureNode {
-  id: string;
-  label: string;
-  type: 'FILE' | 'FOLDER';
-  level: number;
-  path: string;
-  parentId?: string;
-}
+// 1. Core Data Structures
+export const StructureNodeSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  type: z.enum(['FILE', 'FOLDER']),
+  level: z.number(),
+  path: z.string(),
+  parentId: z.string().optional(),
+});
 
-export interface StructureEdge {
-  source: string;
-  target: string;
-}
+export const EdgeSchema = z.object({
+  source: z.string(),
+  target: z.string(),
+});
 
-export interface DiagramData {
-  mermaidSyntax: string;
-  jsonStructure: {
-    nodes: StructureNode[];
-    edges: StructureEdge[];
-  };
-}
+export const JsonStructureSchema = z.object({
+  nodes: z.array(StructureNodeSchema),
+  edges: z.array(EdgeSchema),
+});
 
-// --- 2. Message Payloads ---
+export const DiagramDataSchema = z.object({
+  mermaidSyntax: z.string(),
+  jsonStructure: JsonStructureSchema,
+});
 
-export type AiResponsePayload =
-  | { type: 'TEXT'; message: string; data?: never }
-  | { type: 'DIAGRAM'; message: string; data: DiagramData };
+// 2. AI Response Wrapper (Discriminated Union)
+export const AiResponseSchema = z.discriminatedUnion('type', [
+  // Case 1: Text Response (Chat, Error message)
+  z
+    .object({
+      type: z.literal('TEXT'),
+      message: z.string(),
+      data: z.undefined().optional(),
+    })
+    .strict(),
 
-// --- 3. VS Code Message Definitions ---
+  // Case 2: Diagram Response
+  z
+    .object({
+      type: z.literal('DIAGRAM'),
+      message: z.string(),
+      data: DiagramDataSchema,
+    })
+    .strict(),
+]);
+
+// 3. TYPESCRIPT INTERFACES (Inferred from Schemas)
+
+export type StructureNode = z.infer<typeof StructureNodeSchema>;
+export type StructureEdge = z.infer<typeof EdgeSchema>;
+export type DiagramData = z.infer<typeof DiagramDataSchema>;
+export type AiResponsePayload = z.infer<typeof AiResponseSchema>;
+
+// 4. MESSAGE PROTOCOLS (Frontend <-> Backend)
 
 export type FrontendMessage =
   | {

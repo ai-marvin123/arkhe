@@ -1,36 +1,44 @@
-import { CommandHandler } from "./handlers/CommandHandler";
+import { CommandHandler } from './handlers/CommandHandler';
+import { BackendMessage, FrontendMessage } from './types';
 
-// Fake panel to capture backend responses
 const fakePanel = {
   webview: {
-    postMessage: (data: any) => {
-      console.log("BACKEND RESPONSE:", data);
+    postMessage: (data: BackendMessage) => {
+      console.log('📩 BACKEND SENT:', JSON.stringify(data, null, 2));
+
+      if (data.command === 'AI_RESPONSE' && data.payload.type === 'DIAGRAM') {
+        console.log('✅ Valid Diagram Structure received!');
+      }
     },
   },
 };
 
-async function chatting() {
-  console.log("Test 1: NestJS → should return a DIAGRAM mock");
-  await CommandHandler.handle(fakePanel as any, {
-    command: "generateDiagram",
-    prompt: "nestjs project",
-  });
+async function runTest() {
+  console.log('--- TEST 1: Happy Path (NestJS Diagram) ---');
 
-  console.log("\nTest 2: Chat → should return TEXT mock");
-  await CommandHandler.handle(fakePanel as any, {
-    command: "getMockChat",
-  });
+  const msg1: FrontendMessage = {
+    command: 'GENERATE_STRUCTURE',
+    payload: {
+      sessionId: 'test-sess-01',
+      prompt: 'Create a nestjs project structure',
+    },
+  };
 
-  console.log("\nTest 3: Error → should return INVALID MOCK");
-  await CommandHandler.handle(fakePanel as any, {
-    command: "generateDiagram",
-    prompt: "error please",
-  });
+  await CommandHandler.handle(fakePanel as any, msg1);
 
-  console.log("\nTest 4: Unknown Command");
-  await CommandHandler.handle(fakePanel as any, {
-    command: "unknownAction",
-  });
+  console.log('\n--- TEST 2: Chat Only (Text response) ---');
+  const msg2: FrontendMessage = {
+    command: 'GENERATE_STRUCTURE',
+    payload: { sessionId: 'test-sess-01', prompt: 'chat hello' },
+  };
+  await CommandHandler.handle(fakePanel as any, msg2);
+
+  console.log('\n--- TEST 3: Edge Case (Error/Empty) ---');
+  const msg3: FrontendMessage = {
+    command: 'GENERATE_STRUCTURE',
+    payload: { sessionId: 'test-sess-01', prompt: 'generate an error' },
+  };
+  await CommandHandler.handle(fakePanel as any, msg3);
 }
 
-chatting();
+runTest();

@@ -1,28 +1,28 @@
 export const missingNodeTypeMock = {
-  type: "DIAGRAM",
-  message: "Diagram with missing node type",
+  type: 'DIAGRAM',
+  message: 'Diagram with missing node type',
   data: {
-    mermaidSyntax: "graph TD; X-->Y;",
+    mermaidSyntax: 'graph TD; X-->Y;',
     jsonStructure: {
       nodes: [
         {
-          id: "X",
-          label: "X",
+          id: 'X',
+          label: 'X',
           level: 1,
-          path: "X.ts",
+          path: 'X.ts',
           // ❌ type missing on purpose
         },
       ],
-      edges: [{ source: "X", target: "Y" }],
+      edges: [{ source: 'X', target: 'Y' }],
     },
   },
 };
 
 export const emptyStructureMock = {
-  type: "DIAGRAM",
-  message: "Empty jsonStructure",
+  type: 'DIAGRAM',
+  message: 'Empty jsonStructure',
   data: {
-    mermaidSyntax: "",
+    mermaidSyntax: '',
     jsonStructure: {
       nodes: [],
       edges: [],
