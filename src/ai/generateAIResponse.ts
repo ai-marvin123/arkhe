@@ -1,9 +1,8 @@
-import { WrapperType } from "./schema";
+import { WrapperType } from "../schemas/WrapperSchema";
 
-export async function generateAIResponse(prompt: string): Promise<WrapperType> {
-  // Very simple logic for MVP:
+export async function generateAIResponse(prompt: any): Promise<WrapperType> {
+  // MVP fallback: not enough info
   if (!prompt || prompt.trim().length < 10) {
-    // Not enough info -> TEXT response
     return {
       type: "TEXT",
       message:
@@ -11,31 +10,33 @@ export async function generateAIResponse(prompt: string): Promise<WrapperType> {
     };
   }
 
-  // Enough info -> DIAGRAM response with dummy data
+  // Enough info -> DIAGRAM response
   return {
     type: "DIAGRAM",
     message: "New blueprint generated with two nodes.",
     data: {
-      mermaidSyntax:
-        "graph TD;\n  app-file(App.js)-->src-dir(src/components);",
+      mermaidSyntax: `graph TD;
+  app-file(App.js)-->src-dir(src/components);`,
       jsonStructure: {
         nodes: [
           {
             id: "app-file",
             label: "App.js",
+            type: "FILE",      // ✅ REQUIRED
             level: 1,
-            isFolder: false,
             path: "src/App.js",
           },
           {
             id: "src-dir",
             label: "src/components",
+            type: "FOLDER",    // ✅ REQUIRED
             level: 2,
-            isFolder: true,
             path: "src/components",
           },
         ],
-        edges: [{ source: "app-file", target: "src-dir" }],
+        edges: [
+          { source: "app-file", target: "src-dir" },
+        ],
       },
     },
   };
