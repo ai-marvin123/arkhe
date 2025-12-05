@@ -1,31 +1,43 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { MockService } from "../services/MockService";
+import { WrapperType } from "../schemas/WrapperSchema";
 
 export class CommandHandler {
-  public static async handle(
+  /**
+   * Now handle() expects JUST the webview panel and the message.
+   */
+  static async handle(
     panel: vscode.WebviewPanel,
-    message: any,
-    context: vscode.ExtensionContext
+    message: { command: string; prompt?: string }
   ) {
-    // Log for debugging
-    console.log(`[CommandHandler] Received: ${message.command}`);
+    const { command, prompt } = message;
 
-    switch (message.command) {
-      case 'GENERATE_STRUCTURE':
-        // TODO: Invoke AiService.generateStructure()
-        console.log('TODO: Handle GENERATE_STRUCTURE');
+    let response: any;
+
+    switch (command) {
+      case "generateDiagram":
+        response = MockService.getMockResponse(prompt ?? "");
         break;
 
-      case 'RESET_SESSION':
-        // TODO: Invoke SessionManager.clearSession()
-        console.log('TODO: Handle RESET_SESSION');
+      case "getMockDiagram":
+        response = MockService.getDiagramMock();
         break;
 
-      case 'showWarning':
-        vscode.window.showWarningMessage(message.text);
+      case "getMockChat":
+        response = MockService.getChatMock();
+        break;
+
+      case "getEdgeCases":
+        response = MockService.getEdgeCases();
         break;
 
       default:
-        console.warn(`Unknown command: ${message.command}`);
+        response = {
+          type: "TEXT",
+          message: `Unknown command: ${command}`,
+        };
     }
+
+    panel.webview.postMessage(response);
   }
 }
