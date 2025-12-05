@@ -1,6 +1,6 @@
 import type {FormEvent} from 'react';
 import { useDiagramState, useDiagramDispatch } from '../state/diagramContext';
-import type { AiResponsePayload } from '../state/diagramTypes';
+import type { BackendMessage } from '../state/diagramTypes';
 
 export default function AIChat() {
   const state = useDiagramState();
@@ -20,16 +20,16 @@ export default function AIChat() {
     dispatch({type: 'send_userInput'});
     const sessionId = state.session.sessionId;
     try{
-        const response: AiResponsePayload = await ;//Avo's API fetch request here
-
+        const response: BackendMessage = await ;//Avo's API fetch request here
+        const {payload} = response;
         if (!response) {
             throw new Error('No response object received on submit')
         }
 
-        if (response.type === 'DIAGRAM'){
-            dispatch({type: 'load_newDiagram', payload: {message: response.message, data: response.data}})
-        }else if (response.type === 'TEXT'){
-            dispatch({type: 'load_textOnly', payload: {message: response.message}})
+        if (payload.type === 'DIAGRAM'){
+            dispatch({type: 'load_newDiagram', payload: {message: payload.message, data: payload.data}})
+        }else if (payload.type === 'TEXT'){
+            dispatch({type: 'load_textOnly', payload: {message: payload.message}})
         }
     }catch (error){
          dispatch({type: 'load_textOnly', payload: {message: 'API Error: Failed to connect to the backend.'}})

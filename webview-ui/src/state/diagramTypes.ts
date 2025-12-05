@@ -74,5 +74,9 @@ export interface TextEntry {
 export type AiResponsePayload =
   | { type: 'TEXT'; message: string; data?: never }
   | { type: 'DIAGRAM'; message: string; data: DiagramData };
+export type BackendMessage = {
+  command: 'AI_RESPONSE';
+  payload: AiResponsePayload;
+};
 
 export type ChatLog = (TextEntry | DiagramEntry)[];
