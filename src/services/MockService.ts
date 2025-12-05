@@ -4,13 +4,14 @@ import {
   missingNodeTypeMock,
   emptyStructureMock,
 } from "../mocks/edgeCaseMocks";
+import { AiResponsePayload } from "../types";
 
 export class MockService {
-  static getDiagramMock() {
+  static getDiagramMock(): AiResponsePayload {
     return simpleDiagramMock;
   }
 
-  static getChatMock() {
+  static getChatMock(): AiResponsePayload {
     return simpleChatMock;
   }
 
@@ -22,26 +23,26 @@ export class MockService {
   }
 
   /**
-   * Returns a mock response based on keyword detection in the prompt.
+   * Returns a mock response based on keyword detection
+   * to simulate Phase 3 behavior.
    */
-  static getMockResponse(prompt: string) {
+  static getMockResponse(prompt: string): AiResponsePayload {
     const lower = prompt.toLowerCase();
 
-    // Edge-case mocks
-if (lower.includes("error")) return missingNodeTypeMock;
-if (lower.includes("empty")) return emptyStructureMock;
+    // Edge-case failure mocks
+    if (lower.includes("error")) return missingNodeTypeMock;
+    if (lower.includes("empty")) return emptyStructureMock;
 
-// Framework-specific mocks
-if (lower.includes("nestjs")) return simpleDiagramMock;
-if (lower.includes("folder") || lower.includes("structure"))
-  return simpleDiagramMock;
+    // Framework/system diagram mocks
+    if (lower.includes("nestjs")) return simpleDiagramMock;
+    if (lower.includes("folder") || lower.includes("structure"))
+      return simpleDiagramMock;
 
-// Chat mocks
-if (lower.includes("chat") || lower.includes("message"))
-  return simpleChatMock;
+    // Natural chat mode, explanation requests
+    if (lower.includes("chat") || lower.includes("message"))
+      return simpleChatMock;
 
-// Default fallback
-return simpleDiagramMock;
-
+    // Default fallback (chat feels better UX)
+    return simpleChatMock;
   }
 }

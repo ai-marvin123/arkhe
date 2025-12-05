@@ -60,7 +60,10 @@ export type FrontendMessage =
       command: 'GENERATE_STRUCTURE';
       payload: { sessionId: string; prompt: string };
     }
-  | { command: 'RESET_SESSION'; payload: { sessionId: string } };
+  | {
+      command: 'RESET_SESSION';
+      payload: { sessionId: string };
+    };
 
 export type BackendMessage =
   | { command: 'AI_RESPONSE'; payload: AiResponsePayload }

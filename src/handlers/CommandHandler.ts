@@ -1,56 +1,57 @@
-import * as vscode from 'vscode';
-import { MockService } from '../services/MockService';
-import { FrontendMessage, BackendMessage, AiResponsePayload } from '../types';
-import { SessionManager } from '../managers/SessionManager';
+import * as vscode from "vscode";
+import { aiService } from "../services/AiService";
+import { sessionManager } from "../managers/SessionManager";
+import { AiResponsePayload, FrontendMessage, BackendMessage } from "../types";
 
 export class CommandHandler {
-  static async handle(
-    panel: vscode.WebviewPanel,
-    message: FrontendMessage
-  ): Promise<void> {
-    console.log(`[CommandHandler] Received command: ${message.command}`);
+  constructor(private panel: vscode.WebviewPanel) {}
 
-    switch (message.command) {
-      case 'GENERATE_STRUCTURE': {
-        const { sessionId, prompt } = message.payload;
+  async handle(msg: FrontendMessage) {
+    try {
+      switch (msg.command) {
+        case "GENERATE_STRUCTURE": {
+          const { sessionId, prompt } = msg.payload;
 
-        const mockData = MockService.getMockResponse(
-          prompt
-        ) as AiResponsePayload;
+          const aiResponsePayload = await aiService.generateStructure(
+            sessionId,
+            prompt
+          );
 
-        await new Promise((resolve) => setTimeout(resolve, 500));
+          this.panel.webview.postMessage(aiResponsePayload);
 
-        const responseMsg: BackendMessage = {
-          command: 'AI_RESPONSE',
-          payload: mockData,
-        };
+          break;
+        }
 
-        panel.webview.postMessage(responseMsg);
-        break;
+        case "RESET_SESSION": {
+          const { sessionId } = msg.payload;
+
+          // Clear history from SessionManager
+          sessionManager.clearSession(sessionId);
+
+          // Send a confirmation text back to the chat so the user knows it happened
+          const resetResponse: BackendMessage = {
+            command: "AI_RESPONSE",
+            payload: {
+              type: "TEXT",
+              message: `Session ${sessionId} has been reset. Memory cleared.`,
+            },
+          };
+
+          this.panel.webview.postMessage(resetResponse);
+          break;
+        }
       }
-
-      case 'RESET_SESSION': {
-        const { sessionId } = message.payload;
-
-        // Clear history from SessionManager
-        SessionManager.getInstance().clearSession(sessionId);
-
-        // Send a confirmation text back to the chat so the user knows it happened
-        const resetResponse: BackendMessage = {
-          command: 'AI_RESPONSE',
-          payload: {
-            type: 'TEXT',
-            message: `Session ${sessionId} has been reset. Memory cleared.`,
-          },
-        };
-
-        panel.webview.postMessage(resetResponse);
-        break;
-      }
-
-      default: {
-        console.warn(`[CommandHandler] Unknown command received.`);
-      }
+    } catch (err: any) {
+      this.sendError(
+        `CommandHandler failed: ${err?.message ?? "Unexpected error"}`
+      );
     }
+  }
+
+  private sendError(message: string): void {
+    this.panel.webview.postMessage({
+      command: "ERROR",
+      payload: { message },
+    });
   }
 }

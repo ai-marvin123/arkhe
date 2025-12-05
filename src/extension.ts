@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import * as vscode from 'vscode';
 import * as path from 'path'; // Need path for joinPath
 import * as fs from 'fs'; // Need fs to read the built index.html
-
+import { FrontendMessage } from './types';
 import { CommandHandler } from './handlers/CommandHandler';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -10,17 +10,14 @@ export function activate(context: vscode.ExtensionContext) {
 
   console.log('Arkhe Extension is active!');
 
-  // 1. Register the command that will launch the webview
   const disposable = vscode.commands.registerCommand('arkhe.helloWorld', () => {
-    // 2. Create and show a new webview panel
+
     const panel = vscode.window.createWebviewPanel(
-      'reactWebview', // Internal ID for the webview
-      'React VS Code Extension', // Title of the panel displayed to the user
-      vscode.ViewColumn.One, // Editor column to show the new webview panel in
+      'reactWebview',
+      'React VS Code Extension',
+      vscode.ViewColumn.One,
       {
-        // Enable scripts in the webview (Required for React)
         enableScripts: true,
-        // Allow access to the entire extension directory root to cover all built assets
         localResourceRoots: [
           vscode.Uri.joinPath(context.extensionUri, 'out'),
           vscode.Uri.joinPath(context.extensionUri, 'webview-ui', 'build'),
@@ -29,14 +26,16 @@ export function activate(context: vscode.ExtensionContext) {
       }
     );
 
-    // 3. Set the HTML content for the webview
     panel.webview.html = getWebviewContent(panel.webview, context.extensionUri);
 
-    // This function listens to ALL messages from the frontend
-    panel.webview.onDidReceiveMessage(async (message) => {
-  CommandHandler.handle(panel, message);
-});
-});
+    // ⭐ Instantiate your command handler
+    const handler = new CommandHandler(panel);
+
+    // ⭐ Correctly typed message receiver
+    panel.webview.onDidReceiveMessage(async (message: FrontendMessage) => {
+      await handler.handle(message);
+    });
+  });
 
   context.subscriptions.push(disposable);
 }
