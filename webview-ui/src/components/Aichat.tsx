@@ -49,10 +49,3 @@ export default function AIChat() {
     </form>
   );
 }
-//1. save user input
-//2. make api request
-//3. receive and process incoming data (promise)
-//4. render diagram and message
-
-//form component with onsubmit
-//input field
