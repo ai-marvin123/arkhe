@@ -1,5 +1,5 @@
-import { CommandHandler } from './handlers/CommandHandler';
-import { BackendMessage, FrontendMessage } from './types';
+import { CommandHandler } from '../handlers/CommandHandler';
+import { BackendMessage, FrontendMessage } from '../types';
 
 const fakePanel = {
   webview: {
