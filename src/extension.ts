@@ -33,14 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
     panel.webview.html = getWebviewContent(panel.webview, context.extensionUri);
 
     // This function listens to ALL messages from the frontend
-    panel.webview.onDidReceiveMessage(
-      async (message) => {
-        await CommandHandler.handle(panel, message, context);
-      },
-      undefined,
-      context.subscriptions
-    );
-  });
+    panel.webview.onDidReceiveMessage(async (message) => {
+  CommandHandler.handle(panel, message);
+});
+});
 
   context.subscriptions.push(disposable);
 }

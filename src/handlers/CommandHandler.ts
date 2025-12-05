@@ -1,31 +1,56 @@
 import * as vscode from 'vscode';
+import { MockService } from '../services/MockService';
+import { FrontendMessage, BackendMessage, AiResponsePayload } from '../types';
+import { SessionManager } from '../managers/SessionManager';
 
 export class CommandHandler {
-  public static async handle(
+  static async handle(
     panel: vscode.WebviewPanel,
-    message: any,
-    context: vscode.ExtensionContext
-  ) {
-    // Log for debugging
-    console.log(`[CommandHandler] Received: ${message.command}`);
+    message: FrontendMessage
+  ): Promise<void> {
+    console.log(`[CommandHandler] Received command: ${message.command}`);
 
     switch (message.command) {
-      case 'GENERATE_STRUCTURE':
-        // TODO: Invoke AiService.generateStructure()
-        console.log('TODO: Handle GENERATE_STRUCTURE');
-        break;
+      case 'GENERATE_STRUCTURE': {
+        const { sessionId, prompt } = message.payload;
 
-      case 'RESET_SESSION':
-        // TODO: Invoke SessionManager.clearSession()
-        console.log('TODO: Handle RESET_SESSION');
-        break;
+        const mockData = MockService.getMockResponse(
+          prompt
+        ) as AiResponsePayload;
 
-      case 'showWarning':
-        vscode.window.showWarningMessage(message.text);
-        break;
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
-      default:
-        console.warn(`Unknown command: ${message.command}`);
+        const responseMsg: BackendMessage = {
+          command: 'AI_RESPONSE',
+          payload: mockData,
+        };
+
+        panel.webview.postMessage(responseMsg);
+        break;
+      }
+
+      case 'RESET_SESSION': {
+        const { sessionId } = message.payload;
+
+        // Clear history from SessionManager
+        SessionManager.getInstance().clearSession(sessionId);
+
+        // Send a confirmation text back to the chat so the user knows it happened
+        const resetResponse: BackendMessage = {
+          command: 'AI_RESPONSE',
+          payload: {
+            type: 'TEXT',
+            message: `Session ${sessionId} has been reset. Memory cleared.`,
+          },
+        };
+
+        panel.webview.postMessage(resetResponse);
+        break;
+      }
+
+      default: {
+        console.warn(`[CommandHandler] Unknown command received.`);
+      }
     }
   }
 }
