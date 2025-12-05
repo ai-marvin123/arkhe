@@ -1,9 +1,15 @@
-import { MOCK_REACT_ARCH } from "../../src/mocks/diagramMocks";
+import { simpleDiagramMock } from "../../src/mocks/diagramMocks";
 import { applyMermaidStyling } from "./utils/mermaidGenerator";
-import MermaidRenderer from "././components/MermaidRenderer";
+import MermaidRenderer from "./components/diagram/MermaidRenderer";
 
 export default function App() {
-  const diagram = MOCK_REACT_ARCH.data;
+  const diagram = simpleDiagramMock.data;
+
+
+  if (diagram === undefined) {
+
+    return
+  }
 
   const styledMermaid = applyMermaidStyling(
     diagram.jsonStructure,
@@ -12,7 +18,7 @@ export default function App() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>{MOCK_REACT_ARCH.message}</h1>
+      <h1>{simpleDiagramMock.message}</h1>
 
       <MermaidRenderer code={styledMermaid} />
 
