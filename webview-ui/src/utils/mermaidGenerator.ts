@@ -1,13 +1,9 @@
 //styling function (color by file/folder)
 
-import {
-  MOCK_REACT_ARCH,
-  MOCK_NESTJS_ARCH,
-} from "../../../src/mocks/diagramMocks";
+import { simpleDiagramMock } from "../../../src/mocks/diagramMocks";
 
 // src/types/diagram.ts
-console.log(MOCK_REACT_ARCH);
-console.log(MOCK_NESTJS_ARCH);
+console.log(simpleDiagramMock);
 
 export interface DiagramNode {
   id: string;
