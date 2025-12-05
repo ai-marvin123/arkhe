@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 import { DiagramContext, DiagramDispatchContext } from './diagramContext';
 import type { DiagramAction, DiagramState } from './diagramTypes';
 import { initialState } from './initialState';
+import { applyMermaidStyling } from '../utils/mermaidGenerator';
 
 //helper function
 const generateId = (): string => {
@@ -47,6 +48,10 @@ function chatReducer(state: DiagramState, action: DiagramAction): DiagramState {
 
     //after receiving data from BE - update current state with new diagram data
     case 'load_newDiagram': {
+      const styledMermaidSyntax = applyMermaidStyling(
+        action.payload.data.jsonStructure,
+        action.payload.data.mermaidSyntax
+      );
       const defaultView = {
         zoomLevel: initialState.view.zoomLevel,
         panX: initialState.view.panX,
@@ -61,7 +66,7 @@ function chatReducer(state: DiagramState, action: DiagramAction): DiagramState {
         type: 'DIAGRAM_CONTENT' as const, // NEW TYPE: Signals this entry holds unique content
         diagramData: {
           jsonStructure: action.payload.data.jsonStructure,
-          mermaidSyntax: action.payload.data.mermaidSyntax,
+          mermaidSyntax: styledMermaidSyntax,
         },
         viewSettings: { ...initialState.view, ...defaultView },
         contentRefId: null,
@@ -72,7 +77,7 @@ function chatReducer(state: DiagramState, action: DiagramAction): DiagramState {
         ...state,
         diagram: {
           jsonStructure: action.payload.data.jsonStructure,
-          mermaidSyntax: action.payload.data.mermaidSyntax,
+          mermaidSyntax: styledMermaidSyntax,
         },
         view: {
           ...state.view,

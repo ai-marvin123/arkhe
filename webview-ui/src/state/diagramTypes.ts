@@ -52,7 +52,7 @@ export type DiagramData = {
 type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
 type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
 
-export interface DiagramEntry {
+export type DiagramEntry = {
   id: string;
   role: string;
   type: DiagramEntryType;
@@ -61,15 +61,15 @@ export interface DiagramEntry {
   viewSettings: ViewSettings;
   contentRefId: string | null;
   timestamp: number;
-}
+};
 
-export interface TextEntry {
+export type TextEntry = {
   id: string;
   role: string;
   type: TextEntryType;
   text: string;
   timestamp: number;
-}
+};
 
 export type AiResponsePayload =
   | { type: 'TEXT'; message: string; data?: never }
