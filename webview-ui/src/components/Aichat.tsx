@@ -43,8 +43,16 @@ export default function AIChat() {
         onChange={handleOnChange}
         placeholder='Type here'
       />
-      <button type='submit' disabled={state.view.isLoading}>
-        Send
+      <button type='submit' aria-label='Send Message' disabled={state.view.isLoading} className={`
+    flex items-center justify-center 
+    p-2 rounded-lg text-white font-semibold 
+    transition-colors duration-200 
+    ${state.view.isLoading 
+      ? 'bg-gray-400 cursor-not-allowed' 
+      : 'bg-blue-600 hover:bg-blue-700'
+    }
+  `}>
+    <span className="codicon codicon-send text-lg" aria-hidden="true"></span>{' '}
       </button>
     </form>
   );

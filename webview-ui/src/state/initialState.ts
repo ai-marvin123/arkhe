@@ -1,15 +1,15 @@
-import type { Node, Edge, ChatLog } from "./diagramTypes";
+import type { Node, Edge, ChatLog } from './diagramTypes';
 
 //define initalState structure
 export const initialState = {
   //A. Session id to send to BE
   session: {
-    sessionId: "",
+    sessionId: '',
   },
   // B. Current diagram
   diagram: {
     jsonStructure: { nodes: [] as Node[], edges: [] as Edge[] },
-    mermaidSyntax: "",
+    mermaidSyntax: '',
   },
 
   // C. Current view
@@ -19,12 +19,11 @@ export const initialState = {
     panY: 0,
     isFullscreen: false,
     isLoading: false,
-    lastLLMMessage: "",
-    activeEntryId: "",
+    lastLLMMessage: '',
   },
   // D. AI Chat log
   chat: {
     log: [] as ChatLog, // Array of { id, role, text, type, diagramData, viewSettings, ... }
-    currentInput: "",
+    currentInput: '',
   },
 };

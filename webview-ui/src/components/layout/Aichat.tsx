@@ -36,6 +36,7 @@ export default function AIChat() {
     }
   }
   return (
+    <div className ='fixed-bar'>
     <form onSubmit = {handleSubmit}>
       <input
         type='text'
@@ -43,10 +44,11 @@ export default function AIChat() {
         onChange={handleOnChange}
         placeholder='Type here'
       />
-      <button type='submit' disabled={state.view.isLoading}>
-        Send
+      <button className = 'send-button' type='submit' disabled={state.view.isLoading}>
+        <span className="codicon codicon-send" aria-hidden="true"></span>
       </button>
     </form>
+    </div>
   );
 }
 //1. save user input
