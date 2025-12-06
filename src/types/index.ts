@@ -7,7 +7,7 @@ export const StructureNodeSchema = z.object({
   type: z.enum(['FILE', 'FOLDER']),
   level: z.number(),
   path: z.string(),
-  parentId: z.string().optional(),
+  parentId: z.string().nullable().optional(),
 });
 
 export const EdgeSchema = z.object({
@@ -32,7 +32,7 @@ export const AiResponseSchema = z.discriminatedUnion('type', [
     .object({
       type: z.literal('TEXT'),
       message: z.string(),
-      data: z.undefined().optional(),
+      data: z.undefined().nullable().optional(),
     })
     .strict(),
 

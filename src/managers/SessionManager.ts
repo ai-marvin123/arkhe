@@ -1,19 +1,27 @@
-class SessionManager {
-  private sessions = new Map<string, any[]>();
+import { InMemoryChatMessageHistory } from '@langchain/core/chat_history';
 
-  get(sessionId: string) {
-    return this.sessions.get(sessionId) ?? [];
+export class SessionManager {
+  private static instance: SessionManager;
+
+  private sessions = new Map<string, InMemoryChatMessageHistory>();
+
+  private constructor() {}
+
+  public static getInstance(): SessionManager {
+    if (!SessionManager.instance) {
+      SessionManager.instance = new SessionManager();
+    }
+    return SessionManager.instance;
   }
 
-  add(sessionId: string, message: { user: string; assistant: string }) {
-    const history = this.get(sessionId);
-    history.push(message);
-    this.sessions.set(sessionId, history);
+  getSession(id: string): InMemoryChatMessageHistory {
+    if (!this.sessions.has(id)) {
+      this.sessions.set(id, new InMemoryChatMessageHistory());
+    }
+    return this.sessions.get(id)!;
   }
 
-  clearSession(sessionId: string) {
-    this.sessions.set(sessionId, []);
+  clearSession(id: string): void {
+    this.sessions.delete(id);
   }
 }
-
-export const sessionManager = new SessionManager();

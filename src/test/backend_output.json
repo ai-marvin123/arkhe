@@ -1,0 +1,8 @@
+{
+  "command": "AI_RESPONSE",
+  "payload": {
+    "type": "TEXT",
+    "message": "You asked me to build a Python Flask app structure.",
+    "data": null
+  }
+}

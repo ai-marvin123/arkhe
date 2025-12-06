@@ -1,134 +1,140 @@
-import "dotenv/config";
-import { ChatOpenAI } from "@langchain/openai";
-// import { SYSTEM_PROMPT } from "../llm/systemPrompt";
-import { sessionManager } from "../managers/SessionManager";
-// import { validateAiResponse } from "../schemas/validation";
+import 'dotenv/config';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from '@langchain/core/prompts';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
+import { AiResponsePayload, AiResponseSchema } from '../types';
+import { SystemMessage } from 'langchain';
 
-import { AiResponsePayload, DiagramData, AiResponseSchema } from "../types";
+// export const chatModel = new ChatOpenAI({
+//   modelName: 'gpt-4.1-mini',
+//   temperature: 0,
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-
-export const chatModel = new ChatOpenAI({
-  modelName: "gpt-4.1-mini",
-  temperature: 0,
-  apiKey: process.env.OPENAI_API_KEY,
+// 1. Initialize Model
+const chatModel = new ChatGoogleGenerativeAI({
+  model: 'gemini-2.5-flash-lite',
+  temperature: 0.7,
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
-interface ChatHistoryEntry {
-  user: string;
-  assistant: string;
-}
+// 2. System Prompt
+const SYSTEM_PROMPT = `
+You are an expert AI Software Architect. Your job is to visualize project folder structures based on user descriptions.
+You must respond strictly in JSON format. RESPONSE MODES (Choose one based on user input): MODE A | MODE B.
 
-export const SYSTEM_PROMPT = `
-You are an AI software architect that generates project structure diagrams
-on request and respond strictly in JSON.
-
-You must return output according to this format:
-
+MODE A: SUFFICIENT DATA (User description is clear). If you can reasonably infer a project structure, generate the diagram. Format:
 {
-  "type": "TEXT" | "DIAGRAM",
-  "message": "string",
-  "data": null | {
-    "mermaidSyntax": "string",
+  "type": "DIAGRAM",
+  "message": "(Briefly explain the architecture choices)",
+  "data": {
+    "mermaidSyntax": "graph TD; ... (Mermaid code for the tree)",
     "jsonStructure": {
       "nodes": [
-        {
-          "id": "string",
-          "label": "string",
-          "type": "FILE" | "FOLDER",
-          "level": number,
-          "path": "string",
-          "parentId": "string|null"
+        { 
+          "id": "unique-id", 
+          "label": "filename.ext", 
+          "type": "FILE", 
+          "level": number, 
+          "path": "/path/to/file", 
+          "parentId": "parent-id-or-null" 
         }
       ],
-      "edges": [
-        {
-          "source": "string",
-          "target": "string"
-        }
-      ]
+      "edges": [{ "source": "parent-id", "target": "child-id" }]
     }
   }
 }
 
-RULES:
-- Never output Markdown or backticks.
-- If you cannot understand prompt, output TEXT with "I need clarification".
-- If output type is TEXT, data MUST be null.
-- IDs must be unique.
+MODE B: INSUFFICIENT DATA (Vague or ambiguous). If the prompt is too short (e.g., "help", "code", "structure") or nonsensical, ask for clarification. Format:
+{
+  "type": "TEXT",
+  "message": "Politely suggest what information you need (e.g., 'Could you specify the language or framework?').",
+  "data": null
+}
 
-Reply with ONLY valid JSON.
+RULES:
+1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
+2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
+3. "parentId" should be null for the root node.
+4. IDs must be unique.
+5. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
 `;
 
 class AiService {
+  /**
+   * Generates project structure using LCEL (LangChain Expression Language)
+   */
   async generateStructure(
     sessionId: string,
     userPrompt: string
   ): Promise<AiResponsePayload> {
-    const history = sessionManager.get(sessionId);
-
-    const messages = [
-      new SystemMessage(SYSTEM_PROMPT),
-      new HumanMessage(this.buildPrompt(history, userPrompt)),
-    ];
-
-    let rawOutput: string;
-
     try {
-      const aiReply = await chatModel.invoke(messages);
+      // A. Get History Instance (Memory)
+      const sessionManager = SessionManager.getInstance();
+      const history = sessionManager.getSession(sessionId);
+      const historyMessages = await history.getMessages();
 
-      rawOutput =
-        typeof aiReply.content === "string"
-          ? aiReply.content
-          : JSON.stringify(aiReply.content);
-    } catch {
-      return this.fallbackText("Model request failed — refine your prompt.");
+      console.log('historyMessages', historyMessages);
+
+      // B. Create Prompt Template
+      const prompt = ChatPromptTemplate.fromMessages([
+        new SystemMessage(SYSTEM_PROMPT),
+        new MessagesPlaceholder('chat_history'),
+        ['human', '{input}'],
+      ]);
+
+      // console.log('prompt: ', prompt);
+
+      // C. Create Output Parser
+      const parser = new JsonOutputParser();
+
+      // D. Define the Chain (The Pipeline)
+      const chain = prompt.pipe(chatModel).pipe(parser);
+
+      console.log(`[AiService] Invoking chain for session: ${sessionId}`);
+
+      // E. Execute Chain
+      const rawJson = await chain.invoke({
+        chat_history: historyMessages,
+        input: userPrompt,
+      });
+
+      console.log('rawJson', rawJson);
+
+      // F. Validate with Zod (Gatekeeper)
+      const validation = AiResponseSchema.safeParse(rawJson);
+
+      if (!validation.success) {
+        console.error('[AiService] Validation Failed:', validation.error);
+        return this.fallbackText(
+          'AI generated invalid structure. Please try again with a clearer description.'
+        );
+      }
+
+      const validatedData = validation.data;
+
+      // G. Update Memory (Manually add this turn)
+      await history.addUserMessage(userPrompt);
+
+      await history.addAIMessage(JSON.stringify(validatedData));
+
+      return validatedData;
+    } catch (error) {
+      console.error('[AiService] Error:', error);
+      return this.fallbackText('System error while contacting AI.');
     }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(rawOutput);
-    } catch {
-      return this.fallbackText(
-        "AI returned invalid JSON — refine your description."
-      );
-    }
-
-    const validation = AiResponseSchema.safeParse(parsed); //validateAiResponse(parsed);
-
-    if (!validation.success) {
-      return this.fallbackText(
-        "AI output did not match required structure — try again."
-      );
-    }
-
-    const validated = validation.data!;
-
-    sessionManager.add(sessionId, {
-      user: userPrompt,
-      assistant: validated.message,
-    });
-
-    return validated;
-  }
-
-  private buildPrompt(
-    history: ChatHistoryEntry[],
-    currentPrompt: string
-  ): string {
-    if (!history.length) {
-      return currentPrompt;
-    }
-
-    const formatted = history
-      .map((h) => `User: ${h.user}\nAssistant: ${h.assistant}`)
-      .join("\n\n");
-
-    return `${formatted}\n\nUser: ${currentPrompt}`;
   }
 
   private fallbackText(message: string): AiResponsePayload {
-    return { type: "TEXT", message };
+    return {
+      type: 'TEXT',
+      message,
+      data: undefined,
+    };
   }
 }
 
