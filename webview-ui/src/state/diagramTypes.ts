@@ -1,22 +1,22 @@
-import { initialState } from './initialState';
+import { initialState } from "./initialState.js";
 
 export type DiagramState = typeof initialState;
 export type DiagramDispatch = (action: DiagramAction) => void;
 
 export type DiagramAction =
-  | { type: 'initialize_session'; payload: { sessionId: string } }
-  | { type: 'set_userInput'; payload: string }
-  | { type: 'send_userInput'; payload?: void }
+  | { type: "initialize_session"; payload: { sessionId: string } }
+  | { type: "set_userInput"; payload: string }
+  | { type: "send_userInput"; payload?: void }
   | {
-      type: 'load_newDiagram';
+      type: "load_newDiagram";
       payload: {
         message: string;
         data: DiagramData;
       };
     }
-  | { type: 'load_textOnly'; payload: { message: string } }
+  | { type: "load_textOnly"; payload: { message: string } }
   | {
-      type: 'update_logEntry';
+      type: "update_logEntry";
       payload: { id: string; zoomLevel?: number; panX?: number; panY?: number };
     };
 export type ViewSettings = {
@@ -30,7 +30,7 @@ export type ViewSettings = {
 export type Node = {
   id: string;
   label: string;
-  type: 'FILE' | 'FOLDER';
+  type: "FILE" | "FOLDER";
   level: number;
   path: string;
   parentId?: string;
@@ -49,8 +49,8 @@ export type DiagramData = {
   };
 };
 
-type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
-type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
+type DiagramEntryType = "DIAGRAM_CONTENT" | "VIEW_ARCHIVE";
+type TextEntryType = "TEXT_INPUT" | "TEXT_RESPONSE";
 
 export type DiagramEntry = {
   id: string;
@@ -72,11 +72,11 @@ export type TextEntry = {
 };
 
 export type AiResponsePayload =
-  | { type: 'TEXT'; message: string; data?: never }
-  | { type: 'DIAGRAM'; message: string; data: DiagramData };
+  | { type: "TEXT"; message: string; data?: never }
+  | { type: "DIAGRAM"; message: string; data: DiagramData };
 
 export type BackendMessage = {
-  command: 'AI_RESPONSE';
+  command: "AI_RESPONSE";
   payload: AiResponsePayload;
 };
 

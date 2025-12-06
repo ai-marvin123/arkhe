@@ -2,11 +2,19 @@
   "compilerOptions": {
     "module": "NodeNext",
     "target": "ES2022",
-    "outDir": "out",
-    "rootDir": "src",
+    // "outDir": "out",
+    // "rootDir": "src",
+    "outDir": "./dist",
     "sourceMap": true,
-    "strict": true
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      // Define an alias for the webview source directory
+      "@webview/*": ["webview-ui/src/*"]
+    },
+    "skipLibCheck": true, // <-- CRITICAL FIX: Skip checking type files in node_modules
+    "noUnusedLocals": false // <-- Less likely, but can sometimes hide this type of error
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "webview-ui/src/**/*"],
   "exclude": ["node_modules", ".vscode-test", "webview-ui"]
 }
