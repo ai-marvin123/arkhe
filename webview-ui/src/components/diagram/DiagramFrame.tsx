@@ -6,7 +6,7 @@ interface diagramFrameType {
 }
 //declare interface text and key - IMPORT TYPE DIAGRAMENTRY FROM DIAGRAMTYPES FILE - PASS ENTRY AS PROP, PROP IS GONNA HAVE THAT
 
-export default function diagramFrame({ entry, key }: diagramFrameType) {
+export default function DiagramFrame({ entry, key }: diagramFrameType) {
   const diagram = entry.diagramData?.mermaidSyntax;
 
   if (diagram === undefined) {
