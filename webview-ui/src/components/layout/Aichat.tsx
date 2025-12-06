@@ -1,12 +1,16 @@
-import type {FormEvent} from 'react';
-import { useDiagramState, useDiagramDispatch } from '../state/diagramContext';
-import type { BackendMessage } from '../state/diagramTypes';
+import type { FormEvent } from 'react';
+import {
+  useDiagramState,
+  useDiagramDispatch,
+} from '../../state/diagramContext';
+import { requestStructure } from '../../utils/vsCodeApi';
 
 export default function AIChat() {
   const state = useDiagramState();
   const dispatch = useDiagramDispatch();
   const prompt = state.chat.currentInput;
 
+  console.log('user input', prompt);
   //TO DO: generate session ID
 
   //onChange handler to capture user input
@@ -16,45 +20,58 @@ export default function AIChat() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    console.log('✅ submit button has been clicked!');
     if (!prompt || state.view.isLoading) return;
-    dispatch({type: 'send_userInput'});
+    dispatch({ type: 'send_userInput' });
     const sessionId = state.session.sessionId;
-    try{
-        const response: BackendMessage = await ;//Avo's API fetch request here
-        const {payload} = response;
-        if (!response) {
-            throw new Error('No response object received on submit')
-        }
+    try {
+      const response = await requestStructure(sessionId, prompt); //Avo's API fetch request here
+      const { payload } = response;
+      if (!response) {
+        throw new Error('No response object received on submit');
+      }
 
-        if (payload.type === 'DIAGRAM'){
-            dispatch({type: 'load_newDiagram', payload: {message: payload.message, data: payload.data}})
-        }else if (payload.type === 'TEXT'){
-            dispatch({type: 'load_textOnly', payload: {message: payload.message}})
-        }
-    }catch (error){
-         dispatch({type: 'load_textOnly', payload: {message: 'API Error: Failed to connect to the backend.'}})
+      console.log('🍎 response object', response);
+
+      if (payload.type === 'DIAGRAM') {
+        dispatch({
+          type: 'load_newDiagram',
+          payload: { message: payload.message, data: payload.data },
+        });
+      } else if (payload.type === 'TEXT') {
+        dispatch({
+          type: 'load_textOnly',
+          payload: { message: payload.message },
+        });
+      }
+    } catch (error) {
+      dispatch({
+        type: 'load_textOnly',
+        payload: {
+          message: `${error} API Error: Failed to connect to the backend.`,
+        },
+      });
     }
-  }
+  };
+
   return (
-    <div className ='fixed-bar'>
-    <form onSubmit = {handleSubmit}>
-      <input
-        type='text'
-        value={prompt}
-        onChange={handleOnChange}
-        placeholder='Type here'
-      />
-      <button className = 'send-button' type='submit' disabled={state.view.isLoading}>
-        <span className="codicon codicon-send" aria-hidden="true"></span>
-      </button>
-    </form>
+    <div className='chat-input'>
+      <form onSubmit={handleSubmit}>
+        <input
+          type='text'
+          value={prompt}
+          onChange={handleOnChange}
+          placeholder='Type here'
+        />
+        <button
+          type='submit'
+          aria-label='Send Message'
+          disabled={state.view.isLoading}
+        >
+          <span className='codicon codicon-send' aria-hidden='true'></span>
+          <span className='sr-only'>Send</span>
+        </button>
+      </form>
     </div>
   );
 }
-//1. save user input
-//2. make api request
-//3. receive and process incoming data (promise)
-//4. render diagram and message
-
-//form component with onsubmit
-//input field

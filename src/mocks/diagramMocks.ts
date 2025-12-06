@@ -1,7 +1,7 @@
 import { AiResponsePayload } from '../types';
 
 export const simpleDiagramMock: AiResponsePayload = {
-  type: 'DIAGRAM',
+  type: 'DIAGRAM' as const,
   message: 'Simple mock diagram',
   data: {
     mermaidSyntax: `graph TD;

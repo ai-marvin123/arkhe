@@ -1,16 +1,11 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { AIChat } from '../components/';
-// 1. Mock the custom hooks used by the component
-const mockDispatch = vi.fn();
-const mockState = {
-  chat: { currentInput: 'test prompt' },
-  session: { sessionId: 'TEST-SESSION-123' },
-  view: { isLoading: false },
-};
+import AIChat from '../../components/layout/Aichat';
+import type { requestStructure } from '../../utils/vsCodeApi';
 
-// 2. Mock the API service call (Crucial for controlling the async response)
-const mockGenerateBlueprint = vi.fn();
+vi.mock('../../utils/vsCodeApi', () => ({
+  requestStructure: mockRequestStructure,
+}));
 
 // Set up the mocks for imports
 vi.mock('../../state/diagramContext', () => ({
@@ -18,9 +13,17 @@ vi.mock('../../state/diagramContext', () => ({
   useDiagramDispatch: () => mockDispatch,
 }));
 
-vi.mock('../../utils/vsCodeApi', () => ({
-  generateBlueprint: mockGenerateBlueprint,
-}));
+// Mock the custom hooks used by the component
+const mockDispatch = vi.fn();
+
+// Mock the API service call (Crucial for controlling the async response)
+const mockRequestStructure = vi.fn();
+
+const mockState = {
+  chat: { currentInput: 'test prompt' },
+  session: { sessionId: 'TEST-SESSION-123' },
+  view: { isLoading: false },
+};
 
 // Define the FULL BackendMessage structure for success
 const mockBackendMessageSuccess = {
@@ -54,15 +57,15 @@ describe('AIChatInput Submission Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Control the API response for success
-    mockGenerateBlueprint.mockResolvedValue(mockBackendMessageSuccess);
+    mockRequestStructure.mockResolvedValue(mockBackendMessageSuccess);
   });
 
   test('should dispatch send_userInput and load_textOnly on error/text response', async () => {
     // ARRANGE 1: Set the API to return the text-only error immediately
-    mockGenerateBlueprint.mockResolvedValue(mockBackendMessageText);
+    mockRequestStructure.mockResolvedValue(mockBackendMessageText);
 
     // ARRANGE 2: Render the component into the simulated DOM
-    render(<AIChatInput />);
+    render(<AIChat />);
 
     // Mock state setup (ensures button is not disabled and has text to send)
     mockState.chat.currentInput = 'Confusing prompt.';
@@ -80,7 +83,7 @@ describe('AIChatInput Submission Flow', () => {
 
     await vi.waitFor(() => {
       // ASSERTION 2 (Async Check): Verify the API call was made
-      expect(mockGenerateBlueprint).toHaveBeenCalledTimes(1);
+      expect(mockRequestStructure).toHaveBeenCalledTimes(1);
 
       // ASSERTION 3 (Final Dispatch Check): Verify the correct final action was dispatched
       // We expect the second dispatch to be load_textOnly with the inner payload

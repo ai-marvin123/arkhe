@@ -1,31 +1,101 @@
 @import 'tailwindcss';
 
 html,
-body,
-#root {
+body {
   margin: 0;
   padding: 0;
   height: 100%;
-  width: 100%;
-  box-sizing: border-box;
+  color: #e5e7eb;
+}
+
+#root {
+  height: 100%;
 }
 
 .panel-layout {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 100%;
-}
-
-.chat-log-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 15px;
+  align-items: center; /* center children horizontally */
+  background: #121212; /* optional: VS Code-ish dark bg */
+  color: #e5e7eb;
+  overflow: hidden; /* prevent page scroll; only middle scrolls */
 }
 
 .fixed-bar {
-  flex-shrink: 0;
-  padding: 10px;
+  flex: 0 0 auto; /* don't grow/shrink */
+  width: 100%;
+  max-width: 900px; /* center column width */
+  padding: 0.5rem 1rem;
+  box-sizing: border-box;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.chat-log-container {
+  flex: 1 1 auto; /* takes up all leftover space */
+  width: 100%;
+  max-width: 900px;
+  padding: 1rem;
+  box-sizing: border-box;
+  overflow-y: auto; /* ONLY this scrolls */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 5px;
+  background: #202023;
+  margin: 1rem 0rem;
+}
+
+.chat-input {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 900px;
+  padding: 0.7rem;
+  box-sizing: border-box;
+  border-top: 1px solid #1e293b;
+  background: #202023;
+  border-radius: 3px;
+  margin-bottom: 2rem;
+}
+
+.chat-input form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #1f2933;
+  background: #353237;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.chat-input input::placeholder {
+  color: #64748b;
+}
+
+.chat-input button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  background-color: #3700b3;
+  color: #e5e7eb;
+  font-size: 2rem;
+}
+
+/* Disabled state */
+.chat-input button:disabled {
+  background-color: #4b5563;
+  cursor: not-allowed;
 }
