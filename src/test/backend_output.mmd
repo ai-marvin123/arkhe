@@ -1,0 +1,29 @@
+graph TD;
+    root[root];
+    app_folder(app);
+    config_folder(config);
+    static_folder(static);
+    templates_folder(templates);
+    tests_folder(tests);
+    run_py(run.py);
+    app_init_py(app/__init__.py);
+    app_routes_py(app/routes.py);
+    app_models_py(app/models.py);
+    app_services_py(app/services.py);
+    config_settings_py(config/settings.py);
+    tests_test_app_py(tests/test_app.py);
+
+    root --> app_folder;
+    root --> config_folder;
+    root --> static_folder;
+    root --> templates_folder;
+    root --> tests_folder;
+    root --> run_py;
+
+    app_folder --> app_init_py;
+    app_folder --> app_routes_py;
+    app_folder --> app_models_py;
+    app_folder --> app_services_py;
+
+    config_folder --> config_settings_py;
+    tests_folder --> tests_test_app_py;

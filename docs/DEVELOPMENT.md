@@ -77,8 +77,8 @@ The Frontend and Backend are isolated. They communicate via **Message Passing**.
 
 ```typescript
 vscode.postMessage({
-  command: 'askAI', // Command ID
-  text: 'Hello Server', // Payload
+  command: "askAI", // Command ID
+  text: "Hello Server", // Payload
 });
 ```
 
@@ -89,9 +89,9 @@ vscode.postMessage({
 ```typescript
 // Listen
 panel.webview.onDidReceiveMessage((msg) => {
-  if (msg.command === 'askAI') {
+  if (msg.command === "askAI") {
     // Reply
-    panel.webview.postMessage({ command: 'aiResponse', text: 'Hello Client' });
+    panel.webview.postMessage({ command: "aiResponse", text: "Hello Client" });
   }
 });
 ```

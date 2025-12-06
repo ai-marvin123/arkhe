@@ -1,14 +1,21 @@
 import 'dotenv/config';
 import { ChatOpenAI } from '@langchain/openai';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { InMemoryChatMessageHistory } from '@langchain/core/chat_history';
 
 // 1. Initialize the model
-const model = new ChatOpenAI({
-  model: 'gpt-4.1-mini',
+// const model = new ChatOpenAI({
+//   model: 'gpt-4.1-mini',
+//   temperature: 0,
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
+
+const model = new ChatGoogleGenerativeAI({
+  model: 'gemini-2.5-flash-lite',
   temperature: 0,
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 // 2. Create a prompt template
