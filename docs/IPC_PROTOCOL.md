@@ -149,6 +149,7 @@ export type AiResponsePayload =
 
 // --- 3. VS Code Message Definitions ---
 
+//what FE sends to BE
 export type FrontendMessage =
   | {
       command: 'GENERATE_STRUCTURE';
@@ -156,6 +157,7 @@ export type FrontendMessage =
     }
   | { command: 'RESET_SESSION'; payload: { sessionId: string } };
 
+//what BE sends to FE
 export type BackendMessage =
   | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
   | {

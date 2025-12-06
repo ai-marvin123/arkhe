@@ -14,7 +14,15 @@ export default function DiagramFrame({ entry, key }: diagramFrameType) {
   }
 
   return (
-    <div key={key} style={{ padding: '20px' }}>
+    <div
+      key={key}
+      style={{ padding: '20px' }}
+      className='
+        w-full max-w-full 
+        bg-gray-900 border border-gray-700 
+        rounded-lg p-3
+      '
+    >
       <MermaidRenderer code={diagram} />
 
       <pre
