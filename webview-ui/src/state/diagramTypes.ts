@@ -4,6 +4,7 @@ export type DiagramState = typeof initialState;
 export type DiagramDispatch = (action: DiagramAction) => void;
 
 export type DiagramAction =
+  | { type: 'initialize_session'; payload: { sessionId: string } }
   | { type: 'set_userInput'; payload: string }
   | { type: 'send_userInput'; payload?: void }
   | {
@@ -25,7 +26,6 @@ export type ViewSettings = {
   isFullscreen: boolean;
   isLoading: boolean;
   lastLLMMessage: string;
-  activeEntryId: string;
 };
 export type Node = {
   id: string;
@@ -74,6 +74,7 @@ export type TextEntry = {
 export type AiResponsePayload =
   | { type: 'TEXT'; message: string; data?: never }
   | { type: 'DIAGRAM'; message: string; data: DiagramData };
+
 export type BackendMessage = {
   command: 'AI_RESPONSE';
   payload: AiResponsePayload;
