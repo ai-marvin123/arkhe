@@ -1,26 +1,27 @@
-import 'dotenv/config';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import "dotenv/config";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
-} from '@langchain/core/prompts';
-import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
-import { AiResponsePayload, AiResponseSchema } from '../types';
-import { SystemMessage } from 'langchain';
+} from "@langchain/core/prompts";
+import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { SessionManager } from "../managers/SessionManager"; // Ensure this path is correct
+import { AiResponsePayload, AiResponseSchema } from "../types";
+import { SystemMessage } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
 
-// export const chatModel = new ChatOpenAI({
-//   modelName: 'gpt-4.1-mini',
-//   temperature: 0,
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+export const chatModel = new ChatOpenAI({
+  modelName: "gpt-4.1-mini",
+  temperature: 0,
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // 1. Initialize Model
-const chatModel = new ChatGoogleGenerativeAI({
-  model: 'gemini-2.5-flash-lite',
-  temperature: 0.7,
-  apiKey: process.env.GEMINI_API_KEY,
-});
+// const chatModel = new ChatGoogleGenerativeAI({
+//   model: 'gemini-2.5-flash-lite',
+//   temperature: 0.7,
+//   apiKey: process.env.GEMINI_API_KEY,
+// });
 
 // 2. System Prompt
 const SYSTEM_PROMPT = `
@@ -78,13 +79,13 @@ class AiService {
       const history = sessionManager.getSession(sessionId);
       const historyMessages = await history.getMessages();
 
-      console.log('historyMessages', historyMessages);
+      console.log("historyMessages", historyMessages);
 
       // B. Create Prompt Template
       const prompt = ChatPromptTemplate.fromMessages([
         new SystemMessage(SYSTEM_PROMPT),
-        new MessagesPlaceholder('chat_history'),
-        ['human', '{input}'],
+        new MessagesPlaceholder("chat_history"),
+        ["human", "{input}"],
       ]);
 
       // console.log('prompt: ', prompt);
@@ -103,15 +104,15 @@ class AiService {
         input: userPrompt,
       });
 
-      console.log('rawJson', rawJson);
+      console.log("rawJson", rawJson);
 
       // F. Validate with Zod (Gatekeeper)
       const validation = AiResponseSchema.safeParse(rawJson);
 
       if (!validation.success) {
-        console.error('[AiService] Validation Failed:', validation.error);
+        console.error("[AiService] Validation Failed:", validation.error);
         return this.fallbackText(
-          'AI generated invalid structure. Please try again with a clearer description.'
+          "AI generated invalid structure. Please try again with a clearer description."
         );
       }
 
@@ -124,14 +125,14 @@ class AiService {
 
       return validatedData;
     } catch (error) {
-      console.error('[AiService] Error:', error);
-      return this.fallbackText('System error while contacting AI.');
+      console.error("[AiService] Error:", error);
+      return this.fallbackText("System error while contacting AI.");
     }
   }
 
   private fallbackText(message: string): AiResponsePayload {
     return {
-      type: 'TEXT',
+      type: "TEXT",
       message,
       data: undefined,
     };
