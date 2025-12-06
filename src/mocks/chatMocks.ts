@@ -1,4 +1,4 @@
-import { AiResponsePayload } from '../types';
+import type { AiResponsePayload } from '../types';
 
 export const simpleChatMock: AiResponsePayload = {
   type: 'TEXT' as const,

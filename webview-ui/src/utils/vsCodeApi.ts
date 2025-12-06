@@ -1,4 +1,4 @@
-import type { BackendMessage } from '../state/diagramTypes';
+import type { BackendMessage } from "../state/diagramTypes";
 declare global {
   interface VsCodeApi {
     postMessage(message: unknown): void;
@@ -25,9 +25,9 @@ function getVsCodeApi(): VsCodeApi {
   }
 
   // Check if the global acquisition function exists (guards against ReferenceError in browser)
-  if (typeof acquireVsCodeApi !== 'function') {
+  if (typeof acquireVsCodeApi !== "function") {
     throw new Error(
-      'VSCODE_API_ERROR: Cannot find acquireVsCodeApi. Are you running in a VS Code Webview?'
+      "VSCODE_API_ERROR: Cannot find acquireVsCodeApi. Are you running in a VS Code Webview?"
     );
   }
 
@@ -47,28 +47,28 @@ export function requestStructure(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
-        resolve(message.payload);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
+        resolve(message);
         return;
       }
       //ADD REJECT LOGIC
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occured during processing'
+              "An unknown error occured during processing"
           )
         );
         return;
       }
     };
 
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'GENERATE_STRUCTURE',
+      command: "GENERATE_STRUCTURE",
       payload: { sessionId, prompt },
     });
   });

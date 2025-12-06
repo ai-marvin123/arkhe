@@ -8,19 +8,20 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
 import { AiResponsePayload, AiResponseSchema } from '../types';
 import { SystemMessage } from 'langchain';
+import { ChatOpenAI } from '@langchain/openai';
 
-// export const chatModel = new ChatOpenAI({
-//   modelName: 'gpt-4.1-mini',
-//   temperature: 0,
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+export const chatModel = new ChatOpenAI({
+  modelName: 'gpt-4.1-mini',
+  temperature: 0,
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // 1. Initialize Model
-const chatModel = new ChatGoogleGenerativeAI({
-  model: 'gemini-2.5-flash-lite',
-  temperature: 0.7,
-  apiKey: process.env.GEMINI_API_KEY,
-});
+// const chatModel = new ChatGoogleGenerativeAI({
+//   model: 'gemini-2.5-flash-lite',
+//   temperature: 0.7,
+//   apiKey: process.env.GEMINI_API_KEY,
+// });
 
 // 2. System Prompt
 const SYSTEM_PROMPT = `

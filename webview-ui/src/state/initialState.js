@@ -1,5 +1,3 @@
-import type { Node, Edge, ChatLog } from "./diagramTypes.js";
-
 // const DUMMY_LOG_DATA = [
 //   // 1. User's Initial Prompt (Log entry 1)
 //   {
@@ -12,7 +10,6 @@ import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 //     viewSettings: null,
 //     contentRefId: null,
 //   },
-
 //   // 2. Diagram Content (Log entry 2 - The first diagram version)
 //   {
 //     id: "D-001", // This is the unique ID for the content (V1)
@@ -21,7 +18,6 @@ import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 //     text: "V1 Blueprint generated: Added three core nodes.",
 //     timestamp: 1733446800001,
 //     contentRefId: null,
-
 //     diagramData: {
 //       // NOTE: This must be the final, fully styled syntax for the renderer!
 //       mermaidSyntax: `graph TD;
@@ -49,7 +45,6 @@ import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 //       lastLLMMessage: "V1 Blueprint generated: Added three core nodes.",
 //     },
 //   },
-
 //   // 3. User's Follow-up Prompt (Log entry 3)
 //   {
 //     id: "L-002",
@@ -61,7 +56,6 @@ import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 //     viewSettings: null,
 //     contentRefId: null,
 //   },
-
 //   // 4. Text-Only Response (Log entry 4 - Clarification/Error)
 //   {
 //     id: "L-003",
@@ -74,31 +68,30 @@ import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 //     contentRefId: null,
 //   },
 // ];
-
 //define initalState structure
 export const initialState = {
-  //A. Session id to send to BE
-  session: {
-    sessionId: "",
-  },
-  // B. Current diagram
-  diagram: {
-    jsonStructure: { nodes: [] as Node[], edges: [] as Edge[] },
-    mermaidSyntax: "",
-  },
-
-  // C. Current view
-  view: {
-    zoomLevel: 1.0,
-    panX: 0,
-    panY: 0,
-    isFullscreen: false,
-    isLoading: false,
-    lastLLMMessage: "",
-  },
-  // D. AI Chat log
-  chat: {
-    log: [] as ChatLog,
-    currentInput: "",
-  },
+    //A. Session id to send to BE
+    session: {
+        sessionId: "",
+    },
+    // B. Current diagram
+    diagram: {
+        jsonStructure: { nodes: [], edges: [] },
+        mermaidSyntax: "",
+    },
+    // C. Current view
+    view: {
+        zoomLevel: 1.0,
+        panX: 0,
+        panY: 0,
+        isFullscreen: false,
+        isLoading: false,
+        lastLLMMessage: "",
+    },
+    // D. AI Chat log
+    chat: {
+        log: [],
+        currentInput: "",
+    },
 };
+//# sourceMappingURL=initialState.js.map
