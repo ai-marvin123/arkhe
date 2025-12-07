@@ -62,7 +62,8 @@ RULES:
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
 3. "parentId" should be null for the root node.
 4. IDs must be unique.
-5. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
+5. Don't need include FILE/FOLDER in label of node.
+6. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
 `;
 
 class AiService {
