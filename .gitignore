@@ -44,8 +44,5 @@ Thumbs.db
 # Tooling/Editors
 
 .idea/
-.vscode/settings.json
-.vscode/tasks.json
-# .vscode/launch.json
 
 *.tsbuildinfo

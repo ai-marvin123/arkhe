@@ -1,0 +1,35 @@
+{
+  // --- 1. EDITOR & FORMATTING ---
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // --- 2. FILE EXCLUSIONS ---
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/*.js.map": true,
+    "out/**": true,
+    "dist/**": true,
+    "webview-ui/build/**": true,
+    "webview-ui/node_modules/**": true,
+    "node_modules/**": true
+  },
+
+  // --- 3. TYPESCRIPT CONFIG ---
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // --- 4. TAILWIND CSS CONFIG ---
+  "tailwindCSS.experimental.configFile": "webview-ui/tailwind.config.js",
+
+  // --- 5. SEARCH EXCLUSIONS ---
+  "search.exclude": {
+    "out": true,
+    "dist": true,
+    "webview-ui/build": true,
+    "**/*.code-search": true
+  }
+}

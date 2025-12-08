@@ -9,9 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:arkhe.helloWorld"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -22,7 +20,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run build:webview",
     "build:webview": "cd webview-ui && npm run build",
     "watch:webview": "cd webview-ui && npm run build -- --watch",
     "compile": "tsc -b",
@@ -44,7 +42,6 @@
     "vitest": "^4.0.15"
   },
   "dependencies": {
-    "22": "^0.0.0",
     "@langchain/core": "^1.1.1",
     "@langchain/google-genai": "^2.0.1",
     "@langchain/openai": "^1.1.3",
