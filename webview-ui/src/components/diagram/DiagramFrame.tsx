@@ -1,21 +1,22 @@
 import MermaidRenderer from './MermaidRenderer';
 import type { DiagramEntry } from '../../state/diagramTypes';
+import ViewTools from '../controls/ViewTools';
+
 interface diagramFrameType {
-  key: string;
+  logKey: string;
   entry: DiagramEntry;
 }
 //declare interface text and key - IMPORT TYPE DIAGRAMENTRY FROM DIAGRAMTYPES FILE - PASS ENTRY AS PROP, PROP IS GONNA HAVE THAT
 
-export default function DiagramFrame({ entry, key }: diagramFrameType) {
+export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
   const diagram = entry.diagramData?.mermaidSyntax;
 
   if (diagram === undefined) {
     return;
   }
-
   return (
     <div
-      key={key}
+      key={logKey}
       style={{ padding: '20px' }}
       className='
         w-full max-w-full 
@@ -35,6 +36,7 @@ export default function DiagramFrame({ entry, key }: diagramFrameType) {
       >
         {JSON.stringify(entry.diagramData?.jsonStructure, null, 2)}
       </pre>
+      <ViewTools id={entry.id} view={entry.viewSettings} />
     </div>
   );
 }

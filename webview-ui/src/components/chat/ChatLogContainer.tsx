@@ -11,21 +11,21 @@ export default function ChatLogContainer() {
   return (
     <div className='chat-log-container'>
       {log.map((entry) => {
-        const key = entry.id;
+        const logKey = entry.id;
         const isUser = entry.role === 'user';
         return (
           <div
-            key={key}
+            key={logKey}
             className={`w-full flex mb-2 ${
               isUser ? 'justify-end' : 'justify-start'
             }`}
           >
-            {isUser && <UserBubble key={key} text={entry.text} />}
+            {isUser && <UserBubble logKey={logKey} text={entry.text} />}
             {entry.type === 'DIAGRAM_CONTENT' && (
-              <DiagramFrame key={key} entry={entry} />
+              <DiagramFrame logKey={logKey} entry={entry} />
             )}
             {entry.type === 'TEXT_RESPONSE' && (
-              <AIBubble key={key} text={entry.text} />
+              <AIBubble logKey={logKey} text={entry.text} />
             )}
           </div>
         );
