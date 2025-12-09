@@ -21,6 +21,8 @@ export const initialState = {
     isLoading: false,
     isPanActive: false, //NEW - added this to enable pan on click
     lastLLMMessage: '',
+    lastLLMMessage: "",
+    isAIOpen: false,
   },
   // D. AI Chat log
   chat: {

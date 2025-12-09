@@ -17,6 +17,7 @@ export type DiagramAction =
   | { type: 'load_textOnly'; payload: { message: string } }
   | {
       type: 'update_logEntry';
+      type: "update_logEntry";
       payload: {
         id: string;
         zoomLevel?: number;
@@ -26,6 +27,7 @@ export type DiagramAction =
         isLoading?: boolean;
         isPanActive?: boolean;
         lastLLMMessage?: string;
+        isAIOpen?: boolean;
       };
     };
 export type ViewSettings = {
@@ -36,6 +38,7 @@ export type ViewSettings = {
   isLoading: boolean;
   isPanActive: boolean;
   lastLLMMessage: string;
+  isAIOpen: boolean;
 };
 export type Node = {
   id: string;
