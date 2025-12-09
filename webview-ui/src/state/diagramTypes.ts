@@ -17,7 +17,14 @@ export type DiagramAction =
   | { type: "load_textOnly"; payload: { message: string } }
   | {
       type: "update_logEntry";
-      payload: { id: string; zoomLevel?: number; panX?: number; panY?: number };
+      payload: {
+        id: string;
+        zoomLevel?: number;
+        panX?: number;
+        panY?: number;
+        isFullscreen?: boolean;
+        isAIOpen?: boolean;
+      };
     };
 export type ViewSettings = {
   zoomLevel: number;
@@ -26,6 +33,7 @@ export type ViewSettings = {
   isFullscreen: boolean;
   isLoading: boolean;
   lastLLMMessage: string;
+  isAIOpen: boolean;
 };
 export type Node = {
   id: string;

@@ -1,4 +1,7 @@
-import type { ViewSettings } from '../../state/diagramTypes';
+import { useDiagramDispatch } from "../../state/diagramContext";
+import type { ViewSettings } from "../../state/diagramTypes";
+import FullscreenButton from "./viewNavigation/FullScreenButton";
+import ViewAiMessageButton from "./viewNavigation/ViewAiMessage";
 
 interface ViewToolstype {
   id: string;
@@ -6,15 +9,30 @@ interface ViewToolstype {
 }
 
 export default function ViewTools({ id, view }: ViewToolstype) {
-  //all features use reducer function 'update_logEntry'
+  const dispatch = useDiagramDispatch();
 
-  //logic for pan
+  // Fullscreen toggle
+  const handleFullscreen = () => {
+    const newValue = !view.isFullscreen;
+    dispatch({
+      type: "update_logEntry",
+      payload: { id, isFullscreen: newValue },
+    });
+  };
 
-  //logic for zoom
+  // AI Message toggle
+  const handleAiToggle = () => {
+    const newValue = !view.isAIOpen;
+    dispatch({
+      type: "update_logEntry",
+      payload: { id, isAIOpen: newValue },
+    });
+  };
 
-  //logic for fullscreen
-
-  //logic for AiMessage
-
-  return <></>;
+  return (
+    <div className="view-tools-container absolute bottom-2 right-2 flex space-x-2">
+      <FullscreenButton clickFunc={handleFullscreen} />
+      <ViewAiMessageButton clickFunc={handleAiToggle} />
+    </div>
+  );
 }
