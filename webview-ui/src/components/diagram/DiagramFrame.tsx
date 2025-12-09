@@ -11,10 +11,11 @@ interface diagramFrameType {
 export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
   const diagram = entry.diagramData?.mermaidSyntax;
   const isFullscreen = entry.viewSettings?.isFullscreen;
+  console.log("🚀Diagram entry text", entry.id, entry.text);
 
   const baseClasses = `
   relative
-        w-full max-w-full 
+        w-full max-w-full å
         bg-gray-900 border border-gray-700 
         rounded-lg p-3
       `;
@@ -34,7 +35,12 @@ export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
       style={{ padding: "20px" }}
       className={isFullscreen ? fullscreenClasses : baseClasses}>
       <MermaidRenderer code={diagram} />
-
+      {entry.viewSettings?.isAIOpen && (
+        <div className="bg-gray-800 text-white p-3 mt-3 rounded border border-gray-700">
+          <h3 className="font-semibold mb-1">AI Message</h3>
+          <p>{entry.text}</p>
+        </div>
+      )}
       <pre
         style={{
           background: "#222",

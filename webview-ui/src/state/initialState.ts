@@ -95,6 +95,7 @@ export const initialState = {
     isFullscreen: false,
     isLoading: false,
     lastLLMMessage: "",
+    isAIOpen: false,
   },
   // D. AI Chat log
   chat: {

@@ -22,7 +22,8 @@ export type DiagramAction =
         zoomLevel?: number;
         panX?: number;
         panY?: number;
-        isFullscreen: boolean;
+        isFullscreen?: boolean;
+        isAIOpen?: boolean;
       };
     };
 export type ViewSettings = {
@@ -32,6 +33,7 @@ export type ViewSettings = {
   isFullscreen: boolean;
   isLoading: boolean;
   lastLLMMessage: string;
+  isAIOpen: boolean;
 };
 export type Node = {
   id: string;
