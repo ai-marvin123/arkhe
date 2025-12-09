@@ -29,9 +29,25 @@ export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
   if (diagram === undefined) {
     return;
   }
+
   return (
     <div
       key={logKey}
+      style={{ padding: '20px' }}
+      className='
+        w-full max-w-full 
+        bg-gray-900 border border-gray-700 
+        rounded-lg p-3
+        relative
+        overflow-hidden
+      '
+    >
+      <MermaidRenderer
+        logKey={logKey}
+        code={diagram}
+        view={entry.viewSettings}
+      />
+
       style={{ padding: "20px" }}
       className={isFullscreen ? fullscreenClasses : baseClasses}>
       <MermaidRenderer code={diagram} />
