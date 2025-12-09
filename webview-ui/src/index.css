@@ -94,8 +94,26 @@ body {
   font-size: 2rem;
 }
 
+.view-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  background-color: #3700b3;
+  color: #e5e7eb;
+  font-size: 1rem;
+}
+
 /* Disabled state */
 .chat-input button:disabled {
   background-color: #4b5563;
   cursor: not-allowed;
+}
+
+.mermaid-container.dragging {
+  /* Cursor when actively dragging */
+  cursor: grabbing;
 }

@@ -14,6 +14,7 @@ export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
   if (diagram === undefined) {
     return;
   }
+
   return (
     <div
       key={logKey}
@@ -22,9 +23,15 @@ export default function DiagramFrame({ entry, logKey }: diagramFrameType) {
         w-full max-w-full 
         bg-gray-900 border border-gray-700 
         rounded-lg p-3
+        relative
+        overflow-hidden
       '
     >
-      <MermaidRenderer code={diagram} />
+      <MermaidRenderer
+        logKey={logKey}
+        code={diagram}
+        view={entry.viewSettings}
+      />
 
       <pre
         style={{
