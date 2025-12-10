@@ -1,6 +1,6 @@
-import type { AiResponsePayload } from '../types';
+import type { AiPayload } from '../types';
 
-export const simpleDiagramMock: AiResponsePayload = {
+export const simpleDiagramMock: AiPayload = {
   type: 'DIAGRAM' as const,
   message: 'Simple mock diagram',
   data: {

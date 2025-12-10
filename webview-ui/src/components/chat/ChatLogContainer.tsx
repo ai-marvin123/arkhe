@@ -6,6 +6,7 @@ import DiagramFrame from '../diagram/DiagramFrame';
 export default function ChatLogContainer() {
   const state = useDiagramState();
   const { log } = state.chat;
+  const { sessionId } = state.session;
 
   console.log('inside ChatLogContainer', log);
   return (
@@ -22,7 +23,11 @@ export default function ChatLogContainer() {
           >
             {isUser && <UserBubble logKey={logKey} text={entry.text} />}
             {entry.type === 'DIAGRAM_CONTENT' && (
-              <DiagramFrame logKey={logKey} entry={entry} />
+              <DiagramFrame
+                sessionId={sessionId}
+                logKey={logKey}
+                entry={entry}
+              />
             )}
             {entry.type === 'TEXT_RESPONSE' && (
               <AIBubble logKey={logKey} text={entry.text} />

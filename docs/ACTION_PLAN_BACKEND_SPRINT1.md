@@ -5,7 +5,7 @@ Refactor `src/` to this modular structure. Do not put business logic in `extensi
 ```text
 src/
 ├── types/
-│   └── index.ts          # Shared interfaces (StructureNode, AiResponsePayload, etc.)
+│   └── index.ts          # Shared interfaces (StructureNode, AiPayload, etc.)
 ├── schemas/
 │   └── validation.ts     # Zod schemas (Validation logic)
 ├── services/
