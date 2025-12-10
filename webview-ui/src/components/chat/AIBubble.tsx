@@ -1,9 +1,9 @@
 interface AIBubbleProps {
-  key: string;
+  logKey: string;
   text: string | null;
 }
 
-export default function AIBubble({ text, key }: AIBubbleProps) {
+export default function AIBubble({ text, logKey }: AIBubbleProps) {
   return (
     <div
       className='
@@ -11,7 +11,7 @@ export default function AIBubble({ text, key }: AIBubbleProps) {
         rounded-xl rounded-br-md
         px-4 py-2 max-w-[75%] text-sm leading-relaxed 
       '
-      key={key}
+      key={logKey}
     >
       <p>{text}</p>
     </div>
