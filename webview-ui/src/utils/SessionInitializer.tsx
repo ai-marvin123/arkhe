@@ -16,6 +16,7 @@ export default function SessionInitializer() {
 
       //try/catch block to invoke api call
       try {
+        console.log('inside sessioninitializer try block');
         const response = await loadSavedDiagram(newSessionId);
 
         if (response.command === 'AI_RESPONSE') {
