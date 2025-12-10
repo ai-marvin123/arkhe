@@ -6,7 +6,7 @@ import {
 } from '@langchain/core/prompts';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
-import { AiResponsePayload, AiResponseSchema } from '../types';
+import { AiPayload, AiPayloadSchema } from '../types';
 import { SystemMessage } from 'langchain';
 import { ChatOpenAI } from '@langchain/openai';
 
@@ -62,9 +62,12 @@ RULES:
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
 3. "parentId" should be null for the root node.
 4. IDs must be unique.
-5. Don't need include FILE/FOLDER in label of node.
+5. Don't need include "FILE" or "FOLDER" in label of node.
 6. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
 7. NAMING CONVENTION: Always include file extensions for files (e.g., "App.tsx", "server.js", "style.css"). Do NOT strip the dot (e.g., avoid "Apptsx" or "server_js").
+8. MERMAID SHAPE: You MUST use parentheses () for all node definitions to create rounded edges. Use syntax id(Label) instead of id[Label].
+   - CORRECT: A(src) --> B(App.tsx)
+   - WRONG: A[src] --> B[App.tsx]
 `;
 
 class AiService {
@@ -74,7 +77,7 @@ class AiService {
   async generateStructure(
     sessionId: string,
     userPrompt: string
-  ): Promise<AiResponsePayload> {
+  ): Promise<AiPayload> {
     try {
       // A. Get History Instance (Memory)
       const sessionManager = SessionManager.getInstance();
@@ -109,7 +112,7 @@ class AiService {
       console.log('rawJson', rawJson);
 
       // F. Validate with Zod (Gatekeeper)
-      const validation = AiResponseSchema.safeParse(rawJson);
+      const validation = AiPayloadSchema.safeParse(rawJson);
 
       if (!validation.success) {
         console.error('[AiService] Validation Failed:', validation.error);
@@ -132,7 +135,7 @@ class AiService {
     }
   }
 
-  private fallbackText(message: string): AiResponsePayload {
+  private fallbackText(message: string): AiPayload {
     return {
       type: 'TEXT',
       message,

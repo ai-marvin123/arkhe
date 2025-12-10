@@ -2,17 +2,16 @@ import { z } from 'zod';
 
 // --- 1. Core Data Structures ---
 
-// NEW: Drift Status Enum for Drift Detection Feature
 export const DriftStatusSchema = z.enum(['MATCHED', 'MISSING', 'UNTRACKED']);
 
 export const StructureNodeSchema = z.object({
-  id: z.string(), // Required: Use UUID for Plan nodes, Relative Path for Disk nodes
+  id: z.string(), // Plan: UUID, Actual: RelativePath
   label: z.string(),
   type: z.enum(['FILE', 'FOLDER']),
   level: z.number(),
   path: z.string(),
   parentId: z.string().nullable().optional(),
-  status: DriftStatusSchema.optional(), // NEW: Optional status for drift visualization
+  status: DriftStatusSchema.optional(), // Drift state
 });
 
 export const EdgeSchema = z.object({
@@ -30,10 +29,10 @@ export const DiagramDataSchema = z.object({
   jsonStructure: JsonStructureSchema,
 });
 
-// --- 2. AI Response Wrapper (Discriminated Union) ---
+// --- 2. AI Payload Wrapper (Renamed from AiResponseSchema) ---
 
-export const AiResponseSchema = z.discriminatedUnion('type', [
-  // Case 1: Text Response (Chat, Error message, Status info)
+export const AiPayloadSchema = z.discriminatedUnion('type', [
+  // A. Standard Chat/Text
   z
     .object({
       type: z.literal('TEXT'),
@@ -42,7 +41,7 @@ export const AiResponseSchema = z.discriminatedUnion('type', [
     })
     .strict(),
 
-  // Case 2: Diagram Response (Gen result, Load result, Drift result)
+  // B. Standard Diagram (Generation / Load Success / Sync Success)
   z
     .object({
       type: z.literal('DIAGRAM'),
@@ -50,19 +49,44 @@ export const AiResponseSchema = z.discriminatedUnion('type', [
       data: DiagramDataSchema,
     })
     .strict(),
+
+  // C. Save Success
+  z
+    .object({
+      type: z.literal('DIAGRAM_SAVED'),
+      message: z.string(),
+    })
+    .strict(),
+
+  // D. Load Failed / No File
+  z
+    .object({
+      type: z.literal('NO_SAVED_DIAGRAM'),
+      message: z.string(),
+    })
+    .strict(),
+
+  // E. Drift Result
+  z
+    .object({
+      type: z.literal('DRIFT_DIAGRAM'),
+      message: z.string(),
+      data: DiagramDataSchema, // Nodes have 'status'
+    })
+    .strict(),
 ]);
 
-// --- 3. TYPESCRIPT INTERFACES (Inferred from Schemas) ---
+// --- 3. TYPESCRIPT INTERFACES ---
 
 export type DriftStatus = z.infer<typeof DriftStatusSchema>;
 export type StructureNode = z.infer<typeof StructureNodeSchema>;
 export type StructureEdge = z.infer<typeof EdgeSchema>;
 export type DiagramData = z.infer<typeof DiagramDataSchema>;
-export type AiResponsePayload = z.infer<typeof AiResponseSchema>;
+export type AiPayload = z.infer<typeof AiPayloadSchema>; // Renamed from AiResponsePayload
 
 // --- 4. MESSAGE PROTOCOLS (Frontend <-> Backend) ---
 
-export type FrontendMessage =
+export type MessageToBackend = // Renamed from FrontendMessage
   // Group A: Generation & Session
   | {
       command: 'GENERATE_STRUCTURE';
@@ -72,13 +96,13 @@ export type FrontendMessage =
       command: 'RESET_SESSION';
       payload: { sessionId: string };
     }
-  // Group B: Persistence (Filesystem)
+  // Group B: Persistence
   | {
-      command: 'SAVE_PLAN';
+      command: 'SAVE_DIAGRAM';
       payload: { sessionId: string; diagramData: DiagramData };
     }
   | {
-      command: 'LOAD_PLAN';
+      command: 'LOAD_DIAGRAM';
       payload: { sessionId: string };
     }
   // Group C: Drift Detection
@@ -91,11 +115,7 @@ export type FrontendMessage =
       payload: { sessionId: string };
     };
 
-export type BackendMessage =
-  | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
-  | {
-      command: 'PROCESSING_STATUS';
-      // Added 'scanning' for Drift Detection phase
-      payload: { step: 'analyzing' | 'generating' | 'scanning' | 'done' };
-    }
-  | { command: 'ERROR'; payload: { message: string } };
+export type MessageToFrontend = // Renamed from BackendMessage
+
+    | { command: 'AI_RESPONSE'; payload: AiPayload }
+    | { command: 'ERROR'; payload: { message: string } };
