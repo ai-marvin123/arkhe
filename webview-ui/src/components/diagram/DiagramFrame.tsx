@@ -50,7 +50,7 @@ export default function DiagramFrame({
     try {
       const response = await postDiagramToSave(sessionId, diagramData);
       if (response.command === 'AI_RESPONSE') {
-        if (response.payload.type === 'DIAGRAM SAVED') {
+        if (response.payload.type === 'DIAGRAM_SAVED') {
           setSaveStatus('saved');
           setTimeout(() => setSaveStatus('idle'), 3000);
         } else {

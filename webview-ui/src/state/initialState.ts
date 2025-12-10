@@ -20,7 +20,7 @@ export const initialState = {
     isFullscreen: false,
     isLoading: false,
     isPanActive: false,
-    isChatEnabled: true, //NEW - added this for drift feature
+    isChatEnabled: false, //NEW - added this for drift feature
     lastLLMMessage: '',
     isAIOpen: false,
   },
