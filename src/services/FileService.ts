@@ -92,3 +92,4 @@ static async loadDiagram(
     return null;
   }
 }
+}
