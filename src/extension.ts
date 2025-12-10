@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import * as vscode from 'vscode';
 import * as path from 'path'; // Need path for joinPath
 import * as fs from 'fs'; // Need fs to read the built index.html
-import { FrontendMessage } from './types';
+import { MessageToBackend } from './types';
 import { CommandHandler } from './handlers/CommandHandler';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
     const handler = new CommandHandler(panel);
 
     // ⭐ Correctly typed message receiver
-    panel.webview.onDidReceiveMessage(async (message: FrontendMessage) => {
+    panel.webview.onDidReceiveMessage(async (message: MessageToBackend) => {
       await handler.handle(message);
     });
   });

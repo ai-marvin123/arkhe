@@ -6,13 +6,13 @@
 
 ### 1. User Saves Diagram
 
-**Trigger:** User clicks "Save" after generating a satisfactory plan.
+**Trigger:** User clicks "Save" after generating a satisfactory diagram.
 
 **FE → BE:**
 
 ```json
 {
-  "command": "SAVE_PLAN",
+  "command": "SAVE_DIAGRAM",
   "payload": {
     "sessionId": "sess-001",
     "diagramData": { ... } // Current full JSON structure
@@ -26,15 +26,15 @@
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "TEXT",
-    "message": "Plan saved successfully."
+    "type": "DIAGRAM_SAVED", // DIAGRAM_SAVED
+    "message": "Diagram saved successfully."
   }
 }
 ```
 
 ---
 
-### 2\. App Startup (Load Plan)
+### 2\. App Startup (Load Diagram)
 
 **Trigger:** User opens the extension. Frontend always checks for existing plans.
 
@@ -42,32 +42,32 @@
 
 ```json
 {
-  "command": "LOAD_PLAN",
+  "command": "LOAD_DIAGRAM",
   "payload": { "sessionId": "sess-001" }
 }
 ```
 
-**BE → FE (Scenario A: Plan Exists):**
+**BE → FE (Scenario A: Diagram Exists):**
 
 ```json
 {
   "command": "AI_RESPONSE",
   "payload": {
     "type": "DIAGRAM",
-    "message": "Plan loaded.",
+    "message": "Diagram loaded.",
     "data": { ... } // Content from .repoplan.json
   }
 }
 ```
 
-**BE → FE (Scenario B: No Plan):**
+**BE → FE (Scenario B: No Diagram):**
 
 ```json
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "TEXT",
-    "message": "No plan found."
+    "type": "NO_SAVED_DIAGRAM",
+    "message": "No diagram found."
   }
 }
 ```
@@ -101,7 +101,7 @@ _(Frontend creates UI for new chat/generation)_
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "DIAGRAM",
+    "type": "DRIFT_DIAGRAM",
     "message": "Drift check complete.",
     "data": {
       "mermaidSyntax": "...",
@@ -138,7 +138,7 @@ _(Frontend creates UI for new chat/generation)_
 
 ### 6\. Update Complete
 
-**Trigger:** Backend overwrites the plan with actual disk structure and saves the file.
+**Trigger:** Backend overwrites the diagram with actual repo structure and saves the file.
 
 **BE → FE:**
 
