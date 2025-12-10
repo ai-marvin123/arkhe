@@ -1,7 +1,7 @@
-import type { DiagramAction, DiagramState } from "./diagramTypes";
-import { initialState } from "./initialState";
-import { applyMermaidStyling } from "../utils/mermaidGenerator";
-import { generateId } from "../utils/idgenerator";
+import type { DiagramAction, DiagramState } from './diagramTypes';
+import { initialState } from './initialState';
+import { applyMermaidStyling } from '../utils/mermaidGenerator';
+import { generateId } from '../utils/idgenerator';
 
 //reducer functions
 export function chatReducer(
@@ -10,7 +10,7 @@ export function chatReducer(
 ): DiagramState {
   //save session ID
   switch (action.type) {
-    case "initialize_session": {
+    case 'initialize_session': {
       return {
         ...state,
         session: {
@@ -18,8 +18,19 @@ export function chatReducer(
         },
       };
     }
+    //enable chat if no saved diagram
+    case 'enable_chat': {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          isChatEnabled: true,
+          isLoading: false,
+        },
+      };
+    }
     //update user input while typing
-    case "set_userInput": {
+    case 'set_userInput': {
       return {
         ...state,
         chat: {
@@ -29,11 +40,11 @@ export function chatReducer(
       };
     }
     //dispatched on submit: save latest user input in log
-    case "send_userInput": {
+    case 'send_userInput': {
       const archivedUserInput = {
         id: generateId(),
-        role: "user",
-        type: "TEXT_INPUT" as const,
+        role: 'user',
+        type: 'TEXT_INPUT' as const,
         text: state.chat.currentInput,
         timestamp: Date.now(),
       };
@@ -45,14 +56,14 @@ export function chatReducer(
         },
         chat: {
           ...state.chat,
-          currentInput: "",
+          currentInput: '',
           log: [...state.chat.log, archivedUserInput],
         },
       };
     }
 
     //after receiving data from BE - update current state with new diagram data
-    case "load_newDiagram": {
+    case 'load_newDiagram': {
       const styledMermaidSyntax = applyMermaidStyling(
         action.payload.data.jsonStructure,
         action.payload.data.mermaidSyntax
@@ -66,9 +77,9 @@ export function chatReducer(
       const newDiagramId = generateId();
       const newAssistantEntry = {
         id: newDiagramId,
-        role: "assistant",
+        role: 'assistant',
         text: action.payload.message,
-        type: "DIAGRAM_CONTENT" as const, // NEW TYPE: Signals this entry holds unique content
+        type: 'DIAGRAM_CONTENT' as const, // NEW TYPE: Signals this entry holds unique content
         diagramData: {
           jsonStructure: action.payload.data.jsonStructure,
           mermaidSyntax: styledMermaidSyntax,
@@ -98,12 +109,12 @@ export function chatReducer(
       };
     }
     //dispatched when AI responds with message only
-    case "load_textOnly": {
+    case 'load_textOnly': {
       const newAssistantEntry = {
         id: generateId(),
-        role: "assistant",
+        role: 'assistant',
         text: action.payload.message,
-        type: "TEXT_RESPONSE" as const,
+        type: 'TEXT_RESPONSE' as const,
         timestamp: Date.now(),
       };
       return {
@@ -120,10 +131,10 @@ export function chatReducer(
       };
     }
     //diapatched when user uses view tools in any diagram of choice: updates view
-    case "update_logEntry": {
+    case 'update_logEntry': {
       const { id, ...viewUpdates } = action.payload;
       const newLog = state.chat.log.map((entry) => {
-        if (entry.id === id && entry.type === "DIAGRAM_CONTENT") {
+        if (entry.id === id && entry.type === 'DIAGRAM_CONTENT') {
           return {
             ...entry,
             viewSettings: {

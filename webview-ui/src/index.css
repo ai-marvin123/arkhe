@@ -94,7 +94,8 @@ body {
   font-size: 2rem;
 }
 
-.view-buttons {
+.view-buttons,
+.save-button {
   display: flex;
   align-items: center;
   justify-content: center;

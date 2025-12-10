@@ -16,14 +16,14 @@ export class CommandHandler {
           console.log("sessionId: ", sessionId);
           console.log("prompt: ", prompt);
 
-          const aiResponsePayload = await aiService.generateStructure(
+          const AiPayload = await aiService.generateStructure(
             sessionId,
             prompt
           );
 
           const responseMsg: MessageToFrontend = {
             command: 'AI_RESPONSE',
-            payload: aiResponsePayload,
+            payload: AiPayload,
           };
 
           this.panel.webview.postMessage(responseMsg);
