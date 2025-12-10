@@ -11,7 +11,7 @@ export const StructureNodeSchema = z.object({
   level: z.number(),
   path: z.string(),
   parentId: z.string().nullable().optional(),
-  status: DriftStatusSchema.optional(), // Drift state
+  status: DriftStatusSchema.nullable().optional(), // Drift state
 });
 
 export const EdgeSchema = z.object({
