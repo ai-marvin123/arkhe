@@ -1,1 +1,10 @@
-graph TD; A(root) --> B(src); B --> C(main.ts); B --> D(app.module.ts); B --> E(app.controller.ts); B --> F(app.service.ts); B --> G(config); G --> G1(configuration.ts); B --> H(common); H --> H1(guards); H1 --> H1a(auth.guard.ts); H --> H2(interceptors); H2 --> H2a(logging.interceptor.ts); H --> H3(pipes); H3 --> H3a(validation.pipe.ts); B --> I(modules); I --> I1(users); I1 --> I1a(users.module.ts); I1 --> I1b(users.controller.ts); I1 --> I1c(users.service.ts); I --> I2(auth); I2 --> I2a(auth.module.ts); I2 --> I2b(auth.service.ts); I2 --> I2c(auth.controller.ts); I2 --> I2d(jwt.strategy.ts;)
+graph TD;
+  root(my-react-app) --> public(public);
+  public(public) --> indexHtml(index.html);
+  root(my-react-app) --> src(src);
+  src(src) --> appJs(App.js);
+  src(src) --> indexJs(index.js);
+  src(src) --> store(store);
+  store(store) --> storeIndexJs(index.js);
+  root(my-react-app) --> packageJson(package.json);
+  root(my-react-app) --> gitignore(.gitignore);

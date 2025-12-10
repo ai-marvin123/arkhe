@@ -79,6 +79,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
 // --- 3. TYPESCRIPT INTERFACES ---
 
 export type DriftStatus = z.infer<typeof DriftStatusSchema>;
+export type JsonStructure = z.infer<typeof JsonStructureSchema>;
 export type StructureNode = z.infer<typeof StructureNodeSchema>;
 export type StructureEdge = z.infer<typeof EdgeSchema>;
 export type DiagramData = z.infer<typeof DiagramDataSchema>;
