@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { AiPayload, FrontendMessage, MessageToFrontend } from '../types';
+import { MessageToFrontend, MessageToBackend } from '../types';
 
 export class CommandHandler {
   constructor(private panel: vscode.WebviewPanel) {}
 
-  async handle(msg: FrontendMessage) {
+  async handle(msg: MessageToBackend) {
     try {
       switch (msg.command) {
         case 'GENERATE_STRUCTURE': {
