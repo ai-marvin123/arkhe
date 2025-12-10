@@ -19,9 +19,9 @@ export const initialState = {
     panY: 0,
     isFullscreen: false,
     isLoading: false,
-    isPanActive: false, //NEW - added this to enable pan on click
+    isPanActive: false,
+    isChatEnabled: true, //NEW - added this for drift feature
     lastLLMMessage: '',
-    lastLLMMessage: "",
     isAIOpen: false,
   },
   // D. AI Chat log

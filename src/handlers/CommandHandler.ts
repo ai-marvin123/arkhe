@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { AiResponsePayload, FrontendMessage, BackendMessage } from '../types';
+import { AiPayload, FrontendMessage, MessageToFrontend } from '../types';
 
 export class CommandHandler {
   constructor(private panel: vscode.WebviewPanel) {}
@@ -15,14 +15,14 @@ export class CommandHandler {
           console.log('sessionId: ', sessionId);
           console.log('prompt: ', prompt);
 
-          const aiResponsePayload = await aiService.generateStructure(
+          const AiPayload = await aiService.generateStructure(
             sessionId,
             prompt
           );
 
-          const responseMsg: BackendMessage = {
+          const responseMsg: MessageToFrontend = {
             command: 'AI_RESPONSE',
-            payload: aiResponsePayload,
+            payload: AiPayload,
           };
 
           this.panel.webview.postMessage(responseMsg);
@@ -37,7 +37,7 @@ export class CommandHandler {
           SessionManager.getInstance().clearSession(sessionId);
 
           // Send a confirmation text back to the chat so the user knows it happened
-          const resetResponse: BackendMessage = {
+          const resetResponse: MessageToFrontend = {
             command: 'AI_RESPONSE',
             payload: {
               type: 'TEXT',

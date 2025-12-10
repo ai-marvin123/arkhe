@@ -143,7 +143,7 @@ export interface DiagramData {
 
 // --- 2. Message Payloads ---
 
-export type AiResponsePayload =
+export type AiPayload =
   | { type: 'TEXT'; message: string; data?: never }
   | { type: 'DIAGRAM'; message: string; data: DiagramData };
 
@@ -158,8 +158,8 @@ export type FrontendMessage =
   | { command: 'RESET_SESSION'; payload: { sessionId: string } };
 
 //what BE sends to FE
-export type BackendMessage =
-  | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
+export type MessageToFrontend =
+  | { command: 'AI_RESPONSE'; payload: AiPayload }
   | {
       command: 'PROCESSING_STATUS';
       payload: { step: 'analyzing' | 'generating' | 'done' };

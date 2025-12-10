@@ -25,8 +25,8 @@
 //   view: { isLoading: false },
 // };
 
-// // Define the FULL BackendMessage structure for success
-// const mockBackendMessageSuccess = {
+// // Define the FULL MessageToFrontend structure for success
+// const mockMessageToFrontendSuccess = {
 //   command: 'AI_RESPONSE' as const,
 //   payload: {
 //     type: 'DIAGRAM' as const,
@@ -43,8 +43,8 @@
 //   },
 // };
 
-// // Define the FULL BackendMessage structure for text-only
-// const mockBackendMessageText = {
+// // Define the FULL MessageToFrontend structure for text-only
+// const mockMessageToFrontendText = {
 //   command: 'AI_RESPONSE' as const,
 //   payload: {
 //     type: 'TEXT' as const,
@@ -57,12 +57,12 @@
 //   beforeEach(() => {
 //     vi.clearAllMocks();
 //     // Control the API response for success
-//     mockRequestStructure.mockResolvedValue(mockBackendMessageSuccess);
+//     mockRequestStructure.mockResolvedValue(mockMessageToFrontendSuccess);
 //   });
 
 //   test('should dispatch send_userInput and load_textOnly on error/text response', async () => {
 //     // ARRANGE 1: Set the API to return the text-only error immediately
-//     mockRequestStructure.mockResolvedValue(mockBackendMessageText);
+//     mockRequestStructure.mockResolvedValue(mockMessageToFrontendText);
 
 //     // ARRANGE 2: Render the component into the simulated DOM
 //     render(<AIChat />);
@@ -90,8 +90,8 @@
 //       expect(mockDispatch).toHaveBeenCalledTimes(2);
 //       expect(mockDispatch).toHaveBeenCalledWith({
 //         type: 'load_textOnly',
-//         // Pass the inner AiResponsePayload from the mock
-//         payload: mockBackendMessageText.payload,
+//         // Pass the inner AiPayload from the mock
+//         payload: mockMessageToFrontendText.payload,
 //       });
 //     });
 //   });

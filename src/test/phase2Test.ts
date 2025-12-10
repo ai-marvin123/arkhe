@@ -1,12 +1,12 @@
 import { CommandHandler } from '../handlers/CommandHandler';
-import { BackendMessage, FrontendMessage } from '../types';
+import { MessageToFrontend, FrontendMessage } from '../types';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const fakePanel = {
   webview: {
-    postMessage: (data: BackendMessage) => {
+    postMessage: (data: MessageToFrontend) => {
       // console.log("📩 BACKEND SENT:", JSON.stringify(data, null, 2));
       const outputPath = path.join(__dirname, 'backend_output.json');
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));

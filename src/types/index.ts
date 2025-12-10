@@ -51,7 +51,7 @@ export const AiResponseSchema = z.discriminatedUnion('type', [
 export type StructureNode = z.infer<typeof StructureNodeSchema>;
 export type StructureEdge = z.infer<typeof EdgeSchema>;
 export type DiagramData = z.infer<typeof DiagramDataSchema>;
-export type AiResponsePayload = z.infer<typeof AiResponseSchema>;
+export type AiPayload = z.infer<typeof AiResponseSchema>;
 
 // 4. MESSAGE PROTOCOLS (Frontend <-> Backend)
 
@@ -65,8 +65,8 @@ export type FrontendMessage =
       payload: { sessionId: string };
     };
 
-export type BackendMessage =
-  | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
+export type MessageToFrontend =
+  | { command: 'AI_RESPONSE'; payload: AiPayload }
   | {
       command: 'PROCESSING_STATUS';
       payload: { step: 'analyzing' | 'generating' | 'done' };

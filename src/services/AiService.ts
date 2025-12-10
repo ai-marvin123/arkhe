@@ -6,7 +6,7 @@ import {
 } from '@langchain/core/prompts';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
-import { AiResponsePayload, AiResponseSchema } from '../types';
+import { AiPayload, AiResponseSchema } from '../types';
 import { SystemMessage } from 'langchain';
 import { ChatOpenAI } from '@langchain/openai';
 
@@ -73,7 +73,7 @@ class AiService {
   async generateStructure(
     sessionId: string,
     userPrompt: string
-  ): Promise<AiResponsePayload> {
+  ): Promise<AiPayload> {
     try {
       // A. Get History Instance (Memory)
       const sessionManager = SessionManager.getInstance();
@@ -131,7 +131,7 @@ class AiService {
     }
   }
 
-  private fallbackText(message: string): AiResponsePayload {
+  private fallbackText(message: string): AiPayload {
     return {
       type: 'TEXT',
       message,
