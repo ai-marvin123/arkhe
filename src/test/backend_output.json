@@ -1,8 +1,276 @@
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "TEXT",
-    "message": "You asked me to build a Python Flask app structure.",
-    "data": null
+    "type": "DIAGRAM",
+    "message": "This NestJS backend structure is designed for scalability and modularity. Each major feature (auth, users, database) is encapsulated in its own module folder. Shared utilities and testing resources are separated to promote reusability and maintainability.",
+    "data": {
+      "mermaidSyntax": "graph TD;\n  root[backend] --> src\n  src --> auth\n  src --> users\n  src --> database\n  src --> shared\n  src --> main_ts[main_ts]\n  src --> app_module_ts[app_module_ts]\n  auth --> auth_module_ts[auth_module_ts]\n  auth --> auth_controller_ts[auth_controller_ts]\n  auth --> auth_service_ts[auth_service_ts]\n  users --> users_module_ts[users_module_ts]\n  users --> users_controller_ts[users_controller_ts]\n  users --> users_service_ts[users_service_ts]\n  database --> database_module_ts[database_module_ts]\n  database --> database_service_ts[database_service_ts]\n  shared --> utils_ts[utils_ts]\n  shared --> constants_ts[constants_ts]\n  testing --> auth_spec_ts[auth_spec_ts]\n  testing --> users_spec_ts[users_spec_ts]\n  testing --> database_spec_ts[database_spec_ts]\n  root --> testing",
+      "jsonStructure": {
+        "nodes": [
+          {
+            "id": "1",
+            "label": "backend",
+            "type": "FOLDER",
+            "level": 0,
+            "path": "/backend",
+            "parentId": null
+          },
+          {
+            "id": "2",
+            "label": "src",
+            "type": "FOLDER",
+            "level": 1,
+            "path": "/backend/src",
+            "parentId": "1"
+          },
+          {
+            "id": "3",
+            "label": "auth",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/backend/src/auth",
+            "parentId": "2"
+          },
+          {
+            "id": "4",
+            "label": "auth_module.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/auth/auth_module.ts",
+            "parentId": "3"
+          },
+          {
+            "id": "5",
+            "label": "auth_controller.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/auth/auth_controller.ts",
+            "parentId": "3"
+          },
+          {
+            "id": "6",
+            "label": "auth_service.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/auth/auth_service.ts",
+            "parentId": "3"
+          },
+          {
+            "id": "7",
+            "label": "users",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/backend/src/users",
+            "parentId": "2"
+          },
+          {
+            "id": "8",
+            "label": "users_module.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/users/users_module.ts",
+            "parentId": "7"
+          },
+          {
+            "id": "9",
+            "label": "users_controller.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/users/users_controller.ts",
+            "parentId": "7"
+          },
+          {
+            "id": "10",
+            "label": "users_service.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/users/users_service.ts",
+            "parentId": "7"
+          },
+          {
+            "id": "11",
+            "label": "database",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/backend/src/database",
+            "parentId": "2"
+          },
+          {
+            "id": "12",
+            "label": "database_module.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/database/database_module.ts",
+            "parentId": "11"
+          },
+          {
+            "id": "13",
+            "label": "database_service.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/database/database_service.ts",
+            "parentId": "11"
+          },
+          {
+            "id": "14",
+            "label": "shared",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/backend/src/shared",
+            "parentId": "2"
+          },
+          {
+            "id": "15",
+            "label": "utils.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/shared/utils.ts",
+            "parentId": "14"
+          },
+          {
+            "id": "16",
+            "label": "constants.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/backend/src/shared/constants.ts",
+            "parentId": "14"
+          },
+          {
+            "id": "17",
+            "label": "main.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/backend/src/main.ts",
+            "parentId": "2"
+          },
+          {
+            "id": "18",
+            "label": "app_module.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/backend/src/app_module.ts",
+            "parentId": "2"
+          },
+          {
+            "id": "19",
+            "label": "testing",
+            "type": "FOLDER",
+            "level": 1,
+            "path": "/backend/testing",
+            "parentId": "1"
+          },
+          {
+            "id": "20",
+            "label": "auth.spec.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/backend/testing/auth.spec.ts",
+            "parentId": "19"
+          },
+          {
+            "id": "21",
+            "label": "users.spec.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/backend/testing/users.spec.ts",
+            "parentId": "19"
+          },
+          {
+            "id": "22",
+            "label": "database.spec.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/backend/testing/database.spec.ts",
+            "parentId": "19"
+          }
+        ],
+        "edges": [
+          {
+            "source": "1",
+            "target": "2"
+          },
+          {
+            "source": "2",
+            "target": "3"
+          },
+          {
+            "source": "2",
+            "target": "7"
+          },
+          {
+            "source": "2",
+            "target": "11"
+          },
+          {
+            "source": "2",
+            "target": "14"
+          },
+          {
+            "source": "2",
+            "target": "17"
+          },
+          {
+            "source": "2",
+            "target": "18"
+          },
+          {
+            "source": "3",
+            "target": "4"
+          },
+          {
+            "source": "3",
+            "target": "5"
+          },
+          {
+            "source": "3",
+            "target": "6"
+          },
+          {
+            "source": "7",
+            "target": "8"
+          },
+          {
+            "source": "7",
+            "target": "9"
+          },
+          {
+            "source": "7",
+            "target": "10"
+          },
+          {
+            "source": "11",
+            "target": "12"
+          },
+          {
+            "source": "11",
+            "target": "13"
+          },
+          {
+            "source": "14",
+            "target": "15"
+          },
+          {
+            "source": "14",
+            "target": "16"
+          },
+          {
+            "source": "1",
+            "target": "19"
+          },
+          {
+            "source": "19",
+            "target": "20"
+          },
+          {
+            "source": "19",
+            "target": "21"
+          },
+          {
+            "source": "19",
+            "target": "22"
+          }
+        ]
+      }
+    }
   }
 }

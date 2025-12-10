@@ -194,7 +194,7 @@ async function runAllTests() {
   // await runTest2();
   // await runTest6();
   // await runTest7();
-  await runTest8();
+  await runTest1();
 }
 
 runAllTests();
