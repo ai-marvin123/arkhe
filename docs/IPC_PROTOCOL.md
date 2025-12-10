@@ -118,13 +118,14 @@ export interface DiagramData {
 
 // --- 2. Message Payloads ---
 
-export type AiResponsePayload =
-  | { type: 'TEXT'; message: string; data?: never }
-  | { type: 'DIAGRAM'; message: string; data: DiagramData };
+export type AiResponsePayload = // AiPayload
+
+    | { type: 'TEXT'; message: string; data?: never }
+    | { type: 'DIAGRAM'; message: string; data: DiagramData };
 
 // --- 3. VS Code Message Definitions ---
 
-export type FrontendMessage =
+export type FrontendMessage = // MessageToBackend
   // Gen
   | {
       command: 'GENERATE_STRUCTURE';
@@ -141,11 +142,12 @@ export type FrontendMessage =
   | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
   | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } };
 
-export type BackendMessage =
-  | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
-  | {
-      command: 'PROCESSING_STATUS';
-      payload: { step: 'analyzing' | 'generating' | 'scanning' | 'done' };
-    }
-  | { command: 'ERROR'; payload: { message: string } };
+export type BackendMessage = // MessageToFrontend
+
+    | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
+    // | {
+    //     command: 'PROCESSING_STATUS';
+    //     payload: { step: 'analyzing' | 'generating' | 'scanning' | 'done' };
+    //   }
+    | { command: 'ERROR'; payload: { message: string } };
 ```
