@@ -6,8 +6,6 @@
 
     "bradlc.vscode-tailwindcss",
 
-    "bierner.markdown-mermaid",
-
     "ms-vscode.extension-test-runner"
   ]
 }

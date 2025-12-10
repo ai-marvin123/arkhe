@@ -64,6 +64,7 @@ RULES:
 4. IDs must be unique.
 5. Don't need include FILE/FOLDER in label of node.
 6. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
+7. NAMING CONVENTION: Always include file extensions for files (e.g., "App.tsx", "server.js", "style.css"). Do NOT strip the dot (e.g., avoid "Apptsx" or "server_js").
 `;
 
 class AiService {

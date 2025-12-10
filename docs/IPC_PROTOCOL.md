@@ -1,62 +1,66 @@
-# 🔌 IPC Protocol: Frontend ↔ Backend
+# 🔌 IPC Protocol: Frontend ↔ Backend (v2)
 
-**Definition:** Message contract between React Webview (Frontend) and Extension Host (Backend).
-
-**Core Principle:**
-
-- **Architecture:** Async Message Passing.
-- **Context:** Backend maintains history by `sessionId`. Frontend manages this ID.
+**Core:** Async Message Passing. Shared `sessionId`.
 
 ---
 
-## 1. Shared Data Structures
-
-Schema for file tree data.
+## 1\. Shared Data Structures
 
 ### `StructureNode`
 
-Represents a project item.
+Project item schema.
 
-| Key        | Type                 | Description                     |
-| :--------- | :------------------- | :------------------------------ |
-| `id`       | `string`             | Unique ID (e.g., "src-btn").    |
-| `label`    | `string`             | Display name (e.g., "App.tsx"). |
-| `type`     | `'FILE' \| 'FOLDER'` | UI Icon type (Upper case).      |
-| `level`    | `number`             | Depth (0, 1, 2) for styling.    |
-| `path`     | `string`             | Relative path for actions.      |
-| `parentId` | `string?`            | (Optional) Parent Node ID.      |
+| Key        | Type                 | Description            |
+| :--------- | :------------------- | :--------------------- |
+| `id`       | `string`             | Unique ID.             |
+| `label`    | `string`             | Display name.          |
+| `type`     | `'FILE' \| 'FOLDER'` | UI Icon.               |
+| `level`    | `number`             | Depth.                 |
+| `path`     | `string`             | Relative path.         |
+| `parentId` | `string?`            | Parent ID.             |
+| `status`   | `DriftStatus?`       | **(NEW)** Drift state. |
+
+### `DriftStatus` (Enum)
+
+| Value       | Color (UI)    | Meaning                     |
+| :---------- | :------------ | :-------------------------- |
+| `MATCHED`   | Green/Default | Exists in Plan & Disk.      |
+| `MISSING`   | Red           | In Plan, NOT on Disk.       |
+| `UNTRACKED` | Gray          | NOT in Plan, Found on Disk. |
 
 ### `StructureEdge`
 
-Represents hierarchy.
-
-| Key      | Type     | Description     |
-| :------- | :------- | :-------------- |
-| `source` | `string` | Parent Node ID. |
-| `target` | `string` | Child Node ID.  |
+| Key      | Type     | Description |
+| :------- | :------- | :---------- |
+| `source` | `string` | Parent ID.  |
+| `target` | `string` | Child ID.   |
 
 ---
 
-## 2. Frontend → Backend (Commands)
+## 2\. Frontend → Backend (Commands)
 
 _Direction: UI triggers Backend._
 
-| Command              | Payload               | Description                 |
-| :------------------- | :-------------------- | :-------------------------- |
-| `GENERATE_STRUCTURE` | `{sessionId, prompt}` | Sends prompt & triggers AI. |
-| `RESET_SESSION`      | `{sessionId}`         | Clears backend history.     |
+### A. Generation & Session
 
-#### Example Request:
+| Command              | Payload               | Action                       |
+| :------------------- | :-------------------- | :--------------------------- |
+| `GENERATE_STRUCTURE` | `{sessionId, prompt}` | Calls AI to build/edit plan. |
+| `RESET_SESSION`      | `{sessionId}`         | Clears history.              |
 
-```json
-{
-  "command": "GENERATE_STRUCTURE",
-  "payload": {
-    "sessionId": "uuid-v4-12345",
-    "prompt": "Create NestJS structure"
-  }
-}
-```
+### B. Persistence (Filesystem)
+
+| Command     | Payload                    | Action                                                   |
+| :---------- | :------------------------- | :------------------------------------------------------- |
+| `SAVE_PLAN` | `{sessionId, diagramData}` | Overwrites `.repoplan.json`.                             |
+| `LOAD_PLAN` | `{sessionId}`              | Checks `.repoplan.json`. Returns Diagram or "Not Found". |
+
+### C. Drift Detection
+
+| Command          | Payload       | Action                                                                |
+| :--------------- | :------------ | :-------------------------------------------------------------------- |
+| `CHECK_DRIFT`    | `{sessionId}` | Scans disk, compares to plan. Returns colored Diagram.                |
+| `SYNC_TO_ACTUAL` | `{sessionId}` | Overwrites Plan with Disk reality. Saves file. Returns clean Diagram. |
 
 ---
 
@@ -64,68 +68,39 @@ _Direction: UI triggers Backend._
 
 _Direction: Backend updates UI._
 
-### A. The Wrapper (`AI_RESPONSE`)
+### A. `AI_RESPONSE`
 
-Standard response for Chat & Diagrams.
+Universal data carrier for Chat, Diagrams, and Drift Results.
 
-| Key       | Type                  | Description                        |
-| :-------- | :-------------------- | :--------------------------------- |
-| `type`    | `'TEXT' \| 'DIAGRAM'` | Controls UI mode.                  |
-| `message` | `string`              | AI text explanation.               |
-| `data`    | `object?`             | Diagram payload (if type=DIAGRAM). |
+| Type      | Payload           | Context                                             |
+| :-------- | :---------------- | :-------------------------------------------------- |
+| `TEXT`    | `{message}`       | Chat response / Errors / "No Plan Found".           |
+| `DIAGRAM` | `{message, data}` | Gen result / Load success / Drift result (colored). |
 
-#### Example 1: Text Only
+### B. Status
 
-```json
-{
-  "command": "AI_RESPONSE",
-  "payload": {
-    "type": "TEXT",
-    "message": "Please clarify?",
-    "data": null
-  }
-}
-```
-
-#### Example 2: Diagram
-
-```json
-{
-  "command": "AI_RESPONSE",
-  "payload": {
-    "type": "DIAGRAM",
-    "message": "Done.",
-    "data": {
-      "mermaidSyntax": "graph TD...",
-      "jsonStructure": { "nodes": [], "edges": [] }
-    }
-  }
-}
-```
-
-### B. Other Events
-
-| Command             | Payload     | Description            |
-| :------------------ | :---------- | :--------------------- | ------------ | ------ |
-| `PROCESSING_STATUS` | `{step}`    | `analyzing`            | `generating` | `done` |
-| `ERROR`             | `{message}` | System/Parsing errors. |
+| Command             | Payload     | Values                                         |
+| :------------------ | :---------- | :--------------------------------------------- |
+| `PROCESSING_STATUS` | `{step}`    | `analyzing`, `generating`, `scanning`, `done`. |
+| `ERROR`             | `{message}` | Critical failures.                             |
 
 ---
 
-## 4\. TypeScript Implementation
-
-Copy to `src/types.ts` (Backend) and `webview-ui/src/types.ts` (Frontend).
+## 4\. TypeScript Implementation (Updated)
 
 ```typescript
 // --- 1. Shared Data Models ---
 
+export type DriftStatus = 'MATCHED' | 'MISSING' | 'UNTRACKED';
+
 export interface StructureNode {
-  id: string;
+  id?: string;
   label: string;
   type: 'FILE' | 'FOLDER';
   level: number;
   path: string;
   parentId?: string;
+  status?: DriftStatus; // Added
 }
 
 export interface StructureEdge {
@@ -149,20 +124,28 @@ export type AiResponsePayload =
 
 // --- 3. VS Code Message Definitions ---
 
-//what FE sends to BE
 export type FrontendMessage =
+  // Gen
   | {
       command: 'GENERATE_STRUCTURE';
       payload: { sessionId: string; prompt: string };
     }
-  | { command: 'RESET_SESSION'; payload: { sessionId: string } };
+  | { command: 'RESET_SESSION'; payload: { sessionId: string } }
+  // Persistence
+  | {
+      command: 'SAVE_PLAN';
+      payload: { sessionId: string; diagramData: DiagramData };
+    }
+  | { command: 'LOAD_PLAN'; payload: { sessionId: string } }
+  // Drift
+  | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
+  | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } };
 
-//what BE sends to FE
 export type BackendMessage =
   | { command: 'AI_RESPONSE'; payload: AiResponsePayload }
   | {
       command: 'PROCESSING_STATUS';
-      payload: { step: 'analyzing' | 'generating' | 'done' };
+      payload: { step: 'analyzing' | 'generating' | 'scanning' | 'done' };
     }
   | { command: 'ERROR'; payload: { message: string } };
 ```
