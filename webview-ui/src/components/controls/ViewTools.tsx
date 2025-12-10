@@ -1,9 +1,10 @@
-import { useDiagramDispatch } from "../../state/diagramContext";
-import type { ViewSettings } from "../../state/diagramTypes";
-import PanButton from "./viewNavigation/PanButton";
-import ZoomInButton from "./viewNavigation/ZoomInButton";
-import ZoomOutButton from "./viewNavigation/ZoomOutButton";
-import FullscreenButton from "./viewNavigation/FullScreenButton";
+import { useDiagramDispatch } from '../../state/diagramContext';
+import type { ViewSettings } from '../../state/diagramTypes';
+import PanButton from './viewNavigation/PanButton';
+import ZoomInButton from './viewNavigation/ZoomInButton';
+import ZoomOutButton from './viewNavigation/ZoomOutButton';
+import FullscreenButton from './viewNavigation/FullScreenButton';
+// import ViewAiMessageButton from './viewNavigation/ViewAiMessage';
 
 interface ViewToolstype {
   id: string;
@@ -16,7 +17,6 @@ const minZoom = 1.0;
 
 export default function ViewTools({ id, view }: ViewToolstype) {
   const dispatch = useDiagramDispatch();
-  //all features use reducer function 'update_logEntry'
 
   //logic for pan
   const handlePan = () => {
@@ -57,10 +57,19 @@ export default function ViewTools({ id, view }: ViewToolstype) {
   const handleFullscreen = () => {
     const newValue = !view.isFullscreen;
     dispatch({
-      type: "update_logEntry",
+      type: 'update_logEntry',
       payload: { id, isFullscreen: newValue },
     });
   };
+
+  // AI Message toggle
+  // const handleAiToggle = () => {
+  //   const newValue = !view.isAIOpen;
+  //   dispatch({
+  //     type: "update_logEntry",
+  //     payload: { id, isAIOpen: newValue },
+  //   });
+  // };
 
   return (
     <div className="view-tools-container absolute bottom-2 right-2 flex space-x-2">

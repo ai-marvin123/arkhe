@@ -1,64 +1,111 @@
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { AiResponsePayload, FrontendMessage, BackendMessage } from '../types';
+import { MessageToFrontend, MessageToBackend } from '../types';
+import { FileService } from "../services/FileService";
 
 export class CommandHandler {
-  constructor(private panel: vscode.WebviewPanel) {}
-
-  async handle(msg: FrontendMessage) {
+  constructor(
+    private panel: vscode.WebviewPanel,
+    private fileService = FileService // default real service, mockable in tests
+  ) {}
+  
+  async handle(msg: MessageToBackend) {
     try {
       switch (msg.command) {
-        case 'GENERATE_STRUCTURE': {
+
+        case "GENERATE_STRUCTURE": {
           const { sessionId, prompt } = msg.payload;
 
-          console.log('sessionId: ', sessionId);
-          console.log('prompt: ', prompt);
+          console.log("sessionId:", sessionId);
+          console.log("prompt:", prompt);
 
           const aiResponsePayload = await aiService.generateStructure(
             sessionId,
             prompt
           );
 
-          const responseMsg: BackendMessage = {
+          const responseMsg: MessageToFrontend = {
             command: 'AI_RESPONSE',
             payload: aiResponsePayload,
           };
 
           this.panel.webview.postMessage(responseMsg);
+          break;
+        }
+
+        case "RESET_SESSION": {
+          const { sessionId } = msg.payload;
+
+          SessionManager.getInstance().clearSession(sessionId);
+
+          this.panel.webview.postMessage({
+            command: 'AI_RESPONSE',
+            payload: {
+              type: "TEXT",
+              message: `Session ${sessionId} has been reset. Memory cleared.`,
+            },
+          });
 
           break;
         }
 
-        case 'RESET_SESSION': {
-          const { sessionId } = msg.payload;
+        case "SAVE_DIAGRAM": {
+          const { sessionId, diagramData } = msg.payload;
 
-          // Clear history from SessionManager
-          SessionManager.getInstance().clearSession(sessionId);
+          await this.fileService.saveDiagram(sessionId, diagramData);
 
-          // Send a confirmation text back to the chat so the user knows it happened
-          const resetResponse: BackendMessage = {
-            command: 'AI_RESPONSE',
+          this.panel.webview.postMessage({
+            command: "AI_RESPONSE",
             payload: {
-              type: 'TEXT',
-              message: `Session ${sessionId} has been reset. Memory cleared.`,
+              type: "DIAGRAM_SAVED",
+              message: "Diagram saved successfully.",
             },
-          };
+          });
 
-          this.panel.webview.postMessage(resetResponse);
+          break;
+        }
+
+        case "LOAD_DIAGRAM": {
+          const { sessionId } = msg.payload;
+          const saved = await this.fileService.loadDiagram(sessionId);
+
+          let response: MessageToFrontend;
+
+          if (saved) {
+            response = {
+              command: "AI_RESPONSE",
+              payload: {
+                type: "DIAGRAM",
+                message: "Diagram loaded",
+                data: saved,
+              },
+            };
+          } else {
+            response = {
+              command: "AI_RESPONSE",
+              payload: {
+                type: "NO_SAVED_DIAGRAM",
+                message: "No diagram found.",
+              },
+            };
+          }
+
+          this.panel.webview.postMessage(response);
           break;
         }
       }
+
     } catch (err: any) {
       this.sendError(
-        `CommandHandler failed: ${err?.message ?? 'Unexpected error'}`
+        `CommandHandler failed: ${err?.message ?? "Unexpected error"}`
       );
     }
   }
 
   private sendError(message: string): void {
     this.panel.webview.postMessage({
-      command: 'ERROR',
+      command: "ERROR",
       payload: { message },
     });
   }

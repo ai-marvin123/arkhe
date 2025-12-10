@@ -1,8 +1,312 @@
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "TEXT",
-    "message": "You asked me to build a Python Flask app structure.",
-    "data": null
+    "type": "DIAGRAM",
+    "message": "This structure follows a typical NestJS backend project layout with separate folders for modules, common utilities, configuration, and main application entry point.",
+    "data": {
+      "mermaidSyntax": "graph TD; A(root) --> B(src); B --> C(main.ts); B --> D(app.module.ts); B --> E(app.controller.ts); B --> F(app.service.ts); B --> G(config); G --> G1(configuration.ts); B --> H(common); H --> H1(guards); H1 --> H1a(auth.guard.ts); H --> H2(interceptors); H2 --> H2a(logging.interceptor.ts); H --> H3(pipes); H3 --> H3a(validation.pipe.ts); B --> I(modules); I --> I1(users); I1 --> I1a(users.module.ts); I1 --> I1b(users.controller.ts); I1 --> I1c(users.service.ts); I --> I2(auth); I2 --> I2a(auth.module.ts); I2 --> I2b(auth.service.ts); I2 --> I2c(auth.controller.ts); I2 --> I2d(jwt.strategy.ts;)",
+      "jsonStructure": {
+        "nodes": [
+          {
+            "id": "A",
+            "label": "root",
+            "type": "FOLDER",
+            "level": 0,
+            "path": "/",
+            "parentId": null
+          },
+          {
+            "id": "B",
+            "label": "src",
+            "type": "FOLDER",
+            "level": 1,
+            "path": "/src",
+            "parentId": "A"
+          },
+          {
+            "id": "C",
+            "label": "main.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/main.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "D",
+            "label": "app.module.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/app.module.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "E",
+            "label": "app.controller.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/app.controller.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "F",
+            "label": "app.service.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/app.service.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "G",
+            "label": "config",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/config",
+            "parentId": "B"
+          },
+          {
+            "id": "G1",
+            "label": "configuration.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/config/configuration.ts",
+            "parentId": "G"
+          },
+          {
+            "id": "H",
+            "label": "common",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/common",
+            "parentId": "B"
+          },
+          {
+            "id": "H1",
+            "label": "guards",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/guards",
+            "parentId": "H"
+          },
+          {
+            "id": "H1a",
+            "label": "auth.guard.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/guards/auth.guard.ts",
+            "parentId": "H1"
+          },
+          {
+            "id": "H2",
+            "label": "interceptors",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/interceptors",
+            "parentId": "H"
+          },
+          {
+            "id": "H2a",
+            "label": "logging.interceptor.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/interceptors/logging.interceptor.ts",
+            "parentId": "H2"
+          },
+          {
+            "id": "H3",
+            "label": "pipes",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/pipes",
+            "parentId": "H"
+          },
+          {
+            "id": "H3a",
+            "label": "validation.pipe.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/pipes/validation.pipe.ts",
+            "parentId": "H3"
+          },
+          {
+            "id": "I",
+            "label": "modules",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/modules",
+            "parentId": "B"
+          },
+          {
+            "id": "I1",
+            "label": "users",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/modules/users",
+            "parentId": "I"
+          },
+          {
+            "id": "I1a",
+            "label": "users.module.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.module.ts",
+            "parentId": "I1"
+          },
+          {
+            "id": "I1b",
+            "label": "users.controller.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.controller.ts",
+            "parentId": "I1"
+          },
+          {
+            "id": "I1c",
+            "label": "users.service.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.service.ts",
+            "parentId": "I1"
+          },
+          {
+            "id": "I2",
+            "label": "auth",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/modules/auth",
+            "parentId": "I"
+          },
+          {
+            "id": "I2a",
+            "label": "auth.module.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.module.ts",
+            "parentId": "I2"
+          },
+          {
+            "id": "I2b",
+            "label": "auth.service.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.service.ts",
+            "parentId": "I2"
+          },
+          {
+            "id": "I2c",
+            "label": "auth.controller.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.controller.ts",
+            "parentId": "I2"
+          },
+          {
+            "id": "I2d",
+            "label": "jwt.strategy.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/jwt.strategy.ts",
+            "parentId": "I2"
+          }
+        ],
+        "edges": [
+          {
+            "source": "A",
+            "target": "B"
+          },
+          {
+            "source": "B",
+            "target": "C"
+          },
+          {
+            "source": "B",
+            "target": "D"
+          },
+          {
+            "source": "B",
+            "target": "E"
+          },
+          {
+            "source": "B",
+            "target": "F"
+          },
+          {
+            "source": "B",
+            "target": "G"
+          },
+          {
+            "source": "G",
+            "target": "G1"
+          },
+          {
+            "source": "B",
+            "target": "H"
+          },
+          {
+            "source": "H",
+            "target": "H1"
+          },
+          {
+            "source": "H1",
+            "target": "H1a"
+          },
+          {
+            "source": "H",
+            "target": "H2"
+          },
+          {
+            "source": "H2",
+            "target": "H2a"
+          },
+          {
+            "source": "H",
+            "target": "H3"
+          },
+          {
+            "source": "H3",
+            "target": "H3a"
+          },
+          {
+            "source": "B",
+            "target": "I"
+          },
+          {
+            "source": "I",
+            "target": "I1"
+          },
+          {
+            "source": "I1",
+            "target": "I1a"
+          },
+          {
+            "source": "I1",
+            "target": "I1b"
+          },
+          {
+            "source": "I1",
+            "target": "I1c"
+          },
+          {
+            "source": "I",
+            "target": "I2"
+          },
+          {
+            "source": "I2",
+            "target": "I2a"
+          },
+          {
+            "source": "I2",
+            "target": "I2b"
+          },
+          {
+            "source": "I2",
+            "target": "I2c"
+          },
+          {
+            "source": "I2",
+            "target": "I2d"
+          }
+        ]
+      }
+    }
   }
 }

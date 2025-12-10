@@ -6,9 +6,10 @@ import {
 import { requestStructure } from '../../utils/vsCodeApi';
 
 export default function AIChat() {
-  const state = useDiagramState();
   const dispatch = useDiagramDispatch();
+  const state = useDiagramState();
   const prompt = state.chat.currentInput;
+  const { isChatEnabled, isLoading } = state.view;
 
   console.log('user input', prompt);
   //TO DO: generate session ID
@@ -62,11 +63,12 @@ export default function AIChat() {
           value={prompt}
           onChange={handleOnChange}
           placeholder='Type here'
+          disabled={isLoading || !isChatEnabled}
         />
         <button
           type='submit'
           aria-label='Send Message'
-          disabled={state.view.isLoading}
+          disabled={isLoading || !isChatEnabled}
         >
           <span className='codicon codicon-send' aria-hidden='true'></span>
           <span className='sr-only'>Send</span>

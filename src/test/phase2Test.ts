@@ -1,12 +1,12 @@
 import { CommandHandler } from '../handlers/CommandHandler';
-import { BackendMessage, FrontendMessage } from '../types';
+import { MessageToBackend, MessageToFrontend } from '../types';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const fakePanel = {
   webview: {
-    postMessage: (data: BackendMessage) => {
+    postMessage: (data: MessageToFrontend) => {
       // console.log("📩 BACKEND SENT:", JSON.stringify(data, null, 2));
       const outputPath = path.join(__dirname, 'backend_output.json');
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
@@ -28,12 +28,11 @@ const fakePanel = {
 async function runTest1() {
   console.log('--- TEST 1: Happy Path (NestJS Diagram) ---');
 
-  const msg1: FrontendMessage = {
+  const msg1: MessageToBackend = {
     command: 'GENERATE_STRUCTURE',
     payload: {
       sessionId: 'test-sess-01',
-      prompt:
-        'create a full nestjs backend folder structure for a scalable project. Include modules for auth, users, database, shared utils, and testing. return mermaid syntax and json graph',
+      prompt: 'create a full nestjs backend folder structure',
     },
   };
 
@@ -45,7 +44,7 @@ async function runTest1() {
 // --- TEST 2: CHAT ONLY (Text Response) ---
 async function runTest2() {
   console.log('\n--- TEST 2: Chat Only (Text response) ---');
-  const msg: FrontendMessage = {
+  const msg: MessageToBackend = {
     command: 'GENERATE_STRUCTURE',
     payload: {
       sessionId: 'sess-002',
@@ -59,7 +58,7 @@ async function runTest2() {
 // --- TEST 3: ERROR HANDLING (Malformed/Missing Type) ---
 async function runTest3() {
   console.log('\n--- TEST 3: Edge Case (Error Simulation) ---');
-  const msg: FrontendMessage = {
+  const msg: MessageToBackend = {
     command: 'GENERATE_STRUCTURE',
     payload: {
       sessionId: 'sess-003',
@@ -73,7 +72,7 @@ async function runTest3() {
 // --- TEST 4: EMPTY DATA BUG (AI returns empty structure) ---
 async function runTest4() {
   console.log('\n--- TEST 4: Edge Case (Empty Data) ---');
-  const msg: FrontendMessage = {
+  const msg: MessageToBackend = {
     command: 'GENERATE_STRUCTURE',
     payload: {
       sessionId: 'sess-004',
@@ -87,7 +86,7 @@ async function runTest4() {
 // --- TEST 5: RESET SESSION (Command Logic) ---
 async function runTest5() {
   console.log('\n--- TEST 5: Reset Session Command ---');
-  const msg: FrontendMessage = {
+  const msg: MessageToBackend = {
     command: 'RESET_SESSION',
     payload: {
       sessionId: 'sess-001',
@@ -194,7 +193,7 @@ async function runAllTests() {
   // await runTest2();
   // await runTest6();
   // await runTest7();
-  await runTest8();
+  await runTest1();
 }
 
 runAllTests();

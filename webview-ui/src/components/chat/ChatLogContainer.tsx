@@ -7,6 +7,7 @@ import AiMessageAccordion from './AiMessageAccordion';
 export default function ChatLogContainer() {
   const state = useDiagramState();
   const { log } = state.chat;
+  const { sessionId } = state.session;
 
   console.log('inside ChatLogContainer', log);
   return (
@@ -23,8 +24,12 @@ export default function ChatLogContainer() {
           >
             {isUser && <UserBubble logKey={logKey} text={entry.text} />}
             {entry.type === 'DIAGRAM_CONTENT' && (
-              <div className="w-full flex flex-col">
-                <DiagramFrame logKey={logKey} entry={entry} />
+              <div className='w-full flex flex-col'>
+                <DiagramFrame
+                  sessionId={sessionId}
+                  logKey={logKey}
+                  entry={entry}
+                />
                 <AiMessageAccordion entry={entry} />
               </div>
             )}

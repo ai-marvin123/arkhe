@@ -5,6 +5,7 @@ export type DiagramDispatch = (action: DiagramAction) => void;
 
 export type DiagramAction =
   | { type: 'initialize_session'; payload: { sessionId: string } }
+  | { type: 'enable_chat'; payload?: void }
   | { type: 'set_userInput'; payload: string }
   | { type: 'send_userInput'; payload?: void }
   | {
@@ -16,12 +17,13 @@ export type DiagramAction =
     }
   | { type: 'load_textOnly'; payload: { message: string } }
   | {
-      type: "update_logEntry";
+      type: 'update_logEntry';
       payload: {
         id: string;
         zoomLevel?: number;
         panX?: number;
         panY?: number;
+        isChatEnabled?: boolean;
         isFullscreen?: boolean;
         isLoading?: boolean;
         isPanActive?: boolean;
@@ -33,6 +35,7 @@ export type ViewSettings = {
   zoomLevel: number;
   panX: number;
   panY: number;
+  isChatEnabled: boolean;
   isFullscreen: boolean;
   isLoading: boolean;
   isPanActive: boolean;
@@ -81,15 +84,6 @@ export type TextEntry = {
   type: TextEntryType;
   text: string;
   timestamp: number;
-};
-
-export type AiResponsePayload =
-  | { type: 'TEXT'; message: string; data?: never }
-  | { type: 'DIAGRAM'; message: string; data: DiagramData };
-
-export type BackendMessage = {
-  command: 'AI_RESPONSE';
-  payload: AiResponsePayload;
 };
 
 export type ChatLog = (TextEntry | DiagramEntry)[];
