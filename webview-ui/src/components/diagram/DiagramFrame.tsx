@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MermaidRenderer from './MermaidRenderer';
 import type { DiagramEntry } from '../../state/diagramTypes';
 import ViewTools from '../controls/ViewTools';
@@ -22,19 +22,23 @@ export default function DiagramFrame({
   const [saveStatus, setSaveStatus] = useState<string>('idle');
   console.log('🚀Diagram entry text', entry.id, entry.text);
 
-  const baseClasses = `
-  relative
-        w-full max-w-full å
-        bg-gray-900 border border-gray-700 
-        rounded-lg p-3
-      `;
+  useEffect(() => {
+    if (!isFullscreen) {
+      document.body.style.overflow = '';
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
 
-  const fullscreenClasses = `
-  relative
-        fixed inset-0 z-[9999] 
-        bg-gray-900 overflow-auto 
-        p-6
-      `;
+  const panelClasses = `relative w-full max-w-full bg-gray-900 border border-gray-700 rounded-lg p-5 overflow-hidden shadow-2xl ${
+    isFullscreen ? 'h-full flex flex-col' : ''
+  }`;
+  const wrapperPadding = isFullscreen ? '0px' : '20px';
+
   if (diagram === undefined) {
     return;
   }
@@ -50,7 +54,7 @@ export default function DiagramFrame({
     try {
       const response = await postDiagramToSave(sessionId, diagramData);
       if (response.command === 'AI_RESPONSE') {
-        if (response.payload.type === 'DIAGRAM SAVED') {
+        if (response.payload.type === 'DIAGRAM_SAVED') {
           setSaveStatus('saved');
           setTimeout(() => setSaveStatus('idle'), 3000);
         } else {
@@ -67,11 +71,11 @@ export default function DiagramFrame({
     }
   };
 
-  return (
+  const content = (
     <div
       key={logKey}
-      style={{ padding: '20px' }}
-      className={`${isFullscreen ? fullscreenClasses : baseClasses}
+      style={{ padding: wrapperPadding }}
+      className={`${panelClasses}
         w-full max-w-full 
         bg-gray-900 border border-gray-700 
         rounded-lg p-3
@@ -102,6 +106,15 @@ export default function DiagramFrame({
         {JSON.stringify(entry.diagramData?.jsonStructure, null, 2)}
       </pre>
       <ViewTools id={entry.id} view={entry.viewSettings} />
+    </div>
+  );
+  if (!isFullscreen) {
+    return content;
+  }
+
+  return (
+    <div className='fixed inset-0 z-[9999] bg-[#0c152b] text-white overflow-hidden p-6 flex'>
+      <div className='w-full h-full'>{content}</div>
     </div>
   );
 }
