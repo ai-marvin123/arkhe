@@ -23,11 +23,14 @@ export default function ChatLogContainer() {
           >
             {isUser && <UserBubble logKey={logKey} text={entry.text} />}
             {entry.type === 'DIAGRAM_CONTENT' && (
-              <DiagramFrame
-                sessionId={sessionId}
-                logKey={logKey}
-                entry={entry}
-              />
+              <div className='w-full flex flex-col'>
+                <DiagramFrame
+                  sessionId={sessionId}
+                  logKey={logKey}
+                  entry={entry}
+                />
+                {/* <AiMessageAccordion entry={entry} /> */}
+              </div>
             )}
             {entry.type === 'TEXT_RESPONSE' && (
               <AIBubble logKey={logKey} text={entry.text} />
