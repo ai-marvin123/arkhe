@@ -2,6 +2,7 @@ import { useDiagramState } from '../../state/diagramContext';
 import UserBubble from './UserBubble';
 import AIBubble from './AIBubble';
 import DiagramFrame from '../diagram/DiagramFrame';
+import AiMessageAccordion from './AiMessageAccordion';
 
 export default function ChatLogContainer() {
   const state = useDiagramState();
@@ -29,7 +30,7 @@ export default function ChatLogContainer() {
                   logKey={logKey}
                   entry={entry}
                 />
-                {/* <AiMessageAccordion entry={entry} /> */}
+                <AiMessageAccordion entry={entry} />
               </div>
             )}
             {entry.type === 'TEXT_RESPONSE' && (

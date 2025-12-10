@@ -7,9 +7,10 @@ export default function FullscreenButton({ clickFunc }: FullscreenButtonProps) {
     <button
       onClick={clickFunc}
       className="
-        bg-gray-700 text-white 
-        hover:bg-gray-600 
+        bg-[#3700b3] text-white 
+        hover:bg-[#4f1ed1] 
         rounded p-2
+        transition-colors
       "
       title="Toggle Fullscreen">
       ⛶

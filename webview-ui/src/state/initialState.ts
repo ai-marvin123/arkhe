@@ -1,15 +1,15 @@
-import type { Node, Edge, ChatLog } from './diagramTypes.js';
+import type { Node, Edge, ChatLog } from "./diagramTypes.js";
 
 //define initalState structure
 export const initialState = {
   //A. Session id to send to BE
   session: {
-    sessionId: '',
+    sessionId: "",
   },
   // B. Current diagram
   diagram: {
     jsonStructure: { nodes: [] as Node[], edges: [] as Edge[] },
-    mermaidSyntax: '',
+    mermaidSyntax: "",
   },
 
   // C. Current view
@@ -20,13 +20,13 @@ export const initialState = {
     isFullscreen: false,
     isLoading: false,
     isPanActive: false,
-    isChatEnabled: false, //NEW - added this for drift feature
-    lastLLMMessage: '',
+    isChatEnabled: true, //NEW - added this for drift feature
+    lastLLMMessage: "",
     isAIOpen: false,
   },
   // D. AI Chat log
   chat: {
     log: [] as ChatLog,
-    currentInput: '',
+    currentInput: "",
   },
 };
