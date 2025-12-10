@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { MessageToFrontend, MessageToBackend } from '../types';
+import { MessageToFrontend, MessageToBackend, AiPayload } from '../types';
+import { FileService } from "../services/FileService";
 
 export class CommandHandler {
   constructor(private panel: vscode.WebviewPanel) {}
@@ -48,7 +49,53 @@ export class CommandHandler {
           this.panel.webview.postMessage(resetResponse);
           break;
         }
-      }
+        
+        case "SAVE_DIAGRAM": {
+        const { sessionId, diagramData } = msg.payload;
+
+        await FileService.saveDiagram(sessionId, diagramData);
+
+        const response: MessageToFrontend = {
+          command: "AI_RESPONSE",
+          payload: {
+            type: "DIAGRAM_SAVED",
+            message: "Diagram saved successfully.",
+          },
+        };
+
+        this.panel.webview.postMessage(response);
+      } 
+
+      case "LOAD_DIAGRAM": {
+        const { sessionId } = msg.payload;
+        const saved = await FileService.loadDiagram(sessionId);
+
+        let response: MessageToFrontend;
+
+        if (saved) {
+          response = {
+            command: "AI_RESPONSE",
+            payload: {
+              type: "DIAGRAM",
+              message: "Diagram loaded",
+              data: saved,
+            },
+          };
+        } else {
+          response = {
+            command: "AI_RESPONSE",
+            payload: {
+              type: "NO_SAVED_DIAGRAM",
+              message: "No diagram found.",
+            },
+          };
+      } 
+
+      this.panel.webview.postMessage(response);
+      break;
+    }
+    }
+    
     } catch (err: any) {
       this.sendError(
         `CommandHandler failed: ${err?.message ?? "Unexpected error"}`
