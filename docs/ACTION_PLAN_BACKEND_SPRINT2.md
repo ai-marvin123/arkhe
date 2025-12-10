@@ -32,20 +32,20 @@ src/
 
 #### **Step 1.2: Implement FileService (Persistence)**
 
-- [ ] **Create `src/services/FileService.ts`**.
-- [ ] **Setup:** Import `vscode` and `fs`/`path`.
-- [ ] **Method `getWorkspaceRoot()`**: Helper to get the current workspace URI.
-- [ ] **Method `saveDiagram(sessionId, diagramData)`**:
+- [x] **Create `src/services/FileService.ts`**.
+- [x] **Setup:** Import `vscode` and `fs`/`path`.
+- [x] **Method `getWorkspaceRoot()`**: Helper to get the current workspace URI.
+- [x] **Method `saveDiagram(sessionId, diagramData)`**:
   - Target file: `.repoplan.json` in workspace root.
   - Write `diagramData.jsonStructure` to disk.
-- [ ] **Method `loadDiagram(sessionId)`**:
+- [x] **Method `loadDiagram(sessionId)`**:
   - Check if `.repoplan.json` exists.
   - If yes: Read content, return `DiagramData`.
   - If no: Return `null`.
 
 #### **Step 1.3: Wiring Persistence Commands**
 
-- [ ] **Update `src/handlers/CommandHandler.ts`**:
+- [x] **Update `src/handlers/CommandHandler.ts`**:
   - Update imports to use `MessageToBackend` and `MessageToFrontend`.
   - **Case `SAVE_DIAGRAM`**:
     - Call `FileService.saveDiagram`.
