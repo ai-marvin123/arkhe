@@ -2,272 +2,536 @@
   "command": "AI_RESPONSE",
   "payload": {
     "type": "DIAGRAM",
-    "message": "This NestJS backend structure is designed for scalability and modularity. Each major feature (auth, users, database) is encapsulated in its own module folder. Shared utilities and testing resources are separated to promote reusability and maintainability.",
+    "message": "This structure follows a typical NestJS backend project layout with separate folders for modules, common utilities, configuration, and main application entry point.",
     "data": {
-      "mermaidSyntax": "graph TD;\n  root[backend] --> src\n  src --> auth\n  src --> users\n  src --> database\n  src --> shared\n  src --> main_ts[main_ts]\n  src --> app_module_ts[app_module_ts]\n  auth --> auth_module_ts[auth_module_ts]\n  auth --> auth_controller_ts[auth_controller_ts]\n  auth --> auth_service_ts[auth_service_ts]\n  users --> users_module_ts[users_module_ts]\n  users --> users_controller_ts[users_controller_ts]\n  users --> users_service_ts[users_service_ts]\n  database --> database_module_ts[database_module_ts]\n  database --> database_service_ts[database_service_ts]\n  shared --> utils_ts[utils_ts]\n  shared --> constants_ts[constants_ts]\n  testing --> auth_spec_ts[auth_spec_ts]\n  testing --> users_spec_ts[users_spec_ts]\n  testing --> database_spec_ts[database_spec_ts]\n  root --> testing",
+      "mermaidSyntax": "graph TD; A(root) --> B(src); B --> C(main.ts); B --> D(app.module.ts); B --> E(app.controller.ts); B --> F(app.service.ts); B --> G(common); G --> H(filters); H --> I(http-exception.filter.ts); G --> J(guards); J --> K(auth.guard.ts); G --> L(interceptors); L --> M(logging.interceptor.ts); B --> N(config); N --> O(configuration.ts); B --> P(modules); P --> Q(users); Q --> R(users.module.ts); Q --> S(users.controller.ts); Q --> T(users.service.ts); P --> U(auth); U --> V(auth.module.ts); U --> W(auth.service.ts); U --> X(auth.controller.ts); B --> Y(main.ts); B --> Z(middleware); Z --> AA(logger.middleware.ts); B --> AB(pipes); AB --> AC(validation.pipe.ts); B --> AD(interfaces); AD --> AE/user.interface.ts; B --> AF(dto); AF --> AG/create-user.dto.ts; AF --> AH/update-user.dto.ts; B --> AI(entity); AI --> AJ/user.entity.ts; B --> AK(repository); AK --> AL/user.repository.ts; B --> AM(utils); AM --> AN/helpers.ts; B --> AO(test); AO --> AP(app.e2e-spec.ts); AO --> AQ(jest-e2e.json); B --> AR(.env;)",
       "jsonStructure": {
         "nodes": [
           {
-            "id": "1",
-            "label": "backend",
+            "id": "A",
+            "label": "root",
             "type": "FOLDER",
             "level": 0,
-            "path": "/backend",
+            "path": "/",
             "parentId": null
           },
           {
-            "id": "2",
+            "id": "B",
             "label": "src",
             "type": "FOLDER",
             "level": 1,
-            "path": "/backend/src",
-            "parentId": "1"
+            "path": "/src",
+            "parentId": "A"
           },
           {
-            "id": "3",
-            "label": "auth",
-            "type": "FOLDER",
-            "level": 2,
-            "path": "/backend/src/auth",
-            "parentId": "2"
-          },
-          {
-            "id": "4",
-            "label": "auth_module.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/auth/auth_module.ts",
-            "parentId": "3"
-          },
-          {
-            "id": "5",
-            "label": "auth_controller.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/auth/auth_controller.ts",
-            "parentId": "3"
-          },
-          {
-            "id": "6",
-            "label": "auth_service.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/auth/auth_service.ts",
-            "parentId": "3"
-          },
-          {
-            "id": "7",
-            "label": "users",
-            "type": "FOLDER",
-            "level": 2,
-            "path": "/backend/src/users",
-            "parentId": "2"
-          },
-          {
-            "id": "8",
-            "label": "users_module.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/users/users_module.ts",
-            "parentId": "7"
-          },
-          {
-            "id": "9",
-            "label": "users_controller.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/users/users_controller.ts",
-            "parentId": "7"
-          },
-          {
-            "id": "10",
-            "label": "users_service.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/users/users_service.ts",
-            "parentId": "7"
-          },
-          {
-            "id": "11",
-            "label": "database",
-            "type": "FOLDER",
-            "level": 2,
-            "path": "/backend/src/database",
-            "parentId": "2"
-          },
-          {
-            "id": "12",
-            "label": "database_module.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/database/database_module.ts",
-            "parentId": "11"
-          },
-          {
-            "id": "13",
-            "label": "database_service.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/database/database_service.ts",
-            "parentId": "11"
-          },
-          {
-            "id": "14",
-            "label": "shared",
-            "type": "FOLDER",
-            "level": 2,
-            "path": "/backend/src/shared",
-            "parentId": "2"
-          },
-          {
-            "id": "15",
-            "label": "utils.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/shared/utils.ts",
-            "parentId": "14"
-          },
-          {
-            "id": "16",
-            "label": "constants.ts",
-            "type": "FILE",
-            "level": 3,
-            "path": "/backend/src/shared/constants.ts",
-            "parentId": "14"
-          },
-          {
-            "id": "17",
+            "id": "C",
             "label": "main.ts",
             "type": "FILE",
             "level": 2,
-            "path": "/backend/src/main.ts",
-            "parentId": "2"
+            "path": "/src/main.ts",
+            "parentId": "B"
           },
           {
-            "id": "18",
-            "label": "app_module.ts",
+            "id": "D",
+            "label": "app.module.ts",
             "type": "FILE",
             "level": 2,
-            "path": "/backend/src/app_module.ts",
-            "parentId": "2"
+            "path": "/src/app.module.ts",
+            "parentId": "B"
           },
           {
-            "id": "19",
-            "label": "testing",
+            "id": "E",
+            "label": "app.controller.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/app.controller.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "F",
+            "label": "app.service.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/app.service.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "G",
+            "label": "common",
             "type": "FOLDER",
+            "level": 2,
+            "path": "/src/common",
+            "parentId": "B"
+          },
+          {
+            "id": "H",
+            "label": "filters",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/filters",
+            "parentId": "G"
+          },
+          {
+            "id": "I",
+            "label": "http-exception.filter.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/filters/http-exception.filter.ts",
+            "parentId": "H"
+          },
+          {
+            "id": "J",
+            "label": "guards",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/guards",
+            "parentId": "G"
+          },
+          {
+            "id": "K",
+            "label": "auth.guard.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/guards/auth.guard.ts",
+            "parentId": "J"
+          },
+          {
+            "id": "L",
+            "label": "interceptors",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/common/interceptors",
+            "parentId": "G"
+          },
+          {
+            "id": "M",
+            "label": "logging.interceptor.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/common/interceptors/logging.interceptor.ts",
+            "parentId": "L"
+          },
+          {
+            "id": "N",
+            "label": "config",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/config",
+            "parentId": "B"
+          },
+          {
+            "id": "O",
+            "label": "configuration.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/config/configuration.ts",
+            "parentId": "N"
+          },
+          {
+            "id": "P",
+            "label": "modules",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/modules",
+            "parentId": "B"
+          },
+          {
+            "id": "Q",
+            "label": "users",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/modules/users",
+            "parentId": "P"
+          },
+          {
+            "id": "R",
+            "label": "users.module.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.module.ts",
+            "parentId": "Q"
+          },
+          {
+            "id": "S",
+            "label": "users.controller.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.controller.ts",
+            "parentId": "Q"
+          },
+          {
+            "id": "T",
+            "label": "users.service.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/users/users.service.ts",
+            "parentId": "Q"
+          },
+          {
+            "id": "U",
+            "label": "auth",
+            "type": "FOLDER",
+            "level": 3,
+            "path": "/src/modules/auth",
+            "parentId": "P"
+          },
+          {
+            "id": "V",
+            "label": "auth.module.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.module.ts",
+            "parentId": "U"
+          },
+          {
+            "id": "W",
+            "label": "auth.service.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.service.ts",
+            "parentId": "U"
+          },
+          {
+            "id": "X",
+            "label": "auth.controller.ts",
+            "type": "FILE",
+            "level": 4,
+            "path": "/src/modules/auth/auth.controller.ts",
+            "parentId": "U"
+          },
+          {
+            "id": "Y",
+            "label": "main.ts",
+            "type": "FILE",
+            "level": 2,
+            "path": "/src/main.ts",
+            "parentId": "B"
+          },
+          {
+            "id": "Z",
+            "label": "middleware",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/middleware",
+            "parentId": "B"
+          },
+          {
+            "id": "AA",
+            "label": "logger.middleware.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/middleware/logger.middleware.ts",
+            "parentId": "Z"
+          },
+          {
+            "id": "AB",
+            "label": "pipes",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/pipes",
+            "parentId": "B"
+          },
+          {
+            "id": "AC",
+            "label": "validation.pipe.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/pipes/validation.pipe.ts",
+            "parentId": "AB"
+          },
+          {
+            "id": "AD",
+            "label": "interfaces",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/interfaces",
+            "parentId": "B"
+          },
+          {
+            "id": "AE",
+            "label": "user.interface.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/interfaces/user.interface.ts",
+            "parentId": "AD"
+          },
+          {
+            "id": "AF",
+            "label": "dto",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/dto",
+            "parentId": "B"
+          },
+          {
+            "id": "AG",
+            "label": "create-user.dto.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/dto/create-user.dto.ts",
+            "parentId": "AF"
+          },
+          {
+            "id": "AH",
+            "label": "update-user.dto.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/dto/update-user.dto.ts",
+            "parentId": "AF"
+          },
+          {
+            "id": "AI",
+            "label": "entity",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/entity",
+            "parentId": "B"
+          },
+          {
+            "id": "AJ",
+            "label": "user.entity.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/entity/user.entity.ts",
+            "parentId": "AI"
+          },
+          {
+            "id": "AK",
+            "label": "repository",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/repository",
+            "parentId": "B"
+          },
+          {
+            "id": "AL",
+            "label": "user.repository.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/repository/user.repository.ts",
+            "parentId": "AK"
+          },
+          {
+            "id": "AM",
+            "label": "utils",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/utils",
+            "parentId": "B"
+          },
+          {
+            "id": "AN",
+            "label": "helpers.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/utils/helpers.ts",
+            "parentId": "AM"
+          },
+          {
+            "id": "AO",
+            "label": "test",
+            "type": "FOLDER",
+            "level": 2,
+            "path": "/src/test",
+            "parentId": "B"
+          },
+          {
+            "id": "AP",
+            "label": "app.e2e-spec.ts",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/test/app.e2e-spec.ts",
+            "parentId": "AO"
+          },
+          {
+            "id": "AQ",
+            "label": "jest-e2e.json",
+            "type": "FILE",
+            "level": 3,
+            "path": "/src/test/jest-e2e.json",
+            "parentId": "AO"
+          },
+          {
+            "id": "AR",
+            "label": ".env",
+            "type": "FILE",
             "level": 1,
-            "path": "/backend/testing",
-            "parentId": "1"
-          },
-          {
-            "id": "20",
-            "label": "auth.spec.ts",
-            "type": "FILE",
-            "level": 2,
-            "path": "/backend/testing/auth.spec.ts",
-            "parentId": "19"
-          },
-          {
-            "id": "21",
-            "label": "users.spec.ts",
-            "type": "FILE",
-            "level": 2,
-            "path": "/backend/testing/users.spec.ts",
-            "parentId": "19"
-          },
-          {
-            "id": "22",
-            "label": "database.spec.ts",
-            "type": "FILE",
-            "level": 2,
-            "path": "/backend/testing/database.spec.ts",
-            "parentId": "19"
+            "path": "/.env",
+            "parentId": "A"
           }
         ],
         "edges": [
           {
-            "source": "1",
-            "target": "2"
+            "source": "A",
+            "target": "B"
           },
           {
-            "source": "2",
-            "target": "3"
+            "source": "B",
+            "target": "C"
           },
           {
-            "source": "2",
-            "target": "7"
+            "source": "B",
+            "target": "D"
           },
           {
-            "source": "2",
-            "target": "11"
+            "source": "B",
+            "target": "E"
           },
           {
-            "source": "2",
-            "target": "14"
+            "source": "B",
+            "target": "F"
           },
           {
-            "source": "2",
-            "target": "17"
+            "source": "B",
+            "target": "G"
           },
           {
-            "source": "2",
-            "target": "18"
+            "source": "G",
+            "target": "H"
           },
           {
-            "source": "3",
-            "target": "4"
+            "source": "H",
+            "target": "I"
           },
           {
-            "source": "3",
-            "target": "5"
+            "source": "G",
+            "target": "J"
           },
           {
-            "source": "3",
-            "target": "6"
+            "source": "J",
+            "target": "K"
           },
           {
-            "source": "7",
-            "target": "8"
+            "source": "G",
+            "target": "L"
           },
           {
-            "source": "7",
-            "target": "9"
+            "source": "L",
+            "target": "M"
           },
           {
-            "source": "7",
-            "target": "10"
+            "source": "B",
+            "target": "N"
           },
           {
-            "source": "11",
-            "target": "12"
+            "source": "N",
+            "target": "O"
           },
           {
-            "source": "11",
-            "target": "13"
+            "source": "B",
+            "target": "P"
           },
           {
-            "source": "14",
-            "target": "15"
+            "source": "P",
+            "target": "Q"
           },
           {
-            "source": "14",
-            "target": "16"
+            "source": "Q",
+            "target": "R"
           },
           {
-            "source": "1",
-            "target": "19"
+            "source": "Q",
+            "target": "S"
           },
           {
-            "source": "19",
-            "target": "20"
+            "source": "Q",
+            "target": "T"
           },
           {
-            "source": "19",
-            "target": "21"
+            "source": "P",
+            "target": "U"
           },
           {
-            "source": "19",
-            "target": "22"
+            "source": "U",
+            "target": "V"
+          },
+          {
+            "source": "U",
+            "target": "W"
+          },
+          {
+            "source": "U",
+            "target": "X"
+          },
+          {
+            "source": "B",
+            "target": "Y"
+          },
+          {
+            "source": "B",
+            "target": "Z"
+          },
+          {
+            "source": "Z",
+            "target": "AA"
+          },
+          {
+            "source": "B",
+            "target": "AB"
+          },
+          {
+            "source": "AB",
+            "target": "AC"
+          },
+          {
+            "source": "B",
+            "target": "AD"
+          },
+          {
+            "source": "AD",
+            "target": "AE"
+          },
+          {
+            "source": "B",
+            "target": "AF"
+          },
+          {
+            "source": "AF",
+            "target": "AG"
+          },
+          {
+            "source": "AF",
+            "target": "AH"
+          },
+          {
+            "source": "B",
+            "target": "AI"
+          },
+          {
+            "source": "AI",
+            "target": "AJ"
+          },
+          {
+            "source": "B",
+            "target": "AK"
+          },
+          {
+            "source": "AK",
+            "target": "AL"
+          },
+          {
+            "source": "B",
+            "target": "AM"
+          },
+          {
+            "source": "AM",
+            "target": "AN"
+          },
+          {
+            "source": "B",
+            "target": "AO"
+          },
+          {
+            "source": "AO",
+            "target": "AP"
+          },
+          {
+            "source": "AO",
+            "target": "AQ"
+          },
+          {
+            "source": "A",
+            "target": "AR"
           }
         ]
       }

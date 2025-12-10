@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { AiResponsePayload, FrontendMessage, BackendMessage } from '../types';
+import { MessageToFrontend, MessageToBackend } from '../types';
 
 export class CommandHandler {
   constructor(private panel: vscode.WebviewPanel) {}
 
-  async handle(msg: FrontendMessage) {
+  async handle(msg: MessageToBackend) {
     try {
       switch (msg.command) {
         case 'GENERATE_STRUCTURE': {
@@ -20,7 +20,7 @@ export class CommandHandler {
             prompt
           );
 
-          const responseMsg: BackendMessage = {
+          const responseMsg: MessageToFrontend = {
             command: 'AI_RESPONSE',
             payload: aiResponsePayload,
           };
@@ -37,7 +37,7 @@ export class CommandHandler {
           SessionManager.getInstance().clearSession(sessionId);
 
           // Send a confirmation text back to the chat so the user knows it happened
-          const resetResponse: BackendMessage = {
+          const resetResponse: MessageToFrontend = {
             command: 'AI_RESPONSE',
             payload: {
               type: 'TEXT',

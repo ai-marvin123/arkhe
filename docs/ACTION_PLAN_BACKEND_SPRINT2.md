@@ -5,13 +5,13 @@ We are adding two new services to handle file system operations and comparison l
 ```text
 src/
 ├── types/
-│   └── index.ts          # UPDATE: Add DriftStatus, update StructureNode
+│   └── index.ts          # UPDATE: Renamed types (MessageToBackend, AiPayload), Added DriftStatus
 ├── services/
 │   ├── AiService.ts      # (Existing)
 │   ├── FileService.ts    # NEW: Handles Save/Load .repoplan.json & Scanning Disk
-│   └── DriftService.ts   # NEW: Logic for Comparing Plan vs. Actual (Diffing)
+│   └── DriftService.ts   # NEW: Logic for Comparing Diagram vs. Actual (Diffing)
 ├── handlers/
-│   └── CommandHandler.ts # UPDATE: Handle new Drift commands
+│   └── CommandHandler.ts # UPDATE: Handle new Drift commands & updated types
 └── ...
 ```
 
@@ -19,24 +19,26 @@ src/
 
 ### **Phase 1: Types & Persistence (Day 1)**
 
-**Goal:** Enable saving and loading the architectural plan to/from the disk (`.repoplan.json`).
+**Goal:** Enable saving and loading the architectural diagram to/from the disk (`.repoplan.json`).
 
 #### **Step 1.1: Update Shared Types**
 
-- [x] **Update `src/types/index.ts`**:
-  - Add `DriftStatus` type (`'MATCHED' | 'MISSING' | 'UNTRACKED'`).
-  - Update `StructureNode` interface to include optional `status`.
-  - Ensure `FrontendMessage` and `BackendMessage` unions include the new commands defined in `IPC_PROTOCOL.md` (v2).
+- [x] **Update `src/types/index.ts`** (Reflect IPC Protocol v3):
+  - Rename `FrontendMessage` -\> `MessageToBackend`.
+  - Rename `BackendMessage` -\> `MessageToFrontend`.
+  - Rename `AiResponsePayload` -\> `AiPayload`.
+  - Add `DriftStatus` enum (`'MATCHED' | 'MISSING' | 'UNTRACKED'`).
+  - Update `AiPayloadSchema` to include new types: `DIAGRAM_SAVED`, `NO_SAVED_DIAGRAM`, `DRIFT_DIAGRAM`.
 
 #### **Step 1.2: Implement FileService (Persistence)**
 
 - [ ] **Create `src/services/FileService.ts`**.
 - [ ] **Setup:** Import `vscode` and `fs`/`path`.
 - [ ] **Method `getWorkspaceRoot()`**: Helper to get the current workspace URI.
-- [ ] **Method `savePlan(sessionId, diagramData)`**:
+- [ ] **Method `saveDiagram(sessionId, diagramData)`**:
   - Target file: `.repoplan.json` in workspace root.
   - Write `diagramData.jsonStructure` to disk.
-- [ ] **Method `loadPlan(sessionId)`**:
+- [ ] **Method `loadDiagram(sessionId)`**:
   - Check if `.repoplan.json` exists.
   - If yes: Read content, return `DiagramData`.
   - If no: Return `null`.
@@ -44,16 +46,20 @@ src/
 #### **Step 1.3: Wiring Persistence Commands**
 
 - [ ] **Update `src/handlers/CommandHandler.ts`**:
-  - **Case `SAVE_PLAN`**: Call `FileService.savePlan`. Send success `AI_RESPONSE` (Text).
-  - **Case `LOAD_PLAN`**: Call `FileService.loadPlan`.
-    - If result exists: Send `AI_RESPONSE` (Type: `DIAGRAM`).
-    - If null: Send `AI_RESPONSE` (Type: `TEXT`, message: "No plan found").
+  - Update imports to use `MessageToBackend` and `MessageToFrontend`.
+  - **Case `SAVE_DIAGRAM`**:
+    - Call `FileService.saveDiagram`.
+    - Send `AI_RESPONSE` with payload type `DIAGRAM_SAVED`.
+  - **Case `LOAD_DIAGRAM`**:
+    - Call `FileService.loadDiagram`.
+    - If result exists: Send `AI_RESPONSE` with payload type `DIAGRAM`.
+    - If null: Send `AI_RESPONSE` with payload type `NO_SAVED_DIAGRAM`.
 
 ---
 
 ### **Phase 2: Scanning & Drift Engine (Day 2)**
 
-**Goal:** Implement the logic to scan the actual file system and compare it against the plan.
+**Goal:** Implement the logic to scan the actual file system and compare it against the saved diagram.
 
 #### **Step 2.1: Implement Disk Scanning**
 
@@ -79,17 +85,16 @@ src/
 
 - [ ] **Update `src/handlers/CommandHandler.ts`**:
   - **Case `CHECK_DRIFT`**:
-    - Send `PROCESSING_STATUS` (`scanning`).
-    - Get current Plan (from Memory/SessionManager or `loadPlan`).
+    - Get current Diagram (from Memory/SessionManager or `loadDiagram`).
     - Get Actual Nodes (`FileService.scanDirectory`).
     - Run Diff (`DriftService.calculateDrift`).
-    - Send `AI_RESPONSE` (Type: `DIAGRAM`) with the colored nodes.
+    - Send `AI_RESPONSE` with payload type `DRIFT_DIAGRAM` (contains nodes with `status`).
 
 ---
 
 ### **Phase 3: Sync & Final Integration (Day 3)**
 
-**Goal:** Allow users to overwrite the plan with reality and ensure the full loop works.
+**Goal:** Allow users to overwrite the diagram with reality and ensure the full loop works.
 
 #### **Step 3.1: Implement Sync Logic**
 
@@ -97,21 +102,20 @@ src/
   - **Case `SYNC_TO_ACTUAL`**:
     - Call `FileService.scanDirectory()` to get the "Truth".
     - **Construct new Diagram Data:** Create a clean diagram where all actual nodes are standard (remove `UNTRACKED` status, just make them normal nodes).
-    - Call `FileService.savePlan()` to overwrite `.repoplan.json`.
-    - Send `AI_RESPONSE` (Type: `DIAGRAM`) to update UI.
+    - Call `FileService.saveDiagram()` to overwrite `.repoplan.json`.
+    - Send `AI_RESPONSE` with payload type `DIAGRAM` to update UI.
 
 #### **Step 3.2: Edge Cases & Polish**
 
 - [ ] **Empty Workspace:** Handle case where `scanDirectory` returns empty (new project).
 - [ ] **Relative Path IDs:** Ensure `DriftService` normalizes paths (e.g., handles Windows `\` vs POSIX `/`) so IDs match correctly.
-- [ ] **Refine `AI_RESPONSE`:** Ensure the Frontend receives the correct `DriftStatus` enum strings.
 
 #### **Step 3.3: Verification**
 
 - [ ] **Test Flow:**
-  1.  Generate Plan -\> Save -\> Check `.repoplan.json` created.
-  2.  Reload Window -\> Extension loads Plan automatically.
+  1.  Generate Diagram -\> Save -\> Check `.repoplan.json` created.
+  2.  Reload Window -\> Extension loads Diagram automatically.
   3.  Create a dummy file manually (e.g., `test.ts`).
   4.  Click "Check Drift" -\> Verify `test.ts` appears as Gray (UNTRACKED).
-  5.  Delete a file from Plan -\> Verify it appears as Red (MISSING).
-  6.  Click "Sync" -\> Verify Plan updates and colors reset.
+  5.  Delete a file from Diagram -\> Verify it appears as Red (MISSING).
+  6.  Click "Sync" -\> Verify Diagram updates and colors reset.
