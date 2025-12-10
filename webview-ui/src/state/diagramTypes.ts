@@ -16,7 +16,6 @@ export type DiagramAction =
     }
   | { type: 'load_textOnly'; payload: { message: string } }
   | {
-      type: 'update_logEntry';
       type: "update_logEntry";
       payload: {
         id: string;
