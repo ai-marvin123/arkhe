@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { useDiagramDispatch } from "../state/diagramContext";
-// import { loadSavedDiagram } from '../utils/vsCodeApi';
+import { useEffect } from 'react';
+import { useDiagramDispatch } from '../state/diagramContext';
+import { loadSavedDiagram } from '../utils/vsCodeApi';
 
 export default function SessionInitializer() {
   const dispatch = useDiagramDispatch();
@@ -10,7 +10,7 @@ export default function SessionInitializer() {
     const initializeSession = async () => {
       const newSessionId = crypto.randomUUID();
       dispatch({
-        type: "initialize_session",
+        type: 'initialize_session',
         payload: { sessionId: newSessionId },
       });
 
@@ -28,7 +28,7 @@ export default function SessionInitializer() {
               payload: { message: payload.message, data: payload.data },
             });
           } else if (payload.type === 'NO_SAVED_DIAGRAM') {
-      dispatch({ type: "enable_chat" });
+            dispatch({ type: 'enable_chat' });
           }
         } else if (response.command === 'ERROR') {
           throw new Error(
