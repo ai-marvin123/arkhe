@@ -1,7 +1,7 @@
 # 🌊 Step 4: Return Drift Results (Detailed Flow)
 
 **Context:** This document outlines the refined logic for handling Drift Detection results.
-**Goal:** Improve User Experience (UX) by providing immediate visual feedback (Split View) while asynchronously fetching AI insights.
+**Goal:** Improve User Experience (UX) by providing immediate visual feedback while asynchronously fetching AI insights.
 
 ---
 
@@ -26,14 +26,14 @@ After sending Phase A, the Backend privately invokes the LLM with the list of _M
 
 ## 2. Interaction Flow
 
-| Step    | Actor    | Action                                                                            | Payload Type       |
-| :------ | :------- | :-------------------------------------------------------------------------------- | :----------------- |
-| **3.0** | Frontend | User clicks "Check Drift". Sends `CHECK_DRIFT` command.                           | `MessageToBackend` |
-| **4.1** | Backend  | Scans files, calculates drift. **Immediately** sends separate Plan & Actual data. | `DRIFT_DATA`       |
-| **4.2** | Frontend | Renders "Split View" (Left: Plan, Right: Actual). User sees results instantly.    | -                  |
-| **4.3** | Backend  | (Background) Sends diff to LLM for analysis. Waits for response.                  | -                  |
-| **4.4** | Backend  | LLM finishes. Backend sends analysis text to Frontend.                            | `DRIFT_ANALYSIS`   |
-| **4.5** | Frontend | Displays toast/notification or insight banner with the AI message.                | -                  |
+| Step    | Actor    | Action                                                                                                   | Payload Type       |
+| :------ | :------- | :------------------------------------------------------------------------------------------------------- | :----------------- |
+| **3.0** | Frontend | User clicks "Check Drift". Sends `CHECK_DRIFT` command.                                                  | `MessageToBackend` |
+| **4.1** | Backend  | Scans files, calculates drift. **Immediately** sends separate Plan & Actual data.                        | `DRIFT_DATA`       |
+| **4.2** | Frontend | **Renders results sequentially (Plan section followed by Actual section).** User sees results instantly. | -                  |
+| **4.3** | Backend  | (Background) Sends diff to LLM for analysis. Waits for response.                                         | -                  |
+| **4.4** | Backend  | LLM finishes. Backend sends analysis text to Frontend.                                                   | `DRIFT_ANALYSIS`   |
+| **4.5** | Frontend | Displays toast/notification or insight banner with the AI message.                                       | -                  |
 
 ---
 
@@ -125,4 +125,8 @@ _Sent \~2-3 seconds after request._
     "message": "Drift Detected: It appears 'User.ts' was renamed to 'Users.ts'. Consider updating the plan to match the new filename."
   }
 }
+```
+
+```
+
 ```
