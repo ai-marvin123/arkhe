@@ -39,21 +39,21 @@ export function applyMermaidStyling(
 ) {
   const COLORS = {
     folder: {
-      fill: "#0F2D8C",
+      fill: "#3600b3",
       text: "#FFFFFF",
-      stroke: "#333",
+      // stroke: "#333",
     },
     file: {
-      fill: "#366EC2",
+      fill: "#5d1ec4",
       text: "#FFFFFF",
-      stroke: "#666",
+      // stroke: "#666",
     },
   };
 
   const classDefs = [
     "%% === NODE COLOR DEFINITIONS === %%",
-    `classDef folder fill:${COLORS.folder.fill},color:${COLORS.folder.text},stroke:${COLORS.folder.stroke},stroke-width:2px;`,
-    `classDef file fill:${COLORS.file.fill},color:${COLORS.file.text},stroke:${COLORS.file.stroke},stroke-width:1px;`,
+    `classDef folder fill:${COLORS.folder.fill},color:${COLORS.folder.text}, stroke:none,stroke-width:0px, font-family:sans-serif, font-weight:200, font-size:12px;`,
+    `classDef file fill:${COLORS.file.fill},color:${COLORS.file.text}, stroke:none,stroke-width:0px, font-family:sans-serif, font-weight:200, font-size:12px;`,
   ].join("\n");
 
   const classAssignments = jsonStructure.nodes
