@@ -1,28 +1,70 @@
-import { CommandHandler } from '../handlers/CommandHandler';
+// ==========================================
+// 1. SYSTEM MOCKING (Must be at the very top)
+// ==========================================
+const Module = require('module');
+const originalLoad = Module._load;
+
+// Intercept requests for 'vscode'
+Module._load = function (request: string, parent: any, isMain: boolean) {
+  if (request === 'vscode') {
+    return {
+      workspace: {},
+      window: {
+        showErrorMessage: (msg: string) =>
+          console.error('❌ VSCODE ERROR:', msg),
+        showWarningMessage: (msg: string) =>
+          console.warn('⚠️ VSCODE WARN:', msg),
+        showInformationMessage: (msg: string) =>
+          console.log('ℹ️ VSCODE INFO:', msg),
+      },
+      Uri: {
+        file: (f: string) => ({ fsPath: f }),
+        parse: (f: string) => ({ fsPath: f }),
+      },
+      // Mock WebviewPanel class if needed implicitly
+      WebviewPanel: class {},
+    };
+  }
+  return originalLoad(request, parent, isMain);
+};
+
+// ==========================================
+// 2. IMPORTS (Must use 'require' after mocking)
+// ==========================================
+const fs = require('fs');
+const path = require('path');
+
+// Import your modules AFTER mocking vscode
+const { CommandHandler } = require('../handlers/CommandHandler');
+
+// Types (Just for TS checking, removed from runtime execution)
 import { MessageToBackend, MessageToFrontend } from '../types';
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 
 const fakePanel = {
   webview: {
     postMessage: (data: MessageToFrontend) => {
-      // console.log("📩 BACKEND SENT:", JSON.stringify(data, null, 2));
+      // Logic log file giữ nguyên
       const outputPath = path.join(__dirname, 'backend_output.json');
       fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
       console.log(`📩 BACKEND SENT: Data saved to ${outputPath}`);
 
       if (data.command === 'AI_RESPONSE' && data.payload.type === 'DIAGRAM') {
-        const mermaidPath = path.join(__dirname, 'backend_output.mmd');
-        const syntax = data.payload.data.mermaidSyntax;
+        // Fix: Access correct path inside payload
+        // DiagramDataSchema: { mermaidSyntax: string, jsonStructure: ... }
+        const diagramData = data.payload.data;
 
-        fs.writeFileSync(mermaidPath, syntax);
-        console.log(`📩 BACKEND SENT: Data saved to ${mermaidPath}`);
-        console.log('✅ Valid Diagram Structure received!');
+        if (diagramData && diagramData.mermaidSyntax) {
+          const mermaidPath = path.join(__dirname, 'backend_output.mmd');
+          fs.writeFileSync(mermaidPath, diagramData.mermaidSyntax);
+          console.log(`📩 BACKEND SENT: Data saved to ${mermaidPath}`);
+          console.log('✅ Valid Diagram Structure received!');
+        } else {
+          console.warn('⚠️ Received DIAGRAM type but missing mermaidSyntax');
+        }
       }
     },
   },
-} as vscode.WebviewPanel;
+};
 
 // --- TEST 1: HAPPY PATH (Diagram) ---
 async function runTest1() {
@@ -190,10 +232,14 @@ async function runTest8() {
 // MAIN RUNNER
 // ==========================================
 async function runAllTests() {
+  // await runTest1();
   // await runTest2();
-  // await runTest6();
+  // await runTest3();
+  // await runTest4();
+  // await runTest5();
+
+  await runTest6();
   // await runTest7();
-  await runTest1();
 }
 
 runAllTests();

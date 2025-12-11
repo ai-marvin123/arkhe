@@ -9,6 +9,7 @@ import { SessionManager } from '../managers/SessionManager'; // Ensure this path
 import { AiPayload, AiPayloadSchema } from '../types';
 import { SystemMessage } from 'langchain';
 import { ChatOpenAI } from '@langchain/openai';
+import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 
 export const chatModel = new ChatOpenAI({
   modelName: 'gpt-4.1-mini',
@@ -24,25 +25,70 @@ export const chatModel = new ChatOpenAI({
 // });
 
 // 2. System Prompt
-const SYSTEM_PROMPT = `
-You are an expert AI Software Architect. Your job is to visualize project folder structures based on user descriptions.
-You must respond strictly in JSON format. RESPONSE MODES (Choose one based on user input): MODE A | MODE B.
+// const SYSTEM_PROMPT = `
+// You are an expert AI Software Architect. Your job is to visualize project folder structures based on user descriptions.
+// You must respond strictly in JSON format. RESPONSE MODES (Choose one based on user input): MODE A | MODE B.
 
-MODE A: SUFFICIENT DATA (User description is clear). If you can reasonably infer a project structure, generate the diagram. Format:
+// MODE A: SUFFICIENT DATA (User description is clear). If you can reasonably infer a project structure, generate the diagram. Format:
+// {
+//   "type": "DIAGRAM",
+//   "message": "(Briefly explain the architecture choices)",
+//   "data": {
+//     "mermaidSyntax": "graph TD; ... (Mermaid code for the tree)",
+//     "jsonStructure": {
+//       "nodes": [
+//         {
+//           "id": "unique-id",
+//           "label": "filename.ext",
+//           "type": "FILE",
+//           "level": number,
+//           "path": "/path/to/file",
+//           "parentId": "parent-id-or-null"
+//         }
+//       ],
+//       "edges": [{ "source": "parent-id", "target": "child-id" }]
+//     }
+//   }
+// }
+
+// MODE B: INSUFFICIENT DATA (Vague or ambiguous). If the prompt is too short (e.g., "help", "code", "structure") or nonsensical, ask for clarification. Format:
+// {
+//   "type": "TEXT",
+//   "message": "Politely suggest what information you need (e.g., 'Could you specify the language or framework?').",
+//   "data": null
+// }
+
+// RULES:
+// 1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
+// 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
+// 3. "parentId" should be null for the root node.
+// 4. IDs must be unique.
+// 5. Don't need include "FILE" or "FOLDER" in label of node.
+// 6. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
+// 7. NAMING CONVENTION: Always include file extensions for files (e.g., "App.tsx", "server.js", "style.css"). Do NOT strip the dot (e.g., avoid "Apptsx" or "server_js").
+// 8. MERMAID SHAPE: You MUST use parentheses () for all node definitions to create rounded edges. Use syntax id(Label) instead of id[Label].
+//    - CORRECT: A(src) --> B(App.tsx)
+//    - WRONG: A[src] --> B[App.tsx]
+// `;
+
+const SYSTEM_PROMPT = `
+You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
+Respond strictly in JSON format. MODE A | MODE B.
+
+MODE A: SUFFICIENT DATA. Format:
 {
   "type": "DIAGRAM",
-  "message": "(Briefly explain the architecture choices)",
+  "message": "(Brief architecture explanation)",
   "data": {
-    "mermaidSyntax": "graph TD; ... (Mermaid code for the tree)",
     "jsonStructure": {
       "nodes": [
-        { 
-          "id": "unique-id", 
-          "label": "filename.ext", 
-          "type": "FILE", 
-          "level": number, 
-          "path": "/path/to/file", 
-          "parentId": "parent-id-or-null" 
+        {
+          "id": "unique-id",
+          "label": "filename.ext",
+          "type": "FILE",
+          "level": number,
+          "path": "/path/to/file",
+          "parentId": "parent-id-or-null"
         }
       ],
       "edges": [{ "source": "parent-id", "target": "child-id" }]
@@ -50,24 +96,20 @@ MODE A: SUFFICIENT DATA (User description is clear). If you can reasonably infer
   }
 }
 
-MODE B: INSUFFICIENT DATA (Vague or ambiguous). If the prompt is too short (e.g., "help", "code", "structure") or nonsensical, ask for clarification. Format:
+MODE B: INSUFFICIENT DATA. Format:
 {
   "type": "TEXT",
-  "message": "Politely suggest what information you need (e.g., 'Could you specify the language or framework?').",
+  "message": "Politely ask for clarification.",
   "data": null
 }
 
 RULES:
 1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
-3. "parentId" should be null for the root node.
-4. IDs must be unique.
-5. Don't need include "FILE" or "FOLDER" in label of node.
-6. Mermaid Syntax: Node labels must NOT contain special characters like parentheses (). Use simple alphanumeric text only (e.g., use "root" instead of "root (FOLDER)").
-7. NAMING CONVENTION: Always include file extensions for files (e.g., "App.tsx", "server.js", "style.css"). Do NOT strip the dot (e.g., avoid "Apptsx" or "server_js").
-8. MERMAID SHAPE: You MUST use parentheses () for all node definitions to create rounded edges. Use syntax id(Label) instead of id[Label].
-   - CORRECT: A(src) --> B(App.tsx)
-   - WRONG: A[src] --> B[App.tsx]
+3. IDs must be unique.
+4. "parentId" should be null for the root node.
+5. Always include file extensions.
+6. Don't need include "FILE" or "FOLDER" in label of node.
 `;
 
 class AiService {
@@ -109,7 +151,22 @@ class AiService {
         input: userPrompt,
       });
 
-      console.log('rawJson', rawJson);
+      // console.log('rawJson', rawJson);
+
+      // --- CRITICAL STEP: Inject Mermaid Syntax BEFORE Validation ---
+      // We process the raw JSON here. If it's a DIAGRAM type, we calculate the mermaid string
+      // and inject it into the object so that it satisfies the Zod schema in the next step.
+      if (rawJson?.type === 'DIAGRAM' && rawJson?.data?.jsonStructure) {
+        try {
+          const syntax = generateMermaidFromJSON(rawJson.data.jsonStructure);
+          // Inject mermaidSyntax into the data object
+          rawJson.data.mermaidSyntax = syntax;
+          console.log('[AiService] Mermaid syntax generated successfully.');
+        } catch (err) {
+          console.error('[AiService] Failed to generate mermaid syntax:', err);
+          // We can optionally fallback or let Zod fail depending on strategy
+        }
+      }
 
       // F. Validate with Zod (Gatekeeper)
       const validation = AiPayloadSchema.safeParse(rawJson);
