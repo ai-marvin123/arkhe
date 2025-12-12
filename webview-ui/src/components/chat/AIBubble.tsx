@@ -7,7 +7,7 @@ export default function AIBubble({ text, logKey }: AIBubbleProps) {
   return (
     <div
       className='
-        bg-gray-800 text-gray-200
+        bg-[#3d3a48] text-[#e5e7eb]
         rounded-xl rounded-br-md
         px-4 py-2 max-w-[75%] text-sm leading-relaxed 
       '

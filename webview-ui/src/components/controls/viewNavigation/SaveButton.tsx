@@ -16,7 +16,7 @@ export default function SaveButton({ clickFunc, status }: SaveButtonProps) {
 
   return (
     <button
-      className='save-button absolute top-2 left-2'
+      className='save-button absolute top-2 left-2 z-20 inline-flex items-center justify-center px-2 py-1 rounded-md cursor-pointer !text-[0.6rem]'
       aria-label='save-diagram'
       onClick={clickFunc}
     >
