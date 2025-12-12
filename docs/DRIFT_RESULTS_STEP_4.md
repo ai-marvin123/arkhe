@@ -1,132 +1,135 @@
-# 🌊 Step 4: Return Drift Results (Detailed Flow)
+# 🌊 Step 4: Return Drift Results (Logic Update)
 
-**Context:** This document outlines the refined logic for handling Drift Detection results.
-**Goal:** Improve User Experience (UX) by providing immediate visual feedback while asynchronously fetching AI insights.
+**Context:** Handling Drift Detection results based on specific scenarios (Matched, Missing, Untracked).
+**Goal:** Categorize drift results into 4 distinct cases and send targeted responses to the Frontend.
 
 ---
 
 ## 1. Logic Overview
 
-Instead of sending a single "mixed" JSON response, the Backend will split the response into **two distinct phases**:
+Upon receiving the `CHECK_DRIFT` command, the Backend analyzes the file system against the plan and handles **4 specific scenarios**:
 
-### **Phase A: Immediate Data (Synchronous)**
-
-**Goal:** Render the UI immediately without waiting for AI.
-The Backend compares the **Plan** vs. **Actual File System** and returns **two separate JSON structures** in a single message:
-
-1.  **Plan View:** Contains `MATCHED` and `MISSING` nodes. (What _should_ be there).
-2.  **Actual View:** Contains `MATCHED` and `UNTRACKED` nodes. (What _is_ actually there).
-
-### **Phase B: AI Analysis (Asynchronous)**
-
-**Goal:** Provide intelligent insights (e.g., detecting renamed files, typos, or structural changes).
-After sending Phase A, the Backend privately invokes the LLM with the list of _Missing_ and _Untracked_ files. Once the AI responds, the Backend pushes a second message to the Frontend.
+| Scenario | Condition                                     | Action                                                                                                                  |
+| :------- | :-------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
+| **2.1**  | **All Matched**<br>(No missing, no untracked) | Send **1 message** (`ALL_MATCHED`).                                                                                     |
+| **2.2**  | **Matched + Missing**<br>(No untracked)       | Send **1 message** (`MISSING_DIAGRAM`).<br>Includes **AI analysis** (cause/solution).                                   |
+| **2.3**  | **Matched + Untracked**<br>(No missing)       | Send **1 message** (`UNTRACKED_DIAGRAM`).<br>Includes a **fixed/static** message.                                       |
+| **2.4**  | **Mixed**<br>(Both missing & untracked)       | Send **2 messages** sequentially:<br>1. `MISSING_DIAGRAM` (with AI analysis)<br>2. `UNTRACKED_DIAGRAM` (static message) |
 
 ---
 
 ## 2. Interaction Flow
 
-| Step    | Actor    | Action                                                                                                   | Payload Type       |
-| :------ | :------- | :------------------------------------------------------------------------------------------------------- | :----------------- |
-| **3.0** | Frontend | User clicks "Check Drift". Sends `CHECK_DRIFT` command.                                                  | `MessageToBackend` |
-| **4.1** | Backend  | Scans files, calculates drift. **Immediately** sends separate Plan & Actual data.                        | `DRIFT_DATA`       |
-| **4.2** | Frontend | **Renders results sequentially (Plan section followed by Actual section).** User sees results instantly. | -                  |
-| **4.3** | Backend  | (Background) Sends diff to LLM for analysis. Waits for response.                                         | -                  |
-| **4.4** | Backend  | LLM finishes. Backend sends analysis text to Frontend.                                                   | `DRIFT_ANALYSIS`   |
-| **4.5** | Frontend | Displays toast/notification or insight banner with the AI message.                                       | -                  |
+| Step    | Actor    | Action                                                                | Payload Type                                            |
+| :------ | :------- | :-------------------------------------------------------------------- | :------------------------------------------------------ |
+| **3.0** | Frontend | User clicks "Check Drift". Sends `CHECK_DRIFT`.                       | `MessageToBackend`                                      |
+| **4.0** | Backend  | Calculates drift and determines the scenario (2.1, 2.2, 2.3, or 2.4). | -                                                       |
+| **4.1** | Backend  | Sends the corresponding `AI_RESPONSE` message(s).                     | `ALL_MATCHED` / `MISSING_DIAGRAM` / `UNTRACKED_DIAGRAM` |
+| **4.2** | Frontend | Renders the UI based on the received message type.                    | -                                                       |
 
 ---
 
 ## 3. IPC Protocol Definitions (TypeScript)
 
-Update `src/types/index.ts` with the following definitions:
-
-### A. New Payload Types
+Update `src/types/index.ts` with the new discriminated union types for `AiPayload`.
 
 ```typescript
 import { DiagramData } from './index';
 
-// Payload for Phase A (Immediate)
-export type DriftDataPayload = {
-  planView: DiagramData; // Nodes with status: 'MATCHED' | 'MISSING'
-  actualView: DiagramData; // Nodes with status: 'MATCHED' | 'UNTRACKED'
-};
+export type AiPayload =
+  // ... existing types (TEXT, DIAGRAM, etc.) ...
 
-// Payload for Phase B (Async Analysis)
-export type DriftAnalysisPayload = {
-  message: string; // Combined insight and suggestion from AI
-};
-```
-
-### B. Updated Message Protocols
-
-```typescript
-// Message from Backend to Frontend
-export type MessageToFrontend =
-  // ... existing messages (AI_RESPONSE, ERROR) ...
-
-  // 1. FAST: Immediate Drift Data
+  // CASE 2.1: Perfect Match
   | {
-      command: 'DRIFT_DATA';
-      payload: DriftDataPayload;
+      type: 'ALL_MATCHED';
+      message: string; // e.g., "Everything is in sync."
     }
 
-  // 2. SLOW: AI Analysis Result
+  // CASE 2.2: Missing Files Detected
+  // (Also used as the 1st message in CASE 2.4)
   | {
-      command: 'DRIFT_ANALYSIS';
-      payload: DriftAnalysisPayload;
+      type: 'MISSING_DIAGRAM';
+      message: string; // AI Generated Analysis (Cause & Solution)
+      data: DiagramData; // Full structure (Nodes + Edges) containing 'MATCHED' and 'MISSING'
+    }
+
+  // CASE 2.3: Untracked Files Detected
+  // (Also used as the 2nd message in CASE 2.4)
+  | {
+      type: 'UNTRACKED_DIAGRAM';
+      message: string; // Fixed static message (e.g., "New files detected.")
+      data: DiagramData; // Full structure (Nodes + Edges) containing 'MATCHED' and 'UNTRACKED'
     };
+
+// NOTE: CASE 2.4 (Mixed) does NOT need a new type.
+// It simply sends a 'MISSING_DIAGRAM' message followed by an 'UNTRACKED_DIAGRAM' message.
 ```
 
 ---
 
-## 4\. Example JSON Payloads
+## 4\. Example Payloads
 
-### Phase A: `DRIFT_DATA` (Immediate)
-
-_Sent \~100ms after request._
+### Case 2.1: All Matched
 
 ```json
 {
-  "command": "DRIFT_DATA",
+  "command": "AI_RESPONSE",
   "payload": {
-    "planView": {
-      "mermaidSyntax": "...",
+    "type": "ALL_MATCHED",
+    "message": "Structure is perfectly synced with the codebase."
+  }
+}
+```
+
+### Case 2.2: Missing Nodes Only (AI Analysis Required)
+
+```json
+{
+  "command": "AI_RESPONSE",
+  "payload": {
+    "type": "MISSING_DIAGRAM",
+    "message": "Analysis: 'User.ts' is missing. You might have renamed it. Solution: Update plan.",
+    "data": {
+      "mermaidSyntax": "graph TD; ...",
       "jsonStructure": {
         "nodes": [
-          { "id": "1", "label": "App.tsx", "status": "MATCHED" },
-          { "id": "2", "label": "User.ts", "status": "MISSING" }
+          /* Matched + Missing nodes */
         ],
-        "edges": [...]
-      }
-    },
-    "actualView": {
-      "mermaidSyntax": "...",
-      "jsonStructure": {
-        "nodes": [
-          { "id": "1", "label": "App.tsx", "status": "MATCHED" },
-          { "id": "3", "label": "Users.ts", "status": "UNTRACKED" }
-        ],
-        "edges": [...]
+        "edges": [
+          /* Edges connecting them */
+        ]
       }
     }
   }
 }
 ```
 
-### Phase B: `DRIFT_ANALYSIS` (Async)
-
-_Sent \~2-3 seconds after request._
+### Case 2.3: Untracked Nodes Only (Static Message)
 
 ```json
 {
-  "command": "DRIFT_ANALYSIS",
+  "command": "AI_RESPONSE",
   "payload": {
-    "message": "Drift Detected: It appears 'User.ts' was renamed to 'Users.ts'. Consider updating the plan to match the new filename."
+    "type": "UNTRACKED_DIAGRAM",
+    "message": "Found new untracked files in your repository.",
+    "data": {
+      "mermaidSyntax": "graph TD; ...",
+      "jsonStructure": {
+        "nodes": [
+          /* Matched + Untracked nodes */
+        ],
+        "edges": [
+          /* Edges connecting them */
+        ]
+      }
+    }
   }
 }
 ```
 
-```
+### Case 2.4: Mixed (Both Types)
 
-```
+_The Backend sends two separate `postMessage` calls sequentially._
+
+**Message 1:** (Payload similar to Case 2.2 - Analysis of missing files)
+**Message 2:** (Payload similar to Case 2.3 - Notification of untracked files)
