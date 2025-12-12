@@ -5,117 +5,129 @@ We are adding two new services to handle file system operations and comparison l
 ```text
 src/
 ├── types/
-│   └── index.ts          # UPDATE: Renamed types (MessageToBackend, AiPayload), Added DriftStatus
+│   └── index.ts          # UPDATE: Renamed types, Added specific Drift payloads
 ├── services/
-│   ├── AiService.ts      # (Existing)
+│   ├── AiService.ts      # UPDATE: Add method `analyzeDrift` for missing files
 │   ├── FileService.ts    # NEW: Handles Save/Load .repoplan.json & Scanning Disk
 │   └── DriftService.ts   # NEW: Logic for Comparing Diagram vs. Actual (Diffing)
 ├── handlers/
-│   └── CommandHandler.ts # UPDATE: Handle new Drift commands & updated types
+│   └── CommandHandler.ts # UPDATE: Handle new Drift scenarios (Split messages)
 └── ...
 ```
 
 ---
 
-### **Phase 1: Types & Persistence (Day 1)**
+### **Phase 1: Types & Persistence (Done)**
 
-**Goal:** Enable saving and loading the architectural diagram to/from the disk (`.repoplan.json`).
+_(Matches previous plan - no changes needed)_
 
 #### **Step 1.1: Update Shared Types**
 
-- [x] **Update `src/types/index.ts`** (Reflect IPC Protocol v3):
-  - Rename `FrontendMessage` -\> `MessageToBackend`.
-  - Rename `BackendMessage` -\> `MessageToFrontend`.
-  - Rename `AiResponsePayload` -\> `AiPayload`.
-  - Add `DriftStatus` enum (`'MATCHED' | 'MISSING' | 'UNTRACKED'`).
-  - Update `AiPayloadSchema` to include new types: `DIAGRAM_SAVED`, `NO_SAVED_DIAGRAM`, `DRIFT_DIAGRAM`.
+- [x] **Update `src/types/index.ts`** (Reflect IPC Protocol v4):
+  - Add Payload Types: `ALL_MATCHED`, `MISSING_DIAGRAM`, `UNTRACKED_DIAGRAM`.
 
 #### **Step 1.2: Implement FileService (Persistence)**
 
-- [x] **Create `src/services/FileService.ts`**.
-- [x] **Setup:** Import `vscode` and `fs`/`path`.
-- [x] **Method `getWorkspaceRoot()`**: Helper to get the current workspace URI.
-- [x] **Method `saveDiagram(sessionId, diagramData)`**:
-  - Target file: `.repoplan.json` in workspace root.
-  - Write `diagramData.jsonStructure` to disk.
-- [x] **Method `loadDiagram(sessionId)`**:
-  - Check if `.repoplan.json` exists.
-  - If yes: Read content, return `DiagramData`.
-  - If no: Return `null`.
+- [x] **Create `src/services/FileService.ts`**:
+  - Implement `saveDiagram` and `loadDiagram`.
 
 #### **Step 1.3: Wiring Persistence Commands**
 
 - [x] **Update `src/handlers/CommandHandler.ts`**:
-  - Update imports to use `MessageToBackend` and `MessageToFrontend`.
-  - **Case `SAVE_DIAGRAM`**:
-    - Call `FileService.saveDiagram`.
-    - Send `AI_RESPONSE` with payload type `DIAGRAM_SAVED`.
-  - **Case `LOAD_DIAGRAM`**:
-    - Call `FileService.loadDiagram`.
-    - If result exists: Send `AI_RESPONSE` with payload type `DIAGRAM`.
-    - If null: Send `AI_RESPONSE` with payload type `NO_SAVED_DIAGRAM`.
+  - Handle `SAVE_DIAGRAM` and `LOAD_DIAGRAM`.
 
 ---
 
 ### **Phase 2: Scanning & Drift Engine (Day 2)**
 
-**Goal:** Implement the logic to scan the actual file system and compare it against the saved diagram.
+**Goal:** Implement disk scanning, drift calculation, AI analysis for missing files, and the 4-scenario response logic.
 
 #### **Step 2.1: Implement Disk Scanning**
 
 - [x] **Update `src/services/FileService.ts`**:
   - **Method `scanDirectory()`**:
-    - Use `vscode.workspace.findFiles` (Best practice: respects `.gitignore`).
-    - **Pattern:** `'**/*'`
-    - **Exclude:** `node_modules`, `.git`, `dist`, `out`, `build`.
+    - Use `vscode.workspace.findFiles` (`'**/*'`, exclude `node_modules`, `.git`, `dist`, etc.).
     - **Output:** Return a list of `StructureNode` representing the actual disk state.
-    - **Important:** Use the file's **relative path** as the `id` for these nodes.
+    - **Crucial:** Ensure IDs are relative paths to match the plan's logic.
 
 #### **Step 2.2: Implement DriftService (The Logic)**
 
-- [ ] **Create `src/services/DriftService.ts`**.
-- [ ] **Method `calculateDrift(planNodes, actualNodes)`**:
-  - **Algorithm:**
-    1.  Create a Map of `actualNodes` by ID (Path).
-    2.  **Mark MATCHED/MISSING:** Iterate through `planNodes`. If found in Map, mark `MATCHED`. If not found, mark `MISSING`.
-    3.  **Mark UNTRACKED:** Iterate through `actualNodes`. If not found in `planNodes`, mark `UNTRACKED`.
-    4.  **Merge:** Return the combined list of nodes + edges.
+- [ ] **Create `src/services/DriftService.ts`**:
+  - **Method `calculateDrift(planNodes, actualNodes)`**:
+    - **Input:** List of nodes from Plan and List of nodes from Disk.
+    - **Process:** Compare IDs/Paths.
+    - **Output:** Return a Raw Drift Object (NOT the final DiagramData yet):
+      ```typescript
+      {
+        missing: StructureNode[],   // In Plan, NOT on Disk
+        untracked: StructureNode[], // On Disk, NOT in Plan
+        matched: StructureNode[]    // In Both
+      }
+      ```
+  - **Helper Methods:**
+    - `generateDiagramData(nodes, edges)`: Helper to convert node lists back into full `DiagramData` format (including Mermaid generation) for the response.
 
-#### **Step 2.3: Wiring Drift Command**
+#### **Step 2.3: Update AiService (Drift Analysis)**
+
+- [ ] **Update `src/services/AiService.ts`**:
+  - **Method `analyzeDrift(missingNodes)`**:
+    - **Input:** List of missing nodes.
+    - **Prompt:** "You are a Tech Lead. These files are in the architecture plan but missing from the disk: [list]. Analyze why (renamed? deleted? typo?) and suggest a fix."
+    - **Output:** A short string message.
+
+#### **Step 2.4: Wiring Drift Command (The 4 Scenarios)**
 
 - [ ] **Update `src/handlers/CommandHandler.ts`**:
   - **Case `CHECK_DRIFT`**:
-    - Get current Diagram (from Memory/SessionManager or `loadDiagram`).
-    - Get Actual Nodes (`FileService.scanDirectory`).
-    - Run Diff (`DriftService.calculateDrift`).
-    - Send `AI_RESPONSE` with payload type `DRIFT_DIAGRAM` (contains nodes with `status`).
+    1.  Get `planNodes` (Memory/Load) & `actualNodes` (`FileService.scanDirectory`).
+    2.  Get raw drift results (`DriftService.calculateDrift`).
+    3.  **Determine Scenario & Send Response:**
+        - **Scenario 2.1 (All Matched):**
+          - If `missing.length === 0` && `untracked.length === 0`:
+          - Send `AI_RESPONSE` -\> Type `ALL_MATCHED`.
+        - **Scenario 2.2 (Missing Only):**
+          - Call `AiService.analyzeDrift(missing)`.
+          - Send `AI_RESPONSE` -\> Type `MISSING_DIAGRAM` (with AI message).
+        - **Scenario 2.3 (Untracked Only):**
+          - Send `AI_RESPONSE` -\> Type `UNTRACKED_DIAGRAM` (Static message: "New files detected...").
+        - **Scenario 2.4 (Mixed):**
+          - **Step A:** Call AI & Send `MISSING_DIAGRAM`.
+          - **Step B:** Immediately Send `UNTRACKED_DIAGRAM`.
 
 ---
 
 ### **Phase 3: Sync & Final Integration (Day 3)**
 
-**Goal:** Allow users to overwrite the diagram with reality and ensure the full loop works.
+**Goal:** Allow users to overwrite the diagram with reality (Sync) and verify the full loop.
 
 #### **Step 3.1: Implement Sync Logic**
 
 - [ ] **Update `src/handlers/CommandHandler.ts`**:
   - **Case `SYNC_TO_ACTUAL`**:
     - Call `FileService.scanDirectory()` to get the "Truth".
-    - **Construct new Diagram Data:** Create a clean diagram where all actual nodes are standard (remove `UNTRACKED` status, just make them normal nodes).
+    - **Construct new Diagram Data:**
+      - All `actualNodes` become standard nodes (no specific status or status = MATCHED).
+      - Re-generate Edges/Mermaid if needed.
     - Call `FileService.saveDiagram()` to overwrite `.repoplan.json`.
-    - Send `AI_RESPONSE` with payload type `DIAGRAM` to update UI.
+    - Send `AI_RESPONSE` -\> Type `DIAGRAM` (Message: "Synced with codebase").
 
 #### **Step 3.2: Edge Cases & Polish**
 
 - [ ] **Empty Workspace:** Handle case where `scanDirectory` returns empty (new project).
-- [ ] **Relative Path IDs:** Ensure `DriftService` normalizes paths (e.g., handles Windows `\` vs POSIX `/`) so IDs match correctly.
+- [ ] **Path Normalization:** Ensure `DriftService` handles Windows `\` vs POSIX `/` to avoid false "Missing/Untracked" flags.
+- [ ] **Unit Tests:** Update `test/phase2Test.ts` to simulate the 4 separate scenarios and verify correct payloads are received.
 
 #### **Step 3.3: Verification**
 
 - [ ] **Test Flow:**
-  1.  Generate Diagram -\> Save -\> Check `.repoplan.json` created.
-  2.  Reload Window -\> Extension loads Diagram automatically.
-  3.  Create a dummy file manually (e.g., `test.ts`).
-  4.  Click "Check Drift" -\> Verify `test.ts` appears as Gray (UNTRACKED).
-  5.  Delete a file from Diagram -\> Verify it appears as Red (MISSING).
-  6.  Click "Sync" -\> Verify Diagram updates and colors reset.
+  1.  **Matched:** Generate -\> Save -\> Check Drift -\> Expect `ALL_MATCHED`.
+  2.  **Untracked:** Create `new.ts` -\> Check Drift -\> Expect `UNTRACKED_DIAGRAM`.
+  3.  **Missing:** Delete `app.ts` -\> Check Drift -\> Expect `MISSING_DIAGRAM` + AI explanation.
+  4.  **Mixed:** Do both -\> Check Drift -\> Expect 2 messages.
+  5.  **Sync:** Click Sync -\> Save -\> Check Drift again -\> Expect `ALL_MATCHED`.
+
+<!-- end list -->
+
+```
+
+```

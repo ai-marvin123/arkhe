@@ -1,4 +1,4 @@
-# 🌊 Drift Detection Workflow (Feature 2)
+# 🌊 Drift Detection Workflow (Feature 2) - v2
 
 **Context:** Interaction flow between Frontend (Webview) and Backend (Extension) for saving plans, detecting drift, and syncing with the actual repository.
 
@@ -26,7 +26,7 @@
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "DIAGRAM_SAVED", // DIAGRAM_SAVED
+    "type": "DIAGRAM_SAVED",
     "message": "Diagram saved successfully."
   }
 }
@@ -91,9 +91,11 @@ _(Frontend creates UI for new chat/generation)_
 
 ---
 
-### 4\. Return Drift Results
+### 4\. Return Drift Results (Updated Logic)
 
-**Trigger:** Backend finishes scanning and comparison.
+**Trigger:** Backend finishes scanning and comparison. It determines one of the following scenarios:
+
+#### **Scenario 2.1: Perfect Match (All Matched)**
 
 **BE → FE:**
 
@@ -101,16 +103,30 @@ _(Frontend creates UI for new chat/generation)_
 {
   "command": "AI_RESPONSE",
   "payload": {
-    "type": "DRIFT_DIAGRAM",
-    "message": "Drift check complete.",
+    "type": "ALL_MATCHED",
+    "message": "✅ Structure is perfectly synced with the codebase."
+  }
+}
+```
+
+#### **Scenario 2.2: Missing Files Detected**
+
+_Files exist in Plan but NOT on Disk._
+
+**BE → FE:**
+
+```json
+{
+  "command": "AI_RESPONSE",
+  "payload": {
+    "type": "MISSING_DIAGRAM",
+    "message": "⚠️ Analysis: 'User.ts' is missing. You might have renamed it. Solution: Update plan.",
     "data": {
-      "mermaidSyntax": "...",
+      "mermaidSyntax": "graph TD; ...",
       "jsonStructure": {
         "nodes": [
-          { "id": "1", "label": "Main.ts", "status": "MATCHED", ... },
-          { "id": "2", "label": "Old.ts", "status": "MISSING", ... },    // In Plan, NOT on Disk
-          { "id": "3", "label": "New.ts", "status": "UNTRACKED", ... }   // On Disk, NOT in Plan
-          // if id is null -> id = path; parentId = parent folder.
+          { "id": "1", "label": "App.tsx", "status": "MATCHED" },
+          { "id": "2", "label": "User.ts", "status": "MISSING" }
         ],
         "edges": [...]
       }
@@ -118,6 +134,39 @@ _(Frontend creates UI for new chat/generation)_
   }
 }
 ```
+
+#### **Scenario 2.3: Untracked Files Detected**
+
+_New files found on Disk NOT in Plan._
+
+**BE → FE:**
+
+```json
+{
+  "command": "AI_RESPONSE",
+  "payload": {
+    "type": "UNTRACKED_DIAGRAM",
+    "message": "ℹ️ Found new untracked files in your repository.",
+    "data": {
+      "mermaidSyntax": "graph TD; ...",
+      "jsonStructure": {
+        "nodes": [
+          { "id": "1", "label": "App.tsx", "status": "MATCHED" },
+          { "id": "3", "label": "NewHelper.ts", "status": "UNTRACKED" }
+        ],
+        "edges": [...]
+      }
+    }
+  }
+}
+```
+
+#### **Scenario 2.4: Mixed (Missing & Untracked)**
+
+_Backend sends TWO messages sequentially._
+
+1.  **Message 1:** Sends `MISSING_DIAGRAM` (Same format as Scenario 2.2).
+2.  **Message 2:** Sends `UNTRACKED_DIAGRAM` (Same format as Scenario 2.3).
 
 ---
 
@@ -167,3 +216,7 @@ _(Frontend creates UI for new chat/generation)_
 **Trigger:** Frontend displays "Would you like to edit your diagram?". User clicks **Yes**.
 
 **FE Action:** Enables Chat Input and user can edit as the feature 1.
+
+```
+
+```

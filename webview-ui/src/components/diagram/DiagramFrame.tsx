@@ -34,7 +34,7 @@ export default function DiagramFrame({
     };
   }, [isFullscreen]);
 
-  const panelClasses = `relative w-full max-w-full bg-gray-900 border border-gray-700 rounded-lg p-5 overflow-hidden shadow-2xl ${
+  const panelClasses = `relative w-full max-w-full bg-[#1f1a24] rounded-lg p-5 overflow-hidden shadow-2xl ${
     isFullscreen ? "h-full flex flex-col" : ""
   }`;
   const wrapperPadding = isFullscreen ? "0px" : "20px";
@@ -75,35 +75,14 @@ export default function DiagramFrame({
     <div
       key={logKey}
       style={{ padding: wrapperPadding }}
-      className={`${panelClasses}
-        w-full max-w-full 
-        bg-gray-900 border border-gray-700 
-        rounded-lg p-3
-        relative
-        overflow-hidden
-      `}>
+      className={`${panelClasses}`}>
       <SaveButton clickFunc={handleSave} status={saveStatus} />
       <MermaidRenderer
         logKey={logKey}
         code={diagram}
         view={entry.viewSettings}
       />
-      {/* {entry.viewSettings?.isAIOpen && (
-        <div className="bg-gray-800 text-white p-3 mt-3 rounded border border-gray-700">
-          <h3 className="font-semibold mb-1">AI Message</h3>
-          <p>{entry.text}</p>
-        </div>
-      )} */}
-      {/* <pre
-        style={{
-          background: '#222',
-          color: '#0f0',
-          padding: '10px',
-          marginTop: '20px',
-        }}
-      >
-        {JSON.stringify(entry.diagramData?.jsonStructure, null, 2)}
-      </pre> */}
+
       <ViewTools id={entry.id} view={entry.viewSettings} />
     </div>
   );
@@ -112,7 +91,7 @@ export default function DiagramFrame({
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#0c152b] text-white overflow-hidden p-6 flex">
+    <div className="fixed inset-0 z-[9999] bg-[#000000] text-[#e5e7eb] overflow-hidden p-6 flex">
       <div className="w-full h-full">{content}</div>
     </div>
   );
