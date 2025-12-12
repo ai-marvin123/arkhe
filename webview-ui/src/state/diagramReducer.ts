@@ -1,4 +1,4 @@
-import type { DiagramAction, DiagramState } from './diagramTypes';
+import type { DiagramAction, DiagramState, TextEntry } from './diagramTypes';
 import { initialState } from './initialState';
 import { applyMermaidStyling } from '../utils/mermaidGenerator';
 import { generateId } from '../utils/idgenerator';
@@ -153,6 +153,64 @@ export function chatReducer(
         },
       };
     }
+    // advances guided flow during drift check
+    case 'proceed_guidedFlow': {
+      const { aiScriptText, nextStep, options, isExit } = action.payload;
+
+      const aiEntry = {
+        id: generateId(),
+        role: 'assistant',
+        type: 'TEXT_RESPONSE' as const,
+        text: aiScriptText,
+        options: options,
+        timestamp: Date.now(),
+      };
+
+      return {
+        ...state,
+        chat: {
+          ...state.chat,
+          log: [...state.chat.log, aiEntry],
+        },
+        view: {
+          ...state.view,
+          isChatEnabled: isExit ? true : state.view.isChatEnabled,
+          driftCheckStep: isExit ? 'IDLE' : nextStep,
+        },
+      };
+    }
+    //adds user choice to chat log and removes options during guided flow
+    case 'log_userChoice': {
+      const { logEntryId, chosenText } = action.payload;
+
+      const userEntry: TextEntry = {
+        id: generateId(),
+        role: 'user' as const,
+        type: 'TEXT_INPUT' as const,
+        text: chosenText,
+        timestamp: Date.now(),
+      };
+
+      const newLog = state.chat.log.map((entry) => {
+        if (entry.id === logEntryId) {
+          if ('options' in entry) {
+            const newEntry = { ...(entry as TextEntry) };
+            delete newEntry.options;
+            return newEntry;
+          }
+          return entry;
+        }
+        return entry;
+      });
+      return {
+        ...state,
+        chat: {
+          ...state.chat,
+          log: [...newLog, userEntry],
+        },
+      };
+    }
+
     default:
       return state;
   }
