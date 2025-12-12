@@ -18,7 +18,7 @@ export default function AiMessageAccordion({ entry }: AiMessageAccordionProps) {
       },
     });
   };
-
+  // <div className="bg-[#3d3a48] border border-[#3d3a48] rounded-lg px-3 py-2 text-sm leading-relaxed w-fit max-w-[70%] text-left">
   return (
     <div className="mt-2 w-full flex justify-start">
       <div className="rounded-lg border border-slate-800 bg-[#1b1f2b] text-slate-50 px-4 py-3 w-fit max-w-full">
@@ -34,10 +34,8 @@ export default function AiMessageAccordion({ entry }: AiMessageAccordionProps) {
             isOpen ? "max-h-72 mt-3" : "max-h-0"
           }`}>
           {isOpen && (
-            <div className="bg-[#111322] border border-[#22253a] rounded-lg px-3 py-2 text-sm leading-relaxed w-fit max-w-[70%] text-left">
-              <p className="font-semibold mb-1 text-slate-100">
-                AI Message
-              </p>
+            <div>
+              <p className="font-semibold mb-1 text-slate-100"></p>
               <p className="text-slate-200">{entry.text}</p>
             </div>
           )}

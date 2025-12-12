@@ -1,0 +1,185 @@
+{
+  "jsonStructure": {
+    "nodes": [
+      {
+        "id": "1",
+        "label": "root",
+        "type": "FOLDER",
+        "level": 0,
+        "path": "/",
+        "parentId": null
+      },
+      {
+        "id": "2",
+        "label": "frontend",
+        "type": "FOLDER",
+        "level": 1,
+        "path": "/frontend",
+        "parentId": "1"
+      },
+      {
+        "id": "3",
+        "label": "package.json",
+        "type": "FILE",
+        "level": 2,
+        "path": "/frontend/package.json",
+        "parentId": "2"
+      },
+      {
+        "id": "4",
+        "label": "src",
+        "type": "FOLDER",
+        "level": 2,
+        "path": "/frontend/src",
+        "parentId": "2"
+      },
+      {
+        "id": "5",
+        "label": "index.js",
+        "type": "FILE",
+        "level": 3,
+        "path": "/frontend/src/index.js",
+        "parentId": "4"
+      },
+      {
+        "id": "6",
+        "label": "App.js",
+        "type": "FILE",
+        "level": 3,
+        "path": "/frontend/src/App.js",
+        "parentId": "4"
+      },
+      {
+        "id": "7",
+        "label": "public",
+        "type": "FOLDER",
+        "level": 2,
+        "path": "/frontend/public",
+        "parentId": "2"
+      },
+      {
+        "id": "8",
+        "label": "index.html",
+        "type": "FILE",
+        "level": 3,
+        "path": "/frontend/public/index.html",
+        "parentId": "7"
+      },
+      {
+        "id": "9",
+        "label": "backend",
+        "type": "FOLDER",
+        "level": 1,
+        "path": "/backend",
+        "parentId": "1"
+      },
+      {
+        "id": "10",
+        "label": "package.json",
+        "type": "FILE",
+        "level": 2,
+        "path": "/backend/package.json",
+        "parentId": "9"
+      },
+      {
+        "id": "11",
+        "label": "server.js",
+        "type": "FILE",
+        "level": 2,
+        "path": "/backend/server.js",
+        "parentId": "9"
+      },
+      {
+        "id": "12",
+        "label": "routes",
+        "type": "FOLDER",
+        "level": 2,
+        "path": "/backend/routes",
+        "parentId": "9"
+      },
+      {
+        "id": "13",
+        "label": "api.js",
+        "type": "FILE",
+        "level": 3,
+        "path": "/backend/routes/api.js",
+        "parentId": "12"
+      },
+      {
+        "id": "14",
+        "label": "controllers",
+        "type": "FOLDER",
+        "level": 2,
+        "path": "/backend/controllers",
+        "parentId": "9"
+      },
+      {
+        "id": "15",
+        "label": "userController.js",
+        "type": "FILE",
+        "level": 3,
+        "path": "/backend/controllers/userController.js",
+        "parentId": "14"
+      }
+    ],
+    "edges": [
+      {
+        "source": "1",
+        "target": "2"
+      },
+      {
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "source": "2",
+        "target": "4"
+      },
+      {
+        "source": "4",
+        "target": "5"
+      },
+      {
+        "source": "4",
+        "target": "6"
+      },
+      {
+        "source": "2",
+        "target": "7"
+      },
+      {
+        "source": "7",
+        "target": "8"
+      },
+      {
+        "source": "1",
+        "target": "9"
+      },
+      {
+        "source": "9",
+        "target": "10"
+      },
+      {
+        "source": "9",
+        "target": "11"
+      },
+      {
+        "source": "9",
+        "target": "12"
+      },
+      {
+        "source": "12",
+        "target": "13"
+      },
+      {
+        "source": "9",
+        "target": "14"
+      },
+      {
+        "source": "14",
+        "target": "15"
+      }
+    ]
+  },
+  "mermaidSyntax": "\n    graph TD;\n    \n    %% === STYLE RULES === %%\n    %% === NODE COLOR DEFINITIONS === %%\nclassDef folder fill:#3600b3,color:#FFFFFF, stroke:none,stroke-width:0px, font-family:sans-serif, font-weight:200, font-size:12px;\nclassDef file fill:#5d1ec4,color:#FFFFFF, stroke:none,stroke-width:0px, font-family:sans-serif, font-weight:200, font-size:12px;\n\n    %% === APPLY CLASSES PER NODE === %%\n      1:::folder;\n  2:::folder;\n  3:::file;\n  4:::folder;\n  5:::file;\n  6:::file;\n  7:::folder;\n  8:::file;\n  9:::folder;\n  10:::file;\n  11:::file;\n  12:::folder;\n  13:::file;\n  14:::folder;\n  15:::file;\n\n      1(root) --> 2(frontend);\n  2(frontend) --> 3(package.json);\n  2(frontend) --> 4(src);\n  4(src) --> 5(index.js);\n  4(src) --> 6(App.js);\n  2(frontend) --> 7(public);\n  7(public) --> 8(index.html);\n  1(root) --> 9(backend);\n  9(backend) --> 10(package.json);\n  9(backend) --> 11(server.js);\n  9(backend) --> 12(routes);\n  12(routes) --> 13(api.js);\n  9(backend) --> 14(controllers);\n  14(controllers) --> 15(userController.js);\n  "
+}
