@@ -83,4 +83,62 @@ export class FileService {
       return null;
     }
   }
+    static async scanDirectory(sessionId: string) {
+  const root = this.getWorkspaceRoot();
+  if (!root) {
+    return [];
+  }
+
+  // Scan workspace respecting .gitignore
+  const fileUris = await vscode.workspace.findFiles(
+    "**/*",
+    "{**/node_modules/**,**/.git/**,**/dist/**,**/out/**,**/build/**}"
+  );
+
+  const nodes: any[] = [];
+
+  // 1. Build file nodes
+  for (const uri of fileUris) {
+    const absPath = uri.fsPath;
+
+    // Compute normalized relative path
+    let relPath = path.relative(root, absPath);
+    relPath = relPath.replace(/\\/g, "/"); // Windows → POSIX
+
+    nodes.push({
+      id: relPath,
+      label: path.basename(relPath),
+      path: relPath,
+      isFolder: false,
+      level: relPath.split("/").length - 1,
+    });
+  }
+
+  // 2. Derive folder nodes
+  const folderSet = new Set<string>();
+
+  nodes.forEach((node) => {
+    const parts = node.path.split("/");
+    let current = "";
+
+    for (let i = 0; i < parts.length - 1; i++) {
+      current = i === 0 ? parts[i] : `${current}/${parts[i]}`;
+      folderSet.add(current);
+    }
+  });
+
+  for (const folder of folderSet) {
+    nodes.push({
+      id: folder,
+      label: path.basename(folder),
+      path: folder,
+      isFolder: true,
+      level: folder.split("/").length - 1,
+    });
+  }
+
+  console.log(
+    `[FileService] Scanned workspace → ${nodes.length} nodes found.`
+  );
+  return nodes;
 }

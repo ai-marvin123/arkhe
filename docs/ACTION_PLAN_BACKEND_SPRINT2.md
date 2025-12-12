@@ -63,7 +63,7 @@ src/
 
 #### **Step 2.1: Implement Disk Scanning**
 
-- [ ] **Update `src/services/FileService.ts`**:
+- [x] **Update `src/services/FileService.ts`**:
   - **Method `scanDirectory()`**:
     - Use `vscode.workspace.findFiles` (Best practice: respects `.gitignore`).
     - **Pattern:** `'**/*'`
