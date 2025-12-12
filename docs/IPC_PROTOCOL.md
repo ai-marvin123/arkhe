@@ -1,4 +1,4 @@
-# 🔌 IPC Protocol: Frontend ↔ Backend (v3)
+# 🔌 IPC Protocol: Frontend ↔ Backend (v4)
 
 **Core:** Async Message Passing. Shared `sessionId`.
 
@@ -65,13 +65,15 @@ _Direction: Backend updates UI._
 
 Universal data carrier.
 
-| Type               | Payload           | Context                                   |
-| :----------------- | :---------------- | :---------------------------------------- |
-| `TEXT`             | `{message}`       | Chat / Errors.                            |
-| `DIAGRAM`          | `{message, data}` | Gen result / Load success / Sync success. |
-| `DIAGRAM_SAVED`    | `{message}`       | Save confirmation.                        |
-| `NO_SAVED_DIAGRAM` | `{message}`       | Load failed (Trigger New Chat UI).        |
-| `DRIFT_DIAGRAM`    | `{message, data}` | Drift result (Nodes have `status`).       |
+| Type                | Payload           | Context                                    |
+| :------------------ | :---------------- | :----------------------------------------- |
+| `TEXT`              | `{message}`       | Chat / Errors.                             |
+| `DIAGRAM`           | `{message, data}` | Gen result / Load success / Sync success.  |
+| `DIAGRAM_SAVED`     | `{message}`       | Save confirmation.                         |
+| `NO_SAVED_DIAGRAM`  | `{message}`       | Load failed (Trigger New Chat UI).         |
+| `ALL_MATCHED`       | `{message}`       | **Drift:** Perfect sync (Case 2.1).        |
+| `MISSING_DIAGRAM`   | `{message, data}` | **Drift:** Plan has items missing on Disk. |
+| `UNTRACKED_DIAGRAM` | `{message, data}` | **Drift:** Disk has new items not in Plan. |
 
 ### Errors
 
@@ -114,11 +116,35 @@ export interface DiagramData {
 // --- 2. Message Payloads ---
 
 export type AiPayload =
+  // Standard Text / Chat
   | { type: 'TEXT'; message: string; data?: never }
+
+  // Standard Diagram Operations
   | { type: 'DIAGRAM'; message: string; data: DiagramData }
   | { type: 'DIAGRAM_SAVED'; message: string }
   | { type: 'NO_SAVED_DIAGRAM'; message: string }
-  | { type: 'DRIFT_DIAGRAM'; message: string; data: DiagramData };
+
+  // --- DRIFT RESULTS (New Scenarios) ---
+
+  // Case 2.1: Perfect Match
+  | {
+      type: 'ALL_MATCHED';
+      message: string;
+    }
+
+  // Case 2.2: Missing Files (Contains AI Analysis)
+  | {
+      type: 'MISSING_DIAGRAM';
+      message: string;
+      data: DiagramData; // Nodes + Edges (Matched + Missing)
+    }
+
+  // Case 2.3: Untracked Files (Static Message)
+  | {
+      type: 'UNTRACKED_DIAGRAM';
+      message: string;
+      data: DiagramData; // Nodes + Edges (Matched + Untracked)
+    };
 
 // --- 3. VS Code Message Definitions ---
 
