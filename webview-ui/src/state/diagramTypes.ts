@@ -37,7 +37,6 @@ export type DiagramAction =
         aiScriptText: string;
         nextStep: string;
         options: Options[];
-        isExit: boolean;
       };
     }
   | {
@@ -45,8 +44,10 @@ export type DiagramAction =
       payload: {
         logEntryId: string;
         chosenText: string;
+        action: GuidedAction;
       };
     };
+
 export type ViewSettings = {
   zoomLevel: number;
   panX: number;
@@ -86,6 +87,14 @@ export type DriftCheck =
   | 'ASK_FOR_DRIFT_CHECK'
   | 'ASK_FOR_SYNC'
   | 'ASK_FOR_EDIT';
+
+type GuidedAction =
+  | 'RUN_CHECK'
+  | 'EDIT_EXIT'
+  | 'SYNC_TO_ACTUAL'
+  | 'KEEP_OLD_PLAN'
+  | 'EDIT_FINAL_YES'
+  | 'EDIT_FINAL_NO';
 
 type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
 type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
