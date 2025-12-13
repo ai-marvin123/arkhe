@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { DiagramData } from '../types';
+import { StructureNode, DiagramData } from '../types';
 
 const PLAN_FILENAME = '.repoplan.json';
 
@@ -95,7 +95,7 @@ export class FileService {
     "{**/node_modules/**,**/.git/**,**/dist/**,**/out/**,**/build/**}"
   );
 
-  const nodes: any[] = [];
+  const nodes: StructureNode[] = [];
 
   // 1. Build file nodes
   for (const uri of fileUris) {
@@ -106,12 +106,15 @@ export class FileService {
     relPath = relPath.replace(/\\/g, "/"); // Windows → POSIX
 
     nodes.push({
-      id: relPath,
-      label: path.basename(relPath),
-      path: relPath,
-      isFolder: false,
-      level: relPath.split("/").length - 1,
-    });
+  id: relPath,
+  label: path.basename(relPath),
+  path: relPath,
+  type: 'FILE',
+  level: relPath.split('/').length - 1,
+  parentId: relPath.includes('/')
+    ? relPath.split('/').slice(0, -1).join('/')
+    : undefined,
+});
   }
 
   // 2. Derive folder nodes
@@ -129,16 +132,21 @@ export class FileService {
 
   for (const folder of folderSet) {
     nodes.push({
-      id: folder,
-      label: path.basename(folder),
-      path: folder,
-      isFolder: true,
-      level: folder.split("/").length - 1,
-    });
+  id: folder,
+  label: path.basename(folder),
+  path: folder,
+  type: 'FOLDER',
+  level: folder.split('/').length - 1,
+  parentId: folder.includes('/')
+    ? folder.split('/').slice(0, -1).join('/')
+    : undefined,
+});
+
   }
 
   console.log(
     `[FileService] Scanned workspace → ${nodes.length} nodes found.`
   );
   return nodes;
+}
 }

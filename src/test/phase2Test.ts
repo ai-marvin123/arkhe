@@ -4,6 +4,26 @@
 const Module = require('module');
 const originalLoad = Module._load;
 
+function assert(condition: any, message = 'Assertion failed') {
+  if (!condition){ throw new Error(`❌ ${message}`);
+}
+}
+
+const mockFileService = {
+  loadDiagram: async () => ({
+    jsonStructure: {
+      nodes: [
+        { id: 'src/index.ts', name: 'index.ts', type: 'FILE', path: 'src/index.ts' },
+      ],
+      edges: [],
+    },
+  }),
+
+  scanDirectory: async () => [],
+  
+  saveDiagram: async () => {},
+};
+
 // Intercept requests for 'vscode'
 Module._load = function (request: string, parent: any, isMain: boolean) {
   if (request === 'vscode') {
@@ -227,6 +247,146 @@ async function runTest8() {
     payload: { sessionId, prompt: 'chat what did I just ask you to build?' },
   });
 }
+async function testEmptyWorkspaceDrift() {
+  const messages: any[] = [];
+
+  const fakePanel = {
+    webview: {
+      postMessage: (msg: any) => messages.push(msg),
+    },
+  };
+
+  const handler = new CommandHandler(fakePanel as any, mockFileService);
+
+  await handler.handle({
+    command: 'CHECK_DRIFT',
+    payload: { sessionId: 'edge-test' },
+  });
+
+  assert(
+  messages[0].payload.message.includes('Workspace is empty'),
+  'Expected empty workspace message'
+);
+}
+
+async function testAllMatched() {
+  const messages: any[] = [];
+
+  const handler = new CommandHandler(
+    { webview: { postMessage: (m: any) => messages.push(m) } } as any,
+    {
+      loadDiagram: async () => ({
+        jsonStructure: {
+          nodes: [{ id: 'src/index.ts', type: 'FILE', path: 'src/index.ts' }],
+          edges: [],
+        },
+      }),
+      scanDirectory: async () => [
+        { id: 'src/index.ts', type: 'FILE', path: 'src/index.ts' },
+      ],
+      saveDiagram: async () => {},
+    }
+  );
+
+  await handler.handle({
+    command: 'CHECK_DRIFT',
+    payload: { sessionId: 'test' },
+  });
+
+  if (messages[0].payload.type !== 'ALL_MATCHED') {
+  throw new Error('Expected ALL_MATCHED payload');
+}
+}
+
+async function testMissingOnly() {
+  const messages: any[] = [];
+
+  const handler = new CommandHandler(
+    { webview: { postMessage: (m: any) => messages.push(m) } } as any,
+    {
+      loadDiagram: async () => ({
+        jsonStructure: {
+          nodes: [
+            // 👇 include folder in plan so it won't count as untracked
+            { id: 'src', type: 'FOLDER', path: 'src' },
+            { id: 'src/app.ts', type: 'FILE', path: 'src/app.ts' },
+          ],
+          edges: [],
+        },
+      }),
+      scanDirectory: async () => [
+        // 👇 folder exists, but file is missing
+        { id: 'src', type: 'FOLDER', path: 'src' },
+      ],
+      saveDiagram: async () => {},
+    }
+  );
+
+  await handler.handle({
+    command: 'CHECK_DRIFT',
+    payload: { sessionId: 'test' },
+  });
+
+  assert(messages.length === 1, 'Expected 1 message');
+  assert(messages[0].payload.type === 'MISSING_DIAGRAM', 'Expected MISSING_DIAGRAM');
+}
+
+async function testUntrackedOnly() {
+  const messages: any[] = [];
+
+  const handler = new CommandHandler(
+    { webview: { postMessage: (m: any) => messages.push(m) } } as any,
+    {
+      loadDiagram: async () => ({
+        jsonStructure: { nodes: [], edges: [] },
+      }),
+      scanDirectory: async () => [
+        { id: 'src/new.ts', type: 'FILE', path: 'src/new.ts' },
+      ],
+      saveDiagram: async () => {},
+    }
+  );
+
+  await handler.handle({
+    command: 'CHECK_DRIFT',
+    payload: { sessionId: 'test' },
+  });
+
+  assert(
+  messages[0].payload.type === 'UNTRACKED_DIAGRAM',
+  'Expected UNTRACKED_DIAGRAM payload'
+);
+}
+
+async function testMixedDrift() {
+  const messages: any[] = [];
+
+  const handler = new CommandHandler(
+    { webview: { postMessage: (m: any) => messages.push(m) } } as any,
+    {
+      loadDiagram: async () => ({
+        jsonStructure: {
+          nodes: [{ id: 'src/a.ts', type: 'FILE', path: 'src/a.ts' }],
+          edges: [],
+        },
+      }),
+      scanDirectory: async () => [
+        { id: 'src/b.ts', type: 'FILE', path: 'src/b.ts' },
+      ],
+      saveDiagram: async () => {},
+    }
+  );
+
+  await handler.handle({
+    command: 'CHECK_DRIFT',
+    payload: { sessionId: 'test' },
+  });
+
+assert(messages.length === 2, 'Expected 2 messages');
+assert(messages[0].payload.type === 'MISSING_DIAGRAM', 'Expected MISSING_DIAGRAM');
+assert(messages[1].payload.type === 'UNTRACKED_DIAGRAM', 'Expected UNTRACKED_DIAGRAM');
+
+}
 
 // ==========================================
 // MAIN RUNNER
@@ -238,8 +398,21 @@ async function runAllTests() {
   // await runTest4();
   // await runTest5();
 
-  await runTest6();
+  // await runTest6();
   // await runTest7();
 }
 
-runAllTests();
+async function runPhase2Tests() {
+  await testEmptyWorkspaceDrift();
+  await testAllMatched();
+  await testMissingOnly();
+  await testUntrackedOnly();
+  await testMixedDrift();
+
+  console.log('✅ All Phase 2 Drift Tests Passed');
+}
+
+
+runPhase2Tests();
+
+// runAllTests();
