@@ -36,7 +36,7 @@ export type DiagramAction =
       payload: {
         aiScriptText: string;
         nextStep: string;
-        options: Options[];
+        options?: Options[];
       };
     }
   | {
@@ -44,7 +44,6 @@ export type DiagramAction =
       payload: {
         logEntryId: string;
         chosenText: string;
-        action: GuidedAction;
       };
     };
 
@@ -88,7 +87,7 @@ export type DriftCheck =
   | 'ASK_FOR_SYNC'
   | 'ASK_FOR_EDIT';
 
-type GuidedAction =
+export type GuidedAction =
   | 'RUN_CHECK'
   | 'EDIT_EXIT'
   | 'SYNC_TO_ACTUAL'
@@ -98,9 +97,9 @@ type GuidedAction =
 
 type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
 type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
-type Options = {
+export type Options = {
   text: string;
-  action: string;
+  action: GuidedAction;
 };
 
 export type DiagramEntry = {

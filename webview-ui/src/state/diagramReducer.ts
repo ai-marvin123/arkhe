@@ -180,7 +180,7 @@ export function chatReducer(
     }
     //adds user choice to chat log and removes options during guided flow
     case 'log_userChoice': {
-      const { logEntryId, chosenText, action: choiceAction } = action.payload;
+      const { logEntryId, chosenText } = action.payload;
 
       const userEntry: TextEntry = {
         id: generateId(),
@@ -201,19 +201,11 @@ export function chatReducer(
         }
         return entry;
       });
-
-      const isExitChoice = choiceAction === 'EDIT_EXIT';
-
       return {
         ...state,
         chat: {
           ...state.chat,
           log: [...newLog, userEntry],
-        },
-        view: {
-          ...state.view,
-          isChatEnabled: isExitChoice ? true : state.view.isChatEnabled,
-          driftCheckStep: isExitChoice ? 'IDLE' : state.view.driftCheckStep,
         },
       };
     }

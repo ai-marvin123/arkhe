@@ -1,4 +1,8 @@
-import type { DiagramAction, DiagramData } from '../state/diagramTypes';
+import type {
+  DiagramAction,
+  DiagramData,
+  Options,
+} from '../state/diagramTypes';
 
 type Dispatch = (action: DiagramAction) => void;
 
@@ -7,18 +11,18 @@ type DriftPayload =
   | { type: 'MISSING_DIAGRAM'; message: string; data: DiagramData }
   | { type: 'UNTRACKED_DIAGRAM'; message: string; data: DiagramData };
 
-const Q1_OPTIONS = [
+const Q1_OPTIONS: Options[] = [
   { text: 'Yes, run a check', action: 'RUN_CHECK' },
   { text: 'No, I want to edit my diagram', action: 'EDIT_EXIT' },
 ];
 
-const Q2_OPTIONS = [
+const Q2_OPTIONS: Options[] = [
   { text: 'Yes, update', action: 'SYNC_TO_ACTUAL' },
   { text: 'No, keep the old one', action: 'KEEP_OLD_PLAN' },
   { text: 'I want to edit my diagram', action: 'EDIT_EXIT' },
 ];
 
-const Q3_OPTIONS = [
+const Q3_OPTIONS: Options[] = [
   { text: "Yes, let's edit", action: 'EDIT_FINAL_YES' },
   { text: "No, I'm done", action: 'EDIT_FINAL_NO' },
 ];
@@ -37,15 +41,16 @@ export function startGuidedFlowQ1(dispatch: Dispatch) {
 
 let hasSeenMissing = false;
 
-export const startDriftCheck = (sessionId: string) => {
+export const startDriftCheck = (sessionId: string, dispatch: Dispatch) => {
   // We assume 'START_DRIFT_CHECK' (sets isLoading: true) is dispatched in the calling component.
 
   hasSeenMissing = false;
-  postRunAlignmentCheck(sessionId).catch((error) => {
+  postRunAlignmentCheck(sessionId, dispatch).catch((error) => {
     console.error('Error triggering drift check:', error);
   });
 };
 
+//this function will be invoked inside run check api funciton:
 export const handleDriftCheckReport = (
   payload: DriftPayload,
   dispatch: Dispatch
@@ -107,5 +112,33 @@ export const handleDriftCheckReport = (
     }
     default:
       return;
+  }
+};
+
+export const executeSyncAction = async (
+  sessionId: string,
+  actionType: string,
+  dispatch: Dispatch
+) => {
+  try {
+    const newDiagramData = await syncDiagram(sessionId, actionType); //avo's api call here
+    if (!newDiagramData) {
+      throw new Error('API returned no diagram data after sync.');
+    }
+
+    dispatch({
+      type: 'load_newDiagram',
+      payload: { message: newDiagramData.message, data: newDiagramData.data },
+    });
+    dispatch({
+      type: 'proceed_guidedFlow',
+      payload: {
+        aiScriptText: `The diagram has been updated according to your choice. Would you like to edit it now?`,
+        nextStep: 'ASK_FOR_EDIT',
+        options: Q3_OPTIONS,
+      },
+    });
+  } catch (error) {
+    console.error('"Sync Action Flow Error:', error);
   }
 };
