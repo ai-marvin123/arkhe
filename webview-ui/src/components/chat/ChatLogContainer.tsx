@@ -97,7 +97,7 @@ export default function ChatLogContainer() {
               <AIBubble logKey={logKey} text={entry.text} />
             )}
             {hasOptions && guidedEntry && (
-              <div className='w-full flex justify-start mt-2 ml-2 space-x-2 flex-wrap'>
+              <div className='w-full flex justify-start mt-2 ml-2 space-x-2'>
                 {guidedEntry.options.map((option, index) => (
                   <OptionsButton
                     key={index}
