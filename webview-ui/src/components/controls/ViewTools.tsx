@@ -12,8 +12,8 @@ interface ViewToolstype {
 }
 
 const zoomStep = 0.1;
-const maxZoom = 2.0;
-const minZoom = 1.0;
+const maxZoom = 5.0;
+const minZoom = 0.1;
 
 export default function ViewTools({ id, view }: ViewToolstype) {
   const dispatch = useDiagramDispatch();
