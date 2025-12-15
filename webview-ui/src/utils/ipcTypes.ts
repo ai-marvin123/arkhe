@@ -1,5 +1,20 @@
 import type { DiagramData } from '../state/diagramTypes';
 
+export type SavedUserApiKey = {
+  isConfigured: boolean;
+  config: { provider: string; model: string };
+};
+
+export type UserApiKeyToSave = {
+  provider: string;
+  model: string;
+  apiKey?: string;
+};
+
+export type UserApiKeySuccess = {
+  success: boolean;
+};
+
 export type AiPayload =
   | { type: 'TEXT'; message: string; data?: never }
   | { type: 'DIAGRAM'; message: string; data: DiagramData };
