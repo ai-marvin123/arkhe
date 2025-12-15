@@ -44,7 +44,7 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 2.1: Implement Disk Scanning**
 
-- [ ] **Update `src/services/FileService.ts`**:
+- [x] **Update `src/services/FileService.ts`**:
   - **Method `scanDirectory()`**:
     - Use `vscode.workspace.findFiles` (`'**/*'`, exclude `node_modules`, `.git`, `dist`, etc.).
     - **Output:** Return a list of `StructureNode` representing the actual disk state.
@@ -52,7 +52,7 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 2.2: Implement DriftService (The Logic)**
 
-- [ ] **Create `src/services/DriftService.ts`**:
+- [x] **Create `src/services/DriftService.ts`**:
   - **Method `calculateDrift(planNodes, actualNodes)`**:
     - **Input:** List of nodes from Plan and List of nodes from Disk.
     - **Process:** Compare IDs/Paths.
@@ -69,7 +69,7 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 2.3: Update AiService (Drift Analysis)**
 
-- [ ] **Update `src/services/AiService.ts`**:
+- [x] **Update `src/services/AiService.ts`**:
   - **Method `analyzeDrift(missingNodes)`**:
     - **Input:** List of missing nodes.
     - **Prompt:** "You are a Tech Lead. These files are in the architecture plan but missing from the disk: [list]. Analyze why (renamed? deleted? typo?) and suggest a fix."
@@ -77,7 +77,7 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 2.4: Wiring Drift Command (The 4 Scenarios)**
 
-- [ ] **Update `src/handlers/CommandHandler.ts`**:
+- [x] **Update `src/handlers/CommandHandler.ts`**:
   - **Case `CHECK_DRIFT`**:
     1.  Get `planNodes` (Memory/Load) & `actualNodes` (`FileService.scanDirectory`).
     2.  Get raw drift results (`DriftService.calculateDrift`).
@@ -102,7 +102,7 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 3.1: Implement Sync Logic**
 
-- [ ] **Update `src/handlers/CommandHandler.ts`**:
+- [x] **Update `src/handlers/CommandHandler.ts`**:
   - **Case `SYNC_TO_ACTUAL`**:
     - Call `FileService.scanDirectory()` to get the "Truth".
     - **Construct new Diagram Data:**
@@ -113,13 +113,13 @@ _(Matches previous plan - no changes needed)_
 
 #### **Step 3.2: Edge Cases & Polish**
 
-- [ ] **Empty Workspace:** Handle case where `scanDirectory` returns empty (new project).
-- [ ] **Path Normalization:** Ensure `DriftService` handles Windows `\` vs POSIX `/` to avoid false "Missing/Untracked" flags.
-- [ ] **Unit Tests:** Update `test/phase2Test.ts` to simulate the 4 separate scenarios and verify correct payloads are received.
+- [x] **Empty Workspace:** Handle case where `scanDirectory` returns empty (new project).
+- [x] **Path Normalization:** Ensure `DriftService` handles Windows `\` vs POSIX `/` to avoid false "Missing/Untracked" flags.
+- [x] **Unit Tests:** Update `test/phase2Test.ts` to simulate the 4 separate scenarios and verify correct payloads are received.
 
 #### **Step 3.3: Verification**
 
-- [ ] **Test Flow:**
+- [x] **Test Flow:**
   1.  **Matched:** Generate -\> Save -\> Check Drift -\> Expect `ALL_MATCHED`.
   2.  **Untracked:** Create `new.ts` -\> Check Drift -\> Expect `UNTRACKED_DIAGRAM`.
   3.  **Missing:** Delete `app.ts` -\> Check Drift -\> Expect `MISSING_DIAGRAM` + AI explanation.

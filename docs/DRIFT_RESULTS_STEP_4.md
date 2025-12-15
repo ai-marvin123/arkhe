@@ -34,21 +34,21 @@ Upon receiving the `CHECK_DRIFT` command, the Backend analyzes the file system a
 Update `src/types/index.ts` with the new discriminated union types for `AiPayload`.
 
 ```typescript
-import { DiagramData } from './index';
+import { DiagramData } from "./index";
 
 export type AiPayload =
   // ... existing types (TEXT, DIAGRAM, etc.) ...
 
   // CASE 2.1: Perfect Match
   | {
-      type: 'ALL_MATCHED';
+      type: "ALL_MATCHED";
       message: string; // e.g., "Everything is in sync."
     }
 
   // CASE 2.2: Missing Files Detected
   // (Also used as the 1st message in CASE 2.4)
   | {
-      type: 'MISSING_DIAGRAM';
+      type: "MISSING_DIAGRAM";
       message: string; // AI Generated Analysis (Cause & Solution)
       data: DiagramData; // Full structure (Nodes + Edges) containing 'MATCHED' and 'MISSING'
     }
@@ -56,7 +56,7 @@ export type AiPayload =
   // CASE 2.3: Untracked Files Detected
   // (Also used as the 2nd message in CASE 2.4)
   | {
-      type: 'UNTRACKED_DIAGRAM';
+      type: "UNTRACKED_DIAGRAM";
       message: string; // Fixed static message (e.g., "New files detected.")
       data: DiagramData; // Full structure (Nodes + Edges) containing 'MATCHED' and 'UNTRACKED'
     };

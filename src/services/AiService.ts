@@ -10,6 +10,7 @@ import { AiPayload, AiPayloadSchema } from '../types';
 import { SystemMessage } from 'langchain';
 import { ChatOpenAI } from '@langchain/openai';
 import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
+import { StructureNode } from '../types';
 
 export const chatModel = new ChatOpenAI({
   modelName: 'gpt-4.1-mini',
@@ -192,6 +193,43 @@ class AiService {
     }
   }
 
+  async analyzeDrift(missingNodes: StructureNode[]): Promise<string> {
+    if (!missingNodes || missingNodes.length === 0) {
+      return 'No missing files detected.';
+    }
+
+    const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
+
+    const prompt = `
+You are a Tech Lead.
+
+These files or folders are in the approved architecture plan
+but are missing from the actual repository:
+
+${list}
+
+Analyze why this might have happened (renamed, moved, deleted, typo, branch mismatch)
+and suggest concrete steps to fix the issue.
+
+Keep the response short and actionable.
+`.trim();
+
+    try {
+      const response = await chatModel.invoke(prompt);
+
+      // LangChain ChatOpenAI always returns a message object
+      if ((response as any)?.content) {
+        return typeof response.content === 'string'
+          ? response.content
+          : JSON.stringify(response.content);
+      }
+
+      return 'Missing files detected. Review recent changes and update or restore the plan.';
+    } catch (error) {
+      console.error('[AiService] analyzeDrift error:', error);
+      return 'Unable to analyze drift automatically. Please review missing files manually.';
+    }
+  }
   private fallbackText(message: string): AiPayload {
     return {
       type: 'TEXT',
