@@ -3,10 +3,12 @@ import type {
   DiagramData,
   Options,
 } from '../state/diagramTypes';
+import { requestAlignmentCheck, requestDiagramSync } from './vsCodeApi';
 
-type Dispatch = (action: DiagramAction) => void;
 
-type DriftPayload =
+export type Dispatch = (action: DiagramAction) => void;
+
+export type DriftPayload =
   | { type: 'ALL_MATCHED'; message: string }
   | { type: 'MISSING_DIAGRAM'; message: string; data: DiagramData }
   | { type: 'UNTRACKED_DIAGRAM'; message: string; data: DiagramData };
@@ -45,7 +47,7 @@ export const startDriftCheck = (sessionId: string, dispatch: Dispatch) => {
   // We assume 'START_DRIFT_CHECK' (sets isLoading: true) is dispatched in the calling component.
 
   hasSeenMissing = false;
-  postRunAlignmentCheck(sessionId, dispatch).catch((error) => {
+  requestAlignmentCheck(sessionId, dispatch).catch((error) => {
     console.error('Error triggering drift check:', error);
   });
 };
@@ -117,18 +119,17 @@ export const handleDriftCheckReport = (
 
 export const executeSyncAction = async (
   sessionId: string,
-  actionType: string,
   dispatch: Dispatch
 ) => {
   try {
-    const newDiagramData = await syncDiagram(sessionId, actionType); //avo's api call here
+    const newDiagramData = await requestDiagramSync(sessionId); //avo's api call here
     if (!newDiagramData) {
       throw new Error('API returned no diagram data after sync.');
     }
 
     dispatch({
       type: 'load_newDiagram',
-      payload: { message: newDiagramData.message, data: newDiagramData.data },
+      payload: { message: newDiagramData.payload.message, data: newDiagramData.payload.data!},
     });
     dispatch({
       type: 'proceed_guidedFlow',

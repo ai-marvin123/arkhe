@@ -6,7 +6,8 @@ import UserBubble from './UserBubble';
 import AIBubble from './AIBubble';
 import DiagramFrame from '../diagram/DiagramFrame';
 import AiMessageAccordion from './AiMessageAccordion';
-import { startDriftCheck } from '../../utils/guidedFlow';
+import { startDriftCheck, executeSyncAction } from '../../utils/guidedFlow';
+import type { Dispatch } from '../../utils/guidedFlow';
 import OptionsButton from './Options';
 import type { GuidedAction } from '../../state/diagramTypes';
 
@@ -47,7 +48,8 @@ export default function ChatLogContainer() {
       });
       dispatch({ type: 'enable_chat' });
     } else if (action === 'SYNC_TO_ACTUAL') {
-      //here we call the sync API call
+      executeSyncAction(state.session.sessionId, dispatch as Dispatch)
+
     } else if (action === 'EDIT_FINAL_YES' || action === 'EDIT_FINAL_NO') {
       const finalScript =
         action === 'EDIT_FINAL_YES'
