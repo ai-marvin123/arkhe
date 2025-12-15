@@ -17,7 +17,11 @@
 //     panY: 0,
 //     isFullscreen: false,
 //     isLoading: false,
+//     isPanActive: false,
+//     isChatEnabled: true,
 //     lastLLMMessage: '',
+//     isAIOpen: false,
+//     driftCheckStep: 'IDLE',
 //   },
 //   // D. AI Chat log
 //   chat: {

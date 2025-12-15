@@ -85,7 +85,6 @@ export function chatReducer(
           mermaidSyntax: styledMermaidSyntax,
         },
         viewSettings: { ...initialState.view, ...defaultView, isAIOpen: false },
-
         contentRefId: null,
         timestamp: Date.now(),
       };
