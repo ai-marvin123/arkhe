@@ -5,6 +5,7 @@ interface OptionsButton {
 }
 
 export default function OptionsButton({ key, text, clickFunc }: OptionsButton) {
+
   return (
     <button
       key={key}

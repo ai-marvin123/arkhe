@@ -155,13 +155,13 @@ export function chatReducer(
     // advances guided flow during drift check
     case 'proceed_guidedFlow': {
       const { aiScriptText, nextStep, options } = action.payload;
-
+ console.log('✅inside proceed_guidedFlow, shwoing drift step', state.view.driftCheckStep );
       const aiEntry = {
         id: generateId(),
         role: 'assistant',
         type: 'TEXT_RESPONSE' as const,
         text: aiScriptText,
-        options: options,
+        options: options || [],
         timestamp: Date.now(),
       };
 
@@ -180,7 +180,7 @@ export function chatReducer(
     //adds user choice to chat log and removes options during guided flow
     case 'log_userChoice': {
       const { logEntryId, chosenText } = action.payload;
-
+ console.log('🐸inside log_userChoice');
       const userEntry: TextEntry = {
         id: generateId(),
         role: 'user' as const,
