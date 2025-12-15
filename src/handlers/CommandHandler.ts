@@ -182,9 +182,9 @@ export class CommandHandler {
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
             payload: {
-              type: 'MISSING_DIAGRAM',
+              type: 'MISSING_DIAGRAM', // MIXED_DIAGRAM
               message: aiMessage,
-              data: diagramData,
+              data: diagramData, 
             },
           });
 
