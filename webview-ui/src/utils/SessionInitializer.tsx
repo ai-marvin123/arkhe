@@ -1,45 +1,85 @@
-import { useEffect } from 'react';
-import { useDiagramDispatch } from '../state/diagramContext';
-import { loadSavedDiagram } from '../utils/vsCodeApi';
+import { useEffect } from "react";
+import { useDiagramDispatch } from "../state/diagramContext";
+import { loadSavedDiagram } from "../utils/vsCodeApi";
+import type { DiagramData } from "../state/diagramTypes";
+import {
+  MOCK_ALL_MATCHED,
+  MOCK_MISSING_DIAGRAM,
+  MOCK_UNTRACKED_DIAGRAM,
+} from "../../../src/mocks/driftMocks";
+
+/**
+ * DEV ONLY:
+ * Change this value to test different drift states
+ * "ALL_MATCHED" | "MISSING" | "UNTRACKED"
+ */
 
 export default function SessionInitializer() {
   const dispatch = useDiagramDispatch();
 
   useEffect(() => {
-    //put everything in an async func wrapper
     const initializeSession = async () => {
       const newSessionId = crypto.randomUUID();
+
       dispatch({
-        type: 'initialize_session',
+        type: "initialize_session",
         payload: { sessionId: newSessionId },
       });
 
-      //try/catch block to invoke api call
+      // ---------------- DEV MOCK PATH ----------------
+      if (import.meta.env.DEV) {
+        const mocks = [
+          MOCK_ALL_MATCHED,
+          MOCK_MISSING_DIAGRAM,
+          MOCK_UNTRACKED_DIAGRAM,
+        ];
+        mocks.forEach((mock) => {
+          const { payload } = mock;
+          if ("data" in payload) {
+            dispatch({
+              type: "load_newDiagram",
+              payload: {
+                message: payload.message,
+                data: payload.data as DiagramData,
+              },
+            });
+          } else {
+            dispatch({
+              type: "load_textOnly",
+              payload: { message: payload.message },
+            });
+          }
+        });
+        return;
+      }
+      // ------------------------------------------------
+
       try {
-        console.log('inside sessioninitializer try block');
+        console.log("inside sessioninitializer try block");
         const response = await loadSavedDiagram(newSessionId);
 
-        if (response.command === 'AI_RESPONSE') {
+        if (response.command === "AI_RESPONSE") {
           const { payload } = response;
 
-          if (payload.type === 'DIAGRAM') {
+          if (payload.type === "DIAGRAM") {
             dispatch({
-              type: 'load_newDiagram',
+              type: "load_newDiagram",
               payload: { message: payload.message, data: payload.data },
             });
-          } else if (payload.type === 'NO_SAVED_DIAGRAM') {
-            dispatch({ type: 'enable_chat' });
+          } else if (payload.type === "NO_SAVED_DIAGRAM") {
+            dispatch({ type: "enable_chat" });
           }
-        } else if (response.command === 'ERROR') {
+        } else if (response.command === "ERROR") {
           throw new Error(
             `there was an error checking for saved diagram ${response.payload.message}`
           );
         }
       } catch (error) {
-        console.error('Saved diagram check failed:', error);
-        dispatch({ type: 'enable_chat' });
+        console.error("Saved diagram check failed:", error);
+        dispatch({ type: "enable_chat" });
       }
     };
+
     initializeSession();
   }, [dispatch]);
 
