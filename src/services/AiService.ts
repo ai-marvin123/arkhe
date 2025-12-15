@@ -193,14 +193,12 @@ class AiService {
     }
   }
 
-async analyzeDrift(missingNodes: StructureNode[]): Promise<string> {
+  async analyzeDrift(missingNodes: StructureNode[]): Promise<string> {
     if (!missingNodes || missingNodes.length === 0) {
       return 'No missing files detected.';
     }
 
-    const list = missingNodes
-      .map((node) => `- ${node.id}`)
-      .join('\n');
+    const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
 
     const prompt = `
 You are a Tech Lead.
@@ -219,14 +217,12 @@ Keep the response short and actionable.
     try {
       const response = await chatModel.invoke(prompt);
 
-// LangChain ChatOpenAI always returns a message object
-if ((response as any)?.content) {
-  return typeof response.content === 'string'
-    ? response.content
-    : JSON.stringify(response.content);
-}
-
-return 'Missing files detected. Review recent changes and update or restore the plan.';
+      // LangChain ChatOpenAI always returns a message object
+      if ((response as any)?.content) {
+        return typeof response.content === 'string'
+          ? response.content
+          : JSON.stringify(response.content);
+      }
 
       return 'Missing files detected. Review recent changes and update or restore the plan.';
     } catch (error) {

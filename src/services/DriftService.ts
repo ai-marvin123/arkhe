@@ -1,6 +1,7 @@
 // src/services/DriftService.ts
 
-import { StructureNode, DiagramData } from "../types";
+import { StructureNode, DiagramData } from '../types';
+import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 
 export interface DriftResult {
   matched: StructureNode[];
@@ -17,8 +18,8 @@ export class DriftService {
     planNodes: StructureNode[],
     actualNodes: StructureNode[]
   ): DriftResult {
-    // Normalize paths defensively
-    const normalize = (id: string) => id.replace(/\\/g, "/");
+    // Normalize paths defensively (handle Windows backslashes)
+    const normalize = (id: string) => id.replace(/\\/g, '/');
 
     const planMap = new Map<string, StructureNode>();
     const actualMap = new Map<string, StructureNode>();
@@ -35,39 +36,44 @@ export class DriftService {
     const missing: StructureNode[] = [];
     const untracked: StructureNode[] = [];
 
+    // 1. Check Plan items against Actual
     for (const [id, planNode] of planMap.entries()) {
       if (actualMap.has(id)) {
-        matched.push({ ...planNode, status: "MATCHED" });
+        matched.push({ ...planNode, status: 'MATCHED' });
       } else {
-        missing.push({ ...planNode, status: "MISSING" });
+        missing.push({ ...planNode, status: 'MISSING' });
       }
     }
 
+    // 2. Check Actual items against Plan
     for (const [id, actualNode] of actualMap.entries()) {
       if (!planMap.has(id)) {
-        untracked.push({ ...actualNode, status: "UNTRACKED" });
+        untracked.push({ ...actualNode, status: 'UNTRACKED' });
       }
     }
 
     return { matched, missing, untracked };
   }
 
+  /**
+   * Helper to convert node lists back into full DiagramData format
+   * using the centralized mermaid generator.
+   */
   static generateDiagramData(
     nodes: StructureNode[],
     edges: { source: string; target: string }[] = []
   ): DiagramData {
-    const mermaidLines: string[] = ["graph TD"];
+    const jsonStructure = {
+      nodes,
+      edges,
+    };
 
-    for (const edge of edges) {
-      mermaidLines.push(`${edge.source} --> ${edge.target}`);
-    }
+    // Use the utility to generate consistent, styled Mermaid syntax
+    const mermaidSyntax = generateMermaidFromJSON(jsonStructure);
 
     return {
-      mermaidSyntax: mermaidLines.join("\n"),
-      jsonStructure: {
-        nodes,
-        edges,
-      },
+      mermaidSyntax,
+      jsonStructure,
     };
   }
 }
