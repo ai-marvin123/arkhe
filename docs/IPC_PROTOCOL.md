@@ -146,6 +146,14 @@ export type AiPayload =
       data: DiagramData; // Nodes + Edges (Matched + Untracked)
     };
 
+  // Case 2.4: Mixed diagram
+  | {
+    type: 'MIXED_DIAGRAM';
+    message: string;             // AI Message cho phần Missing
+    missingDiagramData: DiagramData;   // Data vẽ cây đỏ
+    untrackedDiagramData: DiagramData; // Data vẽ cây xám
+  };
+
 // --- 3. VS Code Message Definitions ---
 
 export type MessageToBackend =

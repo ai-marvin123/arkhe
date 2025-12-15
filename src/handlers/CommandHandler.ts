@@ -178,23 +178,39 @@ export class CommandHandler {
           //Mixed
           const aiMessage = await aiService.analyzeDrift(missing);
 
-          // 1️⃣ Missing
-          this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
-            payload: {
-              type: 'MISSING_DIAGRAM',
-              message: aiMessage,
-              data: diagramData,
-            },
-          });
+          const filterValidEdges = (nodes: any[], allEdges: any[]) => {
+            const activeIds = new Set(nodes.map((n) => n.id));
+            return allEdges.filter(
+              (edge) => activeIds.has(edge.source) && activeIds.has(edge.target)
+            );
+          };
 
-          // 2️⃣ Untracked
+          // 1. Prepare Data cho Missing View (Matched + Missing)
+          const missingNodes = [...matched, ...missing];
+          const missingEdges = filterValidEdges(missingNodes, edges);
+
+          const missingDiagramData = DriftService.generateDiagramData(
+            missingNodes,
+            missingEdges
+          );
+
+          // 2. Prepare Data cho Untracked View (Matched + Untracked)
+          const untrackedNodes = [...matched, ...untracked];
+          const untrackedEdges = filterValidEdges(untrackedNodes, edges);
+
+          const untrackedDiagramData = DriftService.generateDiagramData(
+            untrackedNodes,
+            untrackedEdges
+          );
+
+          // 3. Send frontend the mixed diagram
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
             payload: {
-              type: 'UNTRACKED_DIAGRAM',
-              message: 'Found new untracked files in your repository.',
-              data: diagramData,
+              type: 'MIXED_DIAGRAM',
+              message: aiMessage,
+              missingDiagramData: missingDiagramData,
+              untrackedDiagramData: untrackedDiagramData,
             },
           });
 

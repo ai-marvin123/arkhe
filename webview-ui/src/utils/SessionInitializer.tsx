@@ -6,7 +6,8 @@ import {
   MOCK_ALL_MATCHED,
   MOCK_MISSING_DIAGRAM,
   MOCK_UNTRACKED_DIAGRAM,
-} from '../../../src/mocks/driftMocks';
+} from "../../../src/mocks/driftMocks";
+import { startGuidedFlowQ1 } from "./guidedFlow";
 
 /**
  * DEV ONLY:
@@ -101,8 +102,11 @@ export default function SessionInitializer() {
               type: 'load_newDiagram',
               payload: { message: payload.message, data: payload.data },
             });
-          } else if (payload.type === 'NO_SAVED_DIAGRAM') {
-            dispatch({ type: 'enable_chat' });
+
+             startGuidedFlowQ1(dispatch)
+             
+          } else if (payload.type === "NO_SAVED_DIAGRAM") {
+            dispatch({ type: "enable_chat" });
           }
         } else if (response.command === 'ERROR') {
           throw new Error(

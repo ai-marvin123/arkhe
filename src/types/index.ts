@@ -66,12 +66,41 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
     })
     .strict(),
 
-  // E. Drift Result
+  // --- E. DRIFT SCENARIOS (UPDATED) ---
+
+  // E1. All Matched
   z
     .object({
-      type: z.literal('DRIFT_DIAGRAM'),
+      type: z.literal('ALL_MATCHED'),
       message: z.string(),
-      data: DiagramDataSchema, // Nodes have 'status'
+    })
+    .strict(),
+
+  // E2. Missing Only
+  z
+    .object({
+      type: z.literal('MISSING_DIAGRAM'),
+      message: z.string(),
+      data: DiagramDataSchema,
+    })
+    .strict(),
+
+  // E3. Untracked Only
+  z
+    .object({
+      type: z.literal('UNTRACKED_DIAGRAM'),
+      message: z.string(),
+      data: DiagramDataSchema,
+    })
+    .strict(),
+
+  // E4. Mixed (Both Missing & Untracked) - NEW 🔥
+  z
+    .object({
+      type: z.literal('MIXED_DIAGRAM'),
+      message: z.string(), // AI Message
+      missingDiagramData: DiagramDataSchema,
+      untrackedDiagramData: DiagramDataSchema,
     })
     .strict(),
 ]);

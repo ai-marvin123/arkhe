@@ -1,4 +1,5 @@
-import type { DiagramData } from '../state/diagramTypes';
+import type { DiagramData } from "../state/diagramTypes";
+import type { Dispatch } from "./guidedFlow";
 import type {
   MessageToFrontend,
   SaveResponse,
@@ -6,6 +7,10 @@ import type {
   SavedUserApiKey,
   UserApiKeySuccess,
 } from '../utils/ipcTypes';
+} from "../utils/ipcTypes";
+import { handleDriftCheckReport } from "./guidedFlow";
+import type { DriftPayload } from "./guidedFlow";
+
 declare global {
   interface VsCodeApi {
     postMessage(message: unknown): void;
@@ -218,7 +223,8 @@ export function postDiagramToSave(
 }
 
 export function requestAlignmentCheck(
-  sessionId: string
+  sessionId: string,
+  dispatch: Dispatch
 ): Promise<MessageToFrontend> {
   const vsCodeApi = getVsCodeApi();
 
@@ -226,8 +232,9 @@ export function requestAlignmentCheck(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
+        handleDriftCheckReport(message.payload as DriftPayload, dispatch);
         resolve(message);
         return;
       }

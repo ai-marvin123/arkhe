@@ -4,12 +4,12 @@
 // 🎛️ CONTROL PANEL (TOGGLE TESTS HERE)
 // ==========================================
 const TEST_CONFIG = {
-  SCENARIO_1_MATCHED: true, // ✅ Expect: ALL_MATCHED
-  SCENARIO_2_UNTRACKED: true, // ✅ Expect: UNTRACKED_DIAGRAM
-  SCENARIO_3_MISSING: true, // ✅ Expect: MISSING_DIAGRAM
+  SCENARIO_1_MATCHED: false, // ✅ Expect: ALL_MATCHED
+  SCENARIO_2_UNTRACKED: false, // ✅ Expect: UNTRACKED_DIAGRAM
+  SCENARIO_3_MISSING: false, // ✅ Expect: MISSING_DIAGRAM
   SCENARIO_4_MIXED: true, // ✅ Expect: MISSING... then UNTRACKED...
-  SCENARIO_5_SYNC: true, // ✅ Expect: SYNC Success -> ALL_MATCHED
-  SCENARIO_6_NO_FILE: true, // ✅ Expect: NO_SAVED_DIAGRAM (New Case)
+  SCENARIO_5_SYNC: false, // ✅ Expect: SYNC Success -> ALL_MATCHED
+  SCENARIO_6_NO_FILE: false, // ✅ Expect: NO_SAVED_DIAGRAM (New Case)
 };
 
 // ==========================================
@@ -160,18 +160,32 @@ async function runSelectiveTests() {
   }
 
   // ---------------------------------------------------------
-  // SCENARIO 4: MIXED
+  // SCENARIO 4: MIXED (Updated for MIXED_DIAGRAM type)
   // ---------------------------------------------------------
   if (TEST_CONFIG.SCENARIO_4_MIXED) {
     console.log('\n🔹 TEST 4: MIXED');
-    // Setup: Plan has APP, Disk has NEW (APP missing, NEW untracked)
-    sim.setup([NODE_APP], [NODE_NEW]);
+    sim.setup([NODE_APP], [NODE_NEW]); // Plan: APP, Disk: NEW
 
     await handler.handle({
       command: 'CHECK_DRIFT',
       payload: { sessionId: 'test' },
     });
-    printResult(sim.messages);
+
+    // Check kết quả mới
+    const msg = sim.messages[0];
+    if (msg && msg.payload.type === 'MIXED_DIAGRAM') {
+      console.log('      ✅ Correct Type: MIXED_DIAGRAM');
+      console.log(
+        '      📦 Contains missingDiagramData:',
+        !!msg.payload.missingDiagramData
+      );
+      console.log(
+        '      📦 Contains untrackedDiagramData:',
+        !!msg.payload.untrackedDiagramData
+      );
+    } else {
+      console.log('      ❌ Wrong Type. Received:', msg?.payload?.type);
+    }
   }
 
   // ---------------------------------------------------------
