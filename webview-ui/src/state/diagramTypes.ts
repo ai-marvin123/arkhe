@@ -30,7 +30,23 @@ export type DiagramAction =
         lastLLMMessage?: string;
         isAIOpen?: boolean;
       };
+    }
+  | {
+      type: 'proceed_guidedFlow';
+      payload: {
+        aiScriptText: string;
+        nextStep: string;
+        options?: Options[];
+      };
+    }
+  | {
+      type: 'log_userChoice';
+      payload: {
+        logEntryId: string;
+        chosenText: string;
+      };
     };
+
 export type ViewSettings = {
   zoomLevel: number;
   panX: number;
@@ -41,6 +57,7 @@ export type ViewSettings = {
   isPanActive: boolean;
   lastLLMMessage: string;
   isAIOpen: boolean;
+  driftCheckStep: string;
 };
 export type Node = {
   id: string;
@@ -64,8 +81,26 @@ export type DiagramData = {
   };
 };
 
+export type DriftCheck =
+  | 'IDLE'
+  | 'ASK_FOR_DRIFT_CHECK'
+  | 'ASK_FOR_SYNC'
+  | 'ASK_FOR_EDIT';
+
+export type GuidedAction =
+  | 'RUN_CHECK'
+  | 'EDIT_EXIT'
+  | 'SYNC_TO_ACTUAL'
+  | 'KEEP_OLD_PLAN'
+  | 'EDIT_FINAL_YES'
+  | 'EDIT_FINAL_NO';
+
 type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
 type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
+export type Options = {
+  text: string;
+  action: GuidedAction;
+};
 
 export type DiagramEntry = {
   id: string;
@@ -83,6 +118,7 @@ export type TextEntry = {
   role: string;
   type: TextEntryType;
   text: string;
+  options?: Options[];
   timestamp: number;
 };
 

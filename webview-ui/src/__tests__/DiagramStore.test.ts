@@ -4,7 +4,11 @@
 // import { simpleChatMock } from '../../../src/mocks/chatMocks';
 // import { mockInitialState } from '../../../src/mocks/mockInitialState';
 // import { mockUserInputFE } from '../../../src/mocks/mockUserInput';
-// import type { DiagramData, TextEntry } from '../state/diagramTypes';
+// import type {
+//   DiagramData,
+//   DiagramEntry,
+//   TextEntry,
+// } from '../state/diagramTypes';
 
 // type JsonStructureType = DiagramData['jsonStructure'];
 
@@ -166,5 +170,56 @@
 //     const logEntry = stateAfter.chat.log[0];
 //     expect(logEntry.type).toBe('TEXT_RESPONSE');
 //     expect(logEntry.text).toBe(mockTextData.message);
+//   });
+// });
+
+// describe('update_logEntry function', () => {
+//   test('updates view of selected diagram', () => {
+//     const existingLogEntry: DiagramEntry = {
+//       id: 'L1',
+//       role: 'assistant' as const,
+//       type: 'DIAGRAM_CONTENT' as const,
+//       text: 'V1',
+//       diagramData: {
+//         jsonStructure: validDiagramData.jsonStructure,
+//         mermaidSyntax: validDiagramData.mermaidSyntax,
+//       },
+//       viewSettings: { ...mockInitialState.view },
+//       contentRefId: null,
+//       timestamp: Date.now(),
+//     };
+
+//     const stateBeforeUpdate = {
+//       ...mockInitialState,
+//       chat: { ...mockInitialState.chat, log: [existingLogEntry] },
+//     };
+
+//     const viewPayload = {
+//       id: 'V2',
+//       zoomLevel: 2.0,
+//       panX: 1,
+//       panY: 1,
+//       isFullscreen: true,
+//       isLoading: false,
+//       isPanActive: true,
+//       isChatEnabled: true,
+//       lastLLMMessage: '',
+//       isAIOpen: true,
+//       driftCheckStep: 'IDLE',
+//     };
+
+//     const action = {
+//       type: 'update_logEntry' as const,
+//       payload: { viewPayload },
+//     };
+
+//     const stateAfter = chatReducer(stateBeforeUpdate, action);
+
+//     expect(stateAfter.view.zoomLevel).toBe(2.0);
+//     expect(stateAfter.view.panX).toBe(1);
+//     expect(stateAfter.view.panY).toBe(1);
+//     expect(stateAfter.view.isFullscreen).toBe(true);
+//     expect(stateAfter.view.isPanActive).toBe(true);
+//     expect(stateAfter.view.isAIOpen).toBe(true);
 //   });
 // });
