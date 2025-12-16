@@ -214,6 +214,17 @@ export class CommandHandler {
               console.log(
                 `[DEBUG] Saved untracked diagram to: ${untrackedPath}`
               );
+
+              const actualPath = path.join(rootPath, 'actual.json');
+              fs.writeFileSync(
+                missingPath,
+                JSON.stringify(
+                  { nodes: actualNodes, edges: actualEdges },
+                  null,
+                  2
+                )
+              );
+              // nodes: actualNodes, edges: actualEdges
             } catch (err) {
               console.error('[DEBUG] Failed to save debug files:', err);
             }
