@@ -84,6 +84,7 @@ export type DiagramData = {
 export type DriftCheck =
   | 'IDLE'
   | 'ASK_FOR_DRIFT_CHECK'
+  | 'MIXED_CASE_SEPARATOR'
   | 'ASK_FOR_SYNC'
   | 'ASK_FOR_EDIT';
 
