@@ -1,5 +1,5 @@
-import type { DiagramData } from "../state/diagramTypes";
-import type { Dispatch } from "./guidedFlow";
+import type { DiagramData } from '../state/diagramTypes';
+import type { Dispatch } from './guidedFlow';
 import type {
   MessageToFrontend,
   SaveResponse,
@@ -7,9 +7,8 @@ import type {
   SavedUserApiKey,
   UserApiKeySuccess,
 } from '../utils/ipcTypes';
-} from "../utils/ipcTypes";
-import { handleDriftCheckReport } from "./guidedFlow";
-import type { DriftPayload } from "./guidedFlow";
+import { handleDriftCheckReport } from './guidedFlow';
+import type { DriftPayload } from './guidedFlow';
 
 declare global {
   interface VsCodeApi {
@@ -232,8 +231,8 @@ export function requestAlignmentCheck(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === "AI_RESPONSE") {
-        window.removeEventListener("message", listener);
+      if (message.command === 'AI_RESPONSE') {
+        window.removeEventListener('message', listener);
         handleDriftCheckReport(message.payload as DriftPayload, dispatch);
         resolve(message);
         return;

@@ -5,13 +5,18 @@ import type {
 } from '../state/diagramTypes';
 import { requestAlignmentCheck, requestDiagramSync } from './vsCodeApi';
 
-
 export type Dispatch = (action: DiagramAction) => void;
 
 export type DriftPayload =
   | { type: 'ALL_MATCHED'; message: string }
   | { type: 'MISSING_DIAGRAM'; message: string; data: DiagramData }
-  | { type: 'UNTRACKED_DIAGRAM'; message: string; data: DiagramData };
+  | { type: 'UNTRACKED_DIAGRAM'; message: string; data: DiagramData }
+  | {
+      type: 'MIXED_DIAGRAM';
+      message: string;
+      missingDiagramData: DiagramData;
+      untrackedDiagramData: DiagramData;
+    };
 
 const Q1_OPTIONS: Options[] = [
   { text: 'Yes, run a check', action: 'RUN_CHECK' },
@@ -112,6 +117,54 @@ export const handleDriftCheckReport = (
       }
       return;
     }
+    case 'MIXED_DIAGRAM': {
+      hasSeenMissing = true;
+
+      const { message, missingDiagramData, untrackedDiagramData } = payload;
+
+      // 1. RENDER the first diagram (e.g., the missing files view)
+      dispatch({
+        type: 'load_newDiagram',
+        payload: {
+          message: message,
+          data: missingDiagramData,
+        },
+      });
+
+      // 2. RENDER the AI text message (the separator/explanation)
+
+      dispatch({
+        type: 'proceed_guidedFlow',
+        payload: {
+          aiScriptText:
+            'I found some missing files, as shown above. Here is the diagram highlighting your untracked files:',
+          nextStep: 'MIXED_CASE_SEPARATOR',
+          options: [],
+        },
+      });
+
+      // 3. RENDER the second diagram (the untracked files view)
+      dispatch({
+        type: 'load_newDiagram',
+        payload: {
+          message: message,
+          data: untrackedDiagramData,
+        },
+      });
+
+      // 4. RENDER the final question and buttons for the user
+      dispatch({
+        type: 'proceed_guidedFlow',
+        payload: {
+          aiScriptText:
+            'How would you like to resolve this conflict? Would you like to update your diagram to include your untracked files?',
+          nextStep: 'ASK_FOR_SYNC',
+          options: Q2_OPTIONS,
+        },
+      });
+
+      return;
+    }
     default:
       return;
   }
@@ -129,7 +182,10 @@ export const executeSyncAction = async (
 
     dispatch({
       type: 'load_newDiagram',
-      payload: { message: newDiagramData.payload.message, data: newDiagramData.payload.data!},
+      payload: {
+        message: newDiagramData.payload.message,
+        data: newDiagramData.payload.data!,
+      },
     });
     dispatch({
       type: 'proceed_guidedFlow',

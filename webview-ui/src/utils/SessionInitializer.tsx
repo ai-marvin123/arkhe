@@ -6,8 +6,8 @@ import {
   MOCK_ALL_MATCHED,
   MOCK_MISSING_DIAGRAM,
   MOCK_UNTRACKED_DIAGRAM,
-} from "../../../src/mocks/driftMocks";
-import { startGuidedFlowQ1 } from "./guidedFlow";
+} from '../../../src/mocks/driftMocks';
+import { startGuidedFlowQ1 } from './guidedFlow';
 
 /**
  * DEV ONLY:
@@ -20,41 +20,41 @@ export default function SessionInitializer() {
 
   useEffect(() => {
     //check if user has OpenAI API key saved
-    const initializeConnection = async () => {
-      try {
-        const response = await checkUserApiKey();
-        if (!response) {
-          throw new Error(
-            'No response object returned when inquiring saved user API key'
-          );
-        }
-        if (response.isConfigured === true) {
-          return true;
-        } else {
-          dispatch({
-            type: 'load_textOnly',
-            payload: {
-              message:
-                'Please enter your OpenAI API key and model by clicking on the green settings icon above.',
-            },
-          });
-          return false;
-        }
-      } catch (error) {
-        console.error(
-          'There was an error initializing connection with user API key',
-          error
-        );
-        return false;
-      }
-    };
+    // const initializeConnection = async () => {
+    //   try {
+    //     const response = await checkUserApiKey();
+    //     if (!response) {
+    //       throw new Error(
+    //         'No response object returned when inquiring saved user API key'
+    //       );
+    //     }
+    //     if (response.isConfigured === true) {
+    //       return true;
+    //     } else {
+    //       dispatch({
+    //         type: 'load_textOnly',
+    //         payload: {
+    //           message:
+    //             'Please enter your OpenAI API key and model by clicking on the green settings icon above.',
+    //         },
+    //       });
+    //       return false;
+    //     }
+    //   } catch (error) {
+    //     console.error(
+    //       'There was an error initializing connection with user API key',
+    //       error
+    //     );
+    //     return false;
+    //   }
+    // };
     const executeFlow = async () => {
-      // Step A: Check API Key Status (MUST AWAIT)
-      const isConfigured = await initializeConnection();
-      if (!isConfigured) {
-        // Stop execution if key is missing or error occurred
-        return;
-      }
+      // // Step A: Check API Key Status (MUST AWAIT)
+      // const isConfigured = await initializeConnection();
+      // if (!isConfigured) {
+      //   // Stop execution if key is missing or error occurred
+      //   return;
+      // }
       const newSessionId = crypto.randomUUID();
 
       dispatch({
@@ -103,10 +103,9 @@ export default function SessionInitializer() {
               payload: { message: payload.message, data: payload.data },
             });
 
-             startGuidedFlowQ1(dispatch)
-             
-          } else if (payload.type === "NO_SAVED_DIAGRAM") {
-            dispatch({ type: "enable_chat" });
+            startGuidedFlowQ1(dispatch);
+          } else if (payload.type === 'NO_SAVED_DIAGRAM') {
+            dispatch({ type: 'enable_chat' });
           }
         } else if (response.command === 'ERROR') {
           throw new Error(
