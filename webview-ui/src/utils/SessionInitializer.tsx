@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDiagramDispatch } from '../state/diagramContext';
-import { loadSavedDiagram, checkUserApiKey } from '../utils/vsCodeApi';
+import { loadSavedDiagram, } from '../utils/vsCodeApi';
 import type { DiagramData } from '../state/diagramTypes';
 import {
   MOCK_ALL_MATCHED,
