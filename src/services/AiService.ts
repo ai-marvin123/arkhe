@@ -84,12 +84,12 @@ MODE A: SUFFICIENT DATA. Format:
     "jsonStructure": {
       "nodes": [
         {
-          "id": "unique-id",
-          "label": "filename.ext",
-          "type": "FILE",
-          "level": number,
-          "path": "/path/to/file",
-          "parentId": "parent-id-or-null"
+          "id": "root",
+          "label": "root",
+          "type": "FOLDER",
+          "level": 0,
+          "path": "/root",
+          "parentId": null
         }
       ],
       "edges": [{ "source": "parent-id", "target": "child-id" }]
@@ -108,9 +108,13 @@ RULES:
 1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
 3. IDs must be unique.
-4. "parentId" should be null for the root node.
-5. Always include file extensions.
-6. Don't need include "FILE" or "FOLDER" in label of node.
+4. ROOT NODE RULE: There must be EXACTLY ONE root node. Its "id" must be "root". Its "label" must be "root". Its "parentId" must be null. Its "level" is 0. Its "path" must be "/root".
+5. PATH CONVENTION: 
+   - Root node path is "/root".
+   - All child paths MUST start with "/root/" (e.g., "/root/src", "/root/package.json").
+   - IDs of children should generally match their full path (e.g. "/root/src/app.ts") to ensure uniqueness.
+6. Always include file extensions.
+7. Don't need include "FILE" or "FOLDER" in label of node.
 `;
 
 class AiService {

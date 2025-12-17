@@ -11,23 +11,31 @@ export interface DriftResult {
 
 export class DriftService {
   /**
-   * Compare plan nodes vs actual disk nodes.
-   * IDs MUST be relative paths for accurate comparison.
+   * Compares the planned architecture (nodes from .repoplan.json)
+   * against the actual file system nodes.
+   * * It categorizes nodes into three groups:
+   * - MATCHED: Exists in both Plan and Disk.
+   * - MISSING: Exists in Plan but NOT on Disk.
+   * - UNTRACKED: Exists on Disk but NOT in Plan.
    */
   static calculateDrift(
     planNodes: StructureNode[],
     actualNodes: StructureNode[]
   ): DriftResult {
-    // Normalize paths defensively (handle Windows backslashes)
-    const normalize = (id: string) => id.replace(/\\/g, '/');
+    // Helper to normalize IDs for comparison.
+    // We convert to lowercase to handle case-insensitive file systems (Windows/macOS) correctly.
+    // This ensures "User.ts" and "user.ts" are treated as the same file.
+    const normalize = (id: string) => id.replace(/\\/g, '/').toLowerCase();
 
     const planMap = new Map<string, StructureNode>();
     const actualMap = new Map<string, StructureNode>();
 
+    // Index plan nodes by normalized ID
     for (const node of planNodes) {
       planMap.set(normalize(node.id), node);
     }
 
+    // Index actual nodes by normalized ID
     for (const node of actualNodes) {
       actualMap.set(normalize(node.id), node);
     }
@@ -36,18 +44,30 @@ export class DriftService {
     const missing: StructureNode[] = [];
     const untracked: StructureNode[] = [];
 
-    // 1. Check Plan items against Actual
-    for (const [id, planNode] of planMap.entries()) {
-      if (actualMap.has(id)) {
-        matched.push({ ...planNode, status: 'MATCHED' });
+    // 1. Check PLAN items against ACTUAL (Detect Matches & Missing)
+    for (const [key, planNode] of planMap.entries()) {
+      if (actualMap.has(key)) {
+        const actualNode = actualMap.get(key)!;
+
+        // FOUND MATCH:
+        // We prioritize 'actualNode' properties (label, casing, path)
+        // to ensure the diagram reflects the reality of the disk.
+        // We keep 'planNode' properties just in case we need metadata from the plan.
+        matched.push({
+          ...planNode, // Base: Plan data
+          ...actualNode, // Overlay: Actual disk data (Wins on conflict)
+          status: 'MATCHED',
+        });
       } else {
+        // NO MATCH ON DISK -> MISSING
         missing.push({ ...planNode, status: 'MISSING' });
       }
     }
 
-    // 2. Check Actual items against Plan
-    for (const [id, actualNode] of actualMap.entries()) {
-      if (!planMap.has(id)) {
+    // 2. Check ACTUAL items against PLAN (Detect Untracked)
+    for (const [key, actualNode] of actualMap.entries()) {
+      if (!planMap.has(key)) {
+        // EXISTS ON DISK BUT NOT IN PLAN -> UNTRACKED
         untracked.push({ ...actualNode, status: 'UNTRACKED' });
       }
     }
