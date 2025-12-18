@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { MessageToFrontend, MessageToBackend } from '../types';
+import { MessageToFrontend, MessageToBackend, AiPayload } from '../types';
 import { FileService } from '../services/FileService';
 import { DriftService } from '../services/DriftService';
 
@@ -77,14 +77,24 @@ export class CommandHandler {
           let response: MessageToFrontend;
 
           if (saved) {
+            const successPayload: AiPayload = {
+              type: 'DIAGRAM',
+              message: 'Diagram loaded successfully from storage.',
+              data: saved,
+            };
+
             response = {
               command: 'AI_RESPONSE',
-              payload: {
-                type: 'DIAGRAM',
-                message: 'Diagram loaded',
-                data: saved,
-              },
+              payload: successPayload,
             };
+
+            this.panel.webview.postMessage(response);
+
+            await aiService.saveContext(
+              sessionId,
+              'Load the previously saved architecture plan.',
+              successPayload as any
+            );
           } else {
             response = {
               command: 'AI_RESPONSE',
@@ -130,115 +140,69 @@ export class CommandHandler {
             actualNodes
           );
 
+          let responsePayload: AiPayload;
+
           // --- SCENARIO A: ALL MATCHED ---
           if (missing.length === 0 && untracked.length === 0) {
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'ALL_MATCHED',
-                message: 'Structure is perfectly synced with the codebase.',
-              },
-            });
-            break;
+            responsePayload = {
+              type: 'ALL_MATCHED',
+              message: 'Structure is perfectly synced with the codebase.',
+            };
           }
-
           // --- SCENARIO B: MISSING ONLY ---
-          if (missing.length > 0 && untracked.length === 0) {
+          else if (missing.length > 0 && untracked.length === 0) {
+            const aiMessage = await aiService.analyzeDrift(missing);
+            const viewNodes = [...matched, ...missing];
+            responsePayload = {
+              type: 'MISSING_DIAGRAM',
+              message: aiMessage,
+              data: DriftService.generateDiagramData(viewNodes, planEdges),
+            };
+          }
+          // --- SCENARIO C: UNTRACKED ONLY ---
+          else if (missing.length === 0 && untracked.length > 0) {
+            const viewNodes = [...matched, ...untracked];
+            responsePayload = {
+              type: 'UNTRACKED_DIAGRAM',
+              message: 'Found new untracked files in your repository.',
+              data: DriftService.generateDiagramData(viewNodes, actualEdges),
+            };
+          }
+          // --- SCENARIO D: MIXED DRIFT ---
+          else {
             const aiMessage = await aiService.analyzeDrift(missing);
 
-            const viewNodes = [...matched, ...missing];
+            const missingNodes = [...matched, ...missing];
+            const missingDiagramData = DriftService.generateDiagramData(
+              missingNodes,
+              planEdges
+            );
 
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'MISSING_DIAGRAM',
-                message: aiMessage,
-                // ✅ Use PLAN EDGES directly
-                data: DriftService.generateDiagramData(viewNodes, planEdges),
-              },
-            });
-            break;
-          }
+            const untrackedNodes = [...matched, ...untracked];
+            const untrackedDiagramData = DriftService.generateDiagramData(
+              untrackedNodes,
+              actualEdges
+            );
 
-          // --- SCENARIO C: UNTRACKED ONLY ---
-          if (missing.length === 0 && untracked.length > 0) {
-            const viewNodes = [...matched, ...untracked];
-
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'UNTRACKED_DIAGRAM',
-                message: 'Found new untracked files in your repository.',
-                // ✅ Use ACTUAL EDGES directly
-                data: DriftService.generateDiagramData(viewNodes, actualEdges),
-              },
-            });
-            break;
-          }
-
-          // --- SCENARIO D: MIXED DRIFT ---
-          const aiMessage = await aiService.analyzeDrift(missing);
-
-          // 1. Missing View (Use Plan Edges)
-          const missingNodes = [...matched, ...missing];
-          const missingDiagramData = DriftService.generateDiagramData(
-            missingNodes,
-            planEdges // ✅ Clean & Simple
-          );
-
-          // 2. Untracked View (Use Actual Edges)
-          const untrackedNodes = [...matched, ...untracked];
-          const untrackedDiagramData = DriftService.generateDiagramData(
-            untrackedNodes,
-            actualEdges // ✅ Clean & Simple
-          );
-
-          const rootPath = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-
-          if (rootPath) {
-            try {
-              // 1. Save Missing Diagram
-              const missingPath = path.join(rootPath, 'debug_missing.json');
-              fs.writeFileSync(
-                missingPath,
-                JSON.stringify(missingDiagramData, null, 2)
-              );
-              console.log(`[DEBUG] Saved missing diagram to: ${missingPath}`);
-
-              // 2. Save Untracked Diagram
-              const untrackedPath = path.join(rootPath, 'debug_untracked.json');
-              fs.writeFileSync(
-                untrackedPath,
-                JSON.stringify(untrackedDiagramData, null, 2)
-              );
-              console.log(
-                `[DEBUG] Saved untracked diagram to: ${untrackedPath}`
-              );
-
-              const actualPath = path.join(rootPath, 'actual.json');
-              fs.writeFileSync(
-                missingPath,
-                JSON.stringify(
-                  { nodes: actualNodes, edges: actualEdges },
-                  null,
-                  2
-                )
-              );
-              // nodes: actualNodes, edges: actualEdges
-            } catch (err) {
-              console.error('[DEBUG] Failed to save debug files:', err);
-            }
-          }
-
-          this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
-            payload: {
+            responsePayload = {
               type: 'MIXED_DIAGRAM',
               message: aiMessage,
               missingDiagramData: missingDiagramData,
               untrackedDiagramData: untrackedDiagramData,
-            },
+            };
+          }
+
+          this.panel.webview.postMessage({
+            command: 'AI_RESPONSE',
+            payload: responsePayload,
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'Run drift detection check on current codebase.',
+            responsePayload
+          );
+
           break;
         }
 
@@ -261,10 +225,6 @@ export class CommandHandler {
           }
 
           // 2. Construct Clean Data
-          // Since scanDirectory now returns correct parent-child edges,
-          // we can directly use 'actualEdges' to ensure the tree is connected.
-          // Note: If we want to preserve *custom manual* edges from the old plan,
-          // we would need more complex merging logic. For now, strict sync is safer.
 
           const cleanNodes = actualNodes.map((node) => ({
             ...node,
@@ -279,15 +239,23 @@ export class CommandHandler {
           // 3. Save
           await this.fileService.saveDiagram(sessionId, newDiagramData);
 
-          // 4. Respond
+          const responsePayload = {
+            type: 'DIAGRAM',
+            message: 'Diagram successfully synced with the actual codebase.',
+            data: newDiagramData,
+          };
+
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
-            payload: {
-              type: 'DIAGRAM',
-              message: 'Diagram successfully synced with the actual codebase.',
-              data: newDiagramData,
-            },
+            payload: responsePayload as any, // Cast type cho gọn
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'Sync architecture plan to match actual codebase files.',
+            responsePayload as any
+          );
+
           break;
         }
       }
