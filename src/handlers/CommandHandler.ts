@@ -1,7 +1,9 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { aiService } from '../services/AiService';
 import { SessionManager } from '../managers/SessionManager';
-import { MessageToFrontend, MessageToBackend } from '../types';
+import { MessageToFrontend, MessageToBackend, AiPayload } from '../types';
 import { FileService } from '../services/FileService';
 import { DriftService } from '../services/DriftService';
 
@@ -75,14 +77,24 @@ export class CommandHandler {
           let response: MessageToFrontend;
 
           if (saved) {
+            const successPayload: AiPayload = {
+              type: 'DIAGRAM',
+              message: 'Diagram loaded successfully from storage.',
+              data: saved,
+            };
+
             response = {
               command: 'AI_RESPONSE',
-              payload: {
-                type: 'DIAGRAM',
-                message: 'Diagram loaded',
-                data: saved,
-              },
+              payload: successPayload,
             };
+
+            this.panel.webview.postMessage(response);
+
+            await aiService.saveContext(
+              sessionId,
+              'Load the previously saved architecture plan.',
+              successPayload as any
+            );
           } else {
             response = {
               command: 'AI_RESPONSE',
@@ -100,11 +112,8 @@ export class CommandHandler {
         case 'CHECK_DRIFT': {
           const { sessionId } = msg.payload ?? {};
 
-          // 1. Load saved plan
+          // 1. LOAD PLAN (Nodes + Edges)
           const savedDiagram = await this.fileService.loadDiagram(sessionId);
-
-          console.log('savedDiagram: ', savedDiagram);
-
           if (!savedDiagram) {
             this.panel.webview.postMessage({
               command: 'AI_RESPONSE',
@@ -117,102 +126,82 @@ export class CommandHandler {
             break;
           }
 
-          // 2. Scan actual disk
           const planNodes = savedDiagram.jsonStructure.nodes;
-          const actualNodes = await this.fileService.scanDirectory(sessionId);
+          const planEdges = savedDiagram.jsonStructure.edges ?? [];
 
-          // 3. Calculate drift
+          // 2. SCAN ACTUAL (Nodes + Edges)
+          // 🔥 NOW RETURNS FULL GRAPH (Nodes + Edges)
+          const { nodes: actualNodes, edges: actualEdges } =
+            await this.fileService.scanDirectory(sessionId);
+
+          // 3. CALCULATE DRIFT
           const { matched, missing, untracked } = DriftService.calculateDrift(
             planNodes,
             actualNodes
           );
 
-          // 4. Build drift diagram ONCE
-          const driftNodes = [...matched, ...missing, ...untracked];
-          const edges = savedDiagram.jsonStructure.edges ?? [];
-          const diagramData = DriftService.generateDiagramData(
-            driftNodes,
-            edges
-          );
+          let responsePayload: AiPayload;
 
-          //All Matched
+          // --- SCENARIO A: ALL MATCHED ---
           if (missing.length === 0 && untracked.length === 0) {
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'ALL_MATCHED',
-                message: 'Structure is perfectly synced with the codebase.',
-              },
-            });
-            break;
+            responsePayload = {
+              type: 'ALL_MATCHED',
+              message: 'Structure is perfectly synced with the codebase.',
+            };
           }
-
-          //Missing
-          if (missing.length > 0 && untracked.length === 0) {
+          // --- SCENARIO B: MISSING ONLY ---
+          else if (missing.length > 0 && untracked.length === 0) {
+            const aiMessage = await aiService.analyzeDrift(missing);
+            const viewNodes = [...matched, ...missing];
+            responsePayload = {
+              type: 'MISSING_DIAGRAM',
+              message: aiMessage,
+              data: DriftService.generateDiagramData(viewNodes, planEdges),
+            };
+          }
+          // --- SCENARIO C: UNTRACKED ONLY ---
+          else if (missing.length === 0 && untracked.length > 0) {
+            const viewNodes = [...matched, ...untracked];
+            responsePayload = {
+              type: 'UNTRACKED_DIAGRAM',
+              message: 'Found new untracked files in your repository.',
+              data: DriftService.generateDiagramData(viewNodes, actualEdges),
+            };
+          }
+          // --- SCENARIO D: MIXED DRIFT ---
+          else {
             const aiMessage = await aiService.analyzeDrift(missing);
 
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'MISSING_DIAGRAM',
-                message: aiMessage,
-                data: diagramData,
-              },
-            });
-            break;
-          }
-
-          //Untracked
-          if (missing.length === 0 && untracked.length > 0) {
-            this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
-              payload: {
-                type: 'UNTRACKED_DIAGRAM',
-                message: 'Found new untracked files in your repository.',
-                data: diagramData,
-              },
-            });
-            break;
-          }
-
-          //Mixed
-          const aiMessage = await aiService.analyzeDrift(missing);
-
-          const filterValidEdges = (nodes: any[], allEdges: any[]) => {
-            const activeIds = new Set(nodes.map((n) => n.id));
-            return allEdges.filter(
-              (edge) => activeIds.has(edge.source) && activeIds.has(edge.target)
+            const missingNodes = [...matched, ...missing];
+            const missingDiagramData = DriftService.generateDiagramData(
+              missingNodes,
+              planEdges
             );
-          };
 
-          // 1. Prepare Data cho Missing View (Matched + Missing)
-          const missingNodes = [...matched, ...missing];
-          const missingEdges = filterValidEdges(missingNodes, edges);
+            const untrackedNodes = [...matched, ...untracked];
+            const untrackedDiagramData = DriftService.generateDiagramData(
+              untrackedNodes,
+              actualEdges
+            );
 
-          const missingDiagramData = DriftService.generateDiagramData(
-            missingNodes,
-            missingEdges
-          );
-
-          // 2. Prepare Data cho Untracked View (Matched + Untracked)
-          const untrackedNodes = [...matched, ...untracked];
-          const untrackedEdges = filterValidEdges(untrackedNodes, edges);
-
-          const untrackedDiagramData = DriftService.generateDiagramData(
-            untrackedNodes,
-            untrackedEdges
-          );
-
-          // 3. Send frontend the mixed diagram
-          this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
-            payload: {
+            responsePayload = {
               type: 'MIXED_DIAGRAM',
               message: aiMessage,
               missingDiagramData: missingDiagramData,
               untrackedDiagramData: untrackedDiagramData,
-            },
+            };
+          }
+
+          this.panel.webview.postMessage({
+            command: 'AI_RESPONSE',
+            payload: responsePayload,
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'Run drift detection check on current codebase.',
+            responsePayload
+          );
 
           break;
         }
@@ -220,8 +209,9 @@ export class CommandHandler {
         case 'SYNC_TO_ACTUAL': {
           const { sessionId } = msg.payload;
 
-          // 1. Get the "Truth" (Actual files on disk)
-          const actualNodes = await this.fileService.scanDirectory(sessionId);
+          // 1. Get the "Truth" (Actual Graph)
+          const { nodes: actualNodes, edges: actualEdges } =
+            await this.fileService.scanDirectory(sessionId);
 
           if (actualNodes.length === 0) {
             this.panel.webview.postMessage({
@@ -234,45 +224,37 @@ export class CommandHandler {
             break;
           }
 
-          // 2. Try to preserve existing EDGES (Dependencies)
-          // If we just overwrite, we lose all arrows. We should keep arrows
-          // where both source and target still exist.
-          const savedDiagram = await this.fileService.loadDiagram(sessionId);
-          let validEdges: any[] = [];
+          // 2. Construct Clean Data
 
-          if (savedDiagram?.jsonStructure?.edges) {
-            const actualNodeIds = new Set(actualNodes.map((n) => n.id));
-
-            validEdges = savedDiagram.jsonStructure.edges.filter(
-              (edge) =>
-                actualNodeIds.has(edge.source) && actualNodeIds.has(edge.target)
-            );
-          }
-
-          // 3. Construct clean nodes (Remove 'status' field to make them standard)
           const cleanNodes = actualNodes.map((node) => ({
             ...node,
-            status: undefined, // Clear DriftStatus (MATCHED/MISSING/UNTRACKED)
+            status: undefined, // Clear DriftStatus
           }));
 
-          // 4. Generate full Diagram Data (using DriftService helper)
           const newDiagramData = DriftService.generateDiagramData(
             cleanNodes,
-            validEdges
+            actualEdges // ✅ Use the edges calculated from disk scan
           );
 
-          // 5. Save to overwrite .repoplan.json
+          // 3. Save
           await this.fileService.saveDiagram(sessionId, newDiagramData);
 
-          // 6. Send Response to Frontend
+          const responsePayload = {
+            type: 'DIAGRAM',
+            message: 'Diagram successfully synced with the actual codebase.',
+            data: newDiagramData,
+          };
+
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
-            payload: {
-              type: 'DIAGRAM',
-              message: 'Diagram successfully synced with the actual codebase.',
-              data: newDiagramData,
-            },
+            payload: responsePayload as any, // Cast type cho gọn
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'Sync architecture plan to match actual codebase files.',
+            responsePayload as any
+          );
 
           break;
         }

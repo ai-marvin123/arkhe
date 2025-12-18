@@ -139,3 +139,23 @@ body {
   /* Cursor when actively dragging */
   cursor: grabbing;
 }
+
+.api-key-accordion summary {
+  list-style: none;
+}
+
+.api-key-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.api-key-accordion .when-open {
+  display: none;
+}
+
+.api-key-accordion[open] .when-open {
+  display: inline;
+}
+
+.api-key-accordion[open] .when-closed {
+  display: none;
+}
