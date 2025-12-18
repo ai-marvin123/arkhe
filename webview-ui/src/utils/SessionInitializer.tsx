@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDiagramDispatch } from '../state/diagramContext';
-import { loadSavedDiagram, } from '../utils/vsCodeApi';
+import { loadSavedDiagram } from '../utils/vsCodeApi';
 import type { DiagramData } from '../state/diagramTypes';
 import {
   MOCK_ALL_MATCHED,
@@ -9,6 +9,7 @@ import {
 } from '../../../src/mocks/driftMocks';
 import { startGuidedFlowQ1 } from './guidedFlow';
 
+// import { checkUserApiKey } from '../utils/vsCodeApi';
 /**
  * DEV ONLY:
  * Change this value to test different drift states
