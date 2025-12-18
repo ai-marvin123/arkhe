@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import mermaid from 'mermaid';
-import type { ViewSettings } from '../../state/diagramTypes';
+import type { ViewSettings, Node } from '../../state/diagramTypes';
 import { useDiagramDispatch } from '../../state/diagramContext';
+import { openFileOnClick, openFolderOnClick } from '../../utils/vsCodeApi';
 
-// FIX: Make bindFunctions optional by adding a '?'
 interface MermaidRenderResult {
   view: ViewSettings;
   code: string;
   logKey: string;
+  nodes: Node[];
   bindFunctions?: (element: Element) => void; // <--- The fix is here
 }
 
@@ -15,6 +16,7 @@ export default function MermaidRenderer({
   code,
   view,
   logKey,
+  nodes,
 }: MermaidRenderResult) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPosition = useRef({ x: 0, y: 0 });
@@ -45,10 +47,36 @@ export default function MermaidRenderer({
     // 3. Render the Mermaid code
     mermaid
       .render(id, code)
-      // The types now match, resolving the TypeScript error
       .then(({ svg }) => {
-        // Inject the generated SVG into the container
+        if (!containerRef.current) return;
         containerRef.current!.innerHTML = svg;
+        containerRef.current.onclick = (e: MouseEvent) => {
+          if (view.isPanActive) return;
+
+          const nodeElement = (e.target as Element).closest('.node');
+          if (!nodeElement) return;
+
+          const mermaidId = nodeElement.id;
+          const matchedNode = nodes.find(
+            (node) =>
+              mermaidId === node.id ||
+              mermaidId.includes(`-${node.id}-`) ||
+              mermaidId.startsWith(`-${node.id}-`)
+          );
+
+          if (matchedNode?.path) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (matchedNode.type === 'FILE') {
+              console.log('📗file clicked!');
+              openFileOnClick(matchedNode.path);
+            } else if (matchedNode.type === 'FOLDER') {
+              console.log('📕 folder clicked!');
+              openFolderOnClick(matchedNode.path);
+            }
+          }
+        };
       })
       .catch((err: Error) => {
         // Handle rendering errors and display them
@@ -57,14 +85,14 @@ export default function MermaidRenderer({
           err
         )}</pre>`;
       });
-  }, [code]);
+  }, [code, view.isPanActive, nodes]);
 
   //change cursor to grab if pan is activated
   const cursorStyle = view.isPanActive
     ? isDragging
       ? 'grabbing'
       : 'grab'
-    : 'default';
+    : undefined;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!view.isPanActive) return;
@@ -107,12 +135,20 @@ export default function MermaidRenderer({
   // The component returns a div that will hold the rendered diagram
   return (
     <div
-      className='mermaid-container'
-      style={{ ...transformStyle, cursor: cursorStyle }}
+      className={`relative w-full h-full overflow-hidden ${
+        isDragging ? 'dragging' : ''
+      }`}
+      style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      ref={containerRef}
-    />
+    >
+      <div
+        ref={containerRef}
+        className='mermaid-container w-full h-full'
+        data-panning={view.isPanActive}
+        style={{ ...transformStyle }}
+      />
+    </div>
   );
 }
