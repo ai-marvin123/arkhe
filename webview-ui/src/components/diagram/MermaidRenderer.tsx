@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import mermaid from 'mermaid';
-import type { ViewSettings } from '../../state/diagramTypes';
+import type { ViewSettings, Node } from '../../state/diagramTypes';
 import { useDiagramDispatch } from '../../state/diagramContext';
+import { openFileOnClick, openFolderOnClick } from '../../utils/vsCodeApi';
 
-// FIX: Make bindFunctions optional by adding a '?'
 interface MermaidRenderResult {
   view: ViewSettings;
   code: string;
   logKey: string;
+  nodes: Node[];
   bindFunctions?: (element: Element) => void; // <--- The fix is here
 }
 
@@ -15,6 +16,7 @@ export default function MermaidRenderer({
   code,
   view,
   logKey,
+  nodes,
 }: MermaidRenderResult) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPosition = useRef({ x: 0, y: 0 });
@@ -45,10 +47,48 @@ export default function MermaidRenderer({
     // 3. Render the Mermaid code
     mermaid
       .render(id, code)
-      // The types now match, resolving the TypeScript error
       .then(({ svg }) => {
-        // Inject the generated SVG into the container
+        if (!containerRef.current) return;
         containerRef.current!.innerHTML = svg;
+        const svgElement = containerRef.current.querySelector(
+          'svg'
+        ) as SVGElement | null;
+
+        if (!svgElement || !nodes) return;
+
+        //add event listener on each node for click to open file feature
+        nodes.forEach((node: Node) => {
+          const selector = `[id*="-${node.id}-"], [id^="${node.id}-"], [id="${node.id}"]`;
+          const nodeElement = svgElement.querySelector(
+            selector
+          ) as HTMLElement | null;
+
+          if (!nodeElement) return;
+
+          if (nodeElement && node.path) {
+            nodeElement.style.cursor = view.isPanActive ? 'default' : 'pointer';
+
+            nodeElement.onmouseenter = () => {
+              nodeElement.style.filter = 'brightness(1.2)';
+              nodeElement.setAttribute('title', node.path);
+            };
+            nodeElement.onmouseleave = () => {
+              nodeElement.style.filter = 'none';
+            };
+          }
+
+          nodeElement.onclick = (e) => {
+            if (view.isPanActive) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (node.type === 'FILE') {
+              openFileOnClick(node.path);
+            } else if (node.type === 'FOLDER') {
+              openFolderOnClick(node.path);
+            }
+          };
+        });
       })
       .catch((err: Error) => {
         // Handle rendering errors and display them
@@ -57,7 +97,7 @@ export default function MermaidRenderer({
           err
         )}</pre>`;
       });
-  }, [code]);
+  }, [code, view.isPanActive, nodes]);
 
   //change cursor to grab if pan is activated
   const cursorStyle = view.isPanActive

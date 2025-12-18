@@ -39,43 +39,9 @@ function getVsCodeApi(): VsCodeApi {
   return vscodeApi;
 }
 
-// // Send the user prompt + current sessionId to the extension so it can generate a response.
-export function requestStructure(
-  sessionId: string,
-  prompt: string
-): Promise<MessageToFrontend> {
-  const vsCodeApi = getVsCodeApi();
-
-  return new Promise((resolve, reject) => {
-    const listener = (event: MessageEvent) => {
-      const message = event.data;
-
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
-        resolve(message);
-        return;
-      }
-      //ADD REJECT LOGIC
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
-        reject(
-          new Error(
-            message.payload.message ||
-              'An unknown error occured during processing'
-          )
-        );
-        return;
-      }
-    };
-
-    window.addEventListener('message', listener);
-
-    vsCodeApi.postMessage({
-      command: 'GENERATE_STRUCTURE',
-      payload: { sessionId, prompt },
-    });
-  });
-}
+//********************************//
+//        CHAT FEATURE            //
+//********************************//
 
 //send command to check for saved OpenAI key
 export function checkUserApiKey(): Promise<SavedUserApiKey> {
@@ -144,8 +110,86 @@ export function sendUserApiKey(
   });
 }
 
-//send SSID upon starting app for saved diagram check
+// Send the user prompt + current sessionId to the extension so it can generate a response.
+export function requestStructure(
+  sessionId: string,
+  prompt: string
+): Promise<MessageToFrontend> {
+  const vsCodeApi = getVsCodeApi();
 
+  return new Promise((resolve, reject) => {
+    const listener = (event: MessageEvent) => {
+      const message = event.data;
+
+      if (message.command === 'AI_RESPONSE') {
+        window.removeEventListener('message', listener);
+        resolve(message);
+        return;
+      }
+      //ADD REJECT LOGIC
+      if (message.command === 'ERROR') {
+        window.removeEventListener('message', listener);
+        reject(
+          new Error(
+            message.payload.message ||
+              'An unknown error occured during processing'
+          )
+        );
+        return;
+      }
+    };
+
+    window.addEventListener('message', listener);
+
+    vsCodeApi.postMessage({
+      command: 'GENERATE_STRUCTURE',
+      payload: { sessionId, prompt },
+    });
+  });
+}
+
+//save diagram post request
+export function postDiagramToSave(
+  sessionId: string,
+  diagramData: DiagramData
+): Promise<SaveResponse> {
+  const vsCodeApi = getVsCodeApi();
+
+  return new Promise((resolve, reject) => {
+    const listener = (event: MessageEvent) => {
+      const message = event.data;
+
+      if (message.command === 'AI_RESPONSE') {
+        window.removeEventListener('message', listener);
+        resolve(message);
+        return;
+      }
+
+      if (message.command === 'ERROR') {
+        window.removeEventListener('message', listener);
+        reject(
+          new Error(
+            message.payload.message ||
+              'An unknown error occured while attempting to save diagram'
+          )
+        );
+      }
+      return;
+    };
+    window.addEventListener('message', listener);
+
+    vsCodeApi.postMessage({
+      command: 'SAVE_DIAGRAM',
+      payload: { sessionId, diagramData },
+    });
+  });
+}
+
+//********************************//
+//         DRIFT FEATURE          //
+//********************************//
+
+//send SSID upon starting app for saved diagram check
 export function loadSavedDiagram(
   sessionId: string
 ): Promise<LoadSavedDiagramResponse> {
@@ -179,44 +223,6 @@ export function loadSavedDiagram(
     vsCodeApi.postMessage({
       command: 'LOAD_DIAGRAM',
       payload: { sessionId },
-    });
-  });
-}
-
-//save diagram post request
-
-export function postDiagramToSave(
-  sessionId: string,
-  diagramData: DiagramData
-): Promise<SaveResponse> {
-  const vsCodeApi = getVsCodeApi();
-
-  return new Promise((resolve, reject) => {
-    const listener = (event: MessageEvent) => {
-      const message = event.data;
-
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
-        resolve(message);
-        return;
-      }
-
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
-        reject(
-          new Error(
-            message.payload.message ||
-              'An unknown error occured while attempting to save diagram'
-          )
-        );
-      }
-      return;
-    };
-    window.addEventListener('message', listener);
-
-    vsCodeApi.postMessage({
-      command: 'SAVE_DIAGRAM',
-      payload: { sessionId, diagramData },
     });
   });
 }
@@ -290,5 +296,25 @@ export function requestDiagramSync(
       command: 'SYNC_TO_ACTUAL',
       payload: { sessionId },
     });
+  });
+}
+
+//********************************//
+//      CLICK TO OPEN FEATURE     //
+//********************************//
+
+export function openFileOnClick(path: string) {
+  const vsCodeApi = getVsCodeApi();
+  vsCodeApi.postMessage({
+    command: 'OPEN_FILE',
+    payload: { path },
+  });
+}
+
+export function openFolderOnClick(path: string) {
+  const vsCodeApi = getVsCodeApi();
+  vsCodeApi.postMessage({
+    command: 'OPEN_FOLDER',
+    payload: { path },
   });
 }
