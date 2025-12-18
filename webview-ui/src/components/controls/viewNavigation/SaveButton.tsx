@@ -16,7 +16,13 @@ export default function SaveButton({ clickFunc, status }: SaveButtonProps) {
 
   return (
     <button
-      className='save-button absolute top-2 left-2 z-20 inline-flex items-center justify-center px-2 py-1 rounded-md cursor-pointer !text-[0.6rem]'
+      className='save-button cursor-pointer px-2 py-1 rounded bg-[#332940] filter
+    hover:brightness-125
+    transition
+    duration-150'
+      onMouseEnter={() => console.log('ENTER button')}
+      onMouseMove={() => console.log('MOVE button')}
+      style={{ pointerEvents: 'auto', cursor: 'pointer' }}
       aria-label='save-diagram'
       onClick={clickFunc}
     >

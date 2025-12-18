@@ -71,9 +71,6 @@ body {
 .chat-input input {
   flex: 1;
   padding: 0.5rem;
-  /* border-radius: 0.5rem; */
-  /* border: 1px solid #1f2933;
-  background: #1f1a2437; */
   color: #e5e7eb;
   font-size: 0.9rem;
 }
@@ -95,11 +92,10 @@ body {
   font-size: 2rem;
 }
 .chat-input input:focus {
-  outline: none; /* Removes the standard browser focus ring */
-  box-shadow: none; /* Removes any possible box-shadow used for focus */
-  border-color: inherit; /* Ensures the border doesn't change color on focus */
+  outline: none;
+  box-shadow: none;
+  border-color: inherit;
 }
-
 .view-buttons {
   display: flex;
   align-items: center;
@@ -117,27 +113,14 @@ body {
   color: #e5e7eb;
 }
 
-.save-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 0.5rem;
-  border-radius: 0.5rem;
-  border: none;
-  cursor: pointer;
-  background-color: #332940;
-  color: #e5e7eb;
-  font-size: 1rem;
-}
 /* Disabled state */
 .chat-input button:disabled {
   background-color: #1f1a24;
   cursor: not-allowed;
 }
 
-.mermaid-container.dragging {
-  /* Cursor when actively dragging */
-  cursor: grabbing;
+.mermaid-container:not([data-panning='true']) .node:hover {
+  filter: brightness(1.2) !important;
 }
 
 .api-key-accordion summary {

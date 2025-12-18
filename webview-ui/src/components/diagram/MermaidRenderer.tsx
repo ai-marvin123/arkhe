@@ -50,45 +50,33 @@ export default function MermaidRenderer({
       .then(({ svg }) => {
         if (!containerRef.current) return;
         containerRef.current!.innerHTML = svg;
-        const svgElement = containerRef.current.querySelector(
-          'svg'
-        ) as SVGElement | null;
+        containerRef.current.onclick = (e: MouseEvent) => {
+          if (view.isPanActive) return;
 
-        if (!svgElement || !nodes) return;
-
-        //add event listener on each node for click to open file feature
-        nodes.forEach((node: Node) => {
-          const selector = `[id*="-${node.id}-"], [id^="${node.id}-"], [id="${node.id}"]`;
-          const nodeElement = svgElement.querySelector(
-            selector
-          ) as HTMLElement | null;
-
+          const nodeElement = (e.target as Element).closest('.node');
           if (!nodeElement) return;
 
-          if (nodeElement && node.path) {
-            nodeElement.style.cursor = view.isPanActive ? 'default' : 'pointer';
+          const mermaidId = nodeElement.id;
+          const matchedNode = nodes.find(
+            (node) =>
+              mermaidId === node.id ||
+              mermaidId.includes(`-${node.id}-`) ||
+              mermaidId.startsWith(`-${node.id}-`)
+          );
 
-            nodeElement.onmouseenter = () => {
-              nodeElement.style.filter = 'brightness(1.2)';
-              nodeElement.setAttribute('title', node.path);
-            };
-            nodeElement.onmouseleave = () => {
-              nodeElement.style.filter = 'none';
-            };
-          }
-
-          nodeElement.onclick = (e) => {
-            if (view.isPanActive) return;
+          if (matchedNode?.path) {
             e.preventDefault();
             e.stopPropagation();
 
-            if (node.type === 'FILE') {
-              openFileOnClick(node.path);
-            } else if (node.type === 'FOLDER') {
-              openFolderOnClick(node.path);
+            if (matchedNode.type === 'FILE') {
+              console.log('📗file clicked!');
+              openFileOnClick(matchedNode.path);
+            } else if (matchedNode.type === 'FOLDER') {
+              console.log('📕 folder clicked!');
+              openFolderOnClick(matchedNode.path);
             }
-          };
-        });
+          }
+        };
       })
       .catch((err: Error) => {
         // Handle rendering errors and display them
@@ -104,7 +92,7 @@ export default function MermaidRenderer({
     ? isDragging
       ? 'grabbing'
       : 'grab'
-    : 'default';
+    : undefined;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!view.isPanActive) return;
@@ -147,12 +135,20 @@ export default function MermaidRenderer({
   // The component returns a div that will hold the rendered diagram
   return (
     <div
-      className='mermaid-container'
-      style={{ ...transformStyle, cursor: cursorStyle }}
+      className={`relative w-full h-full overflow-hidden ${
+        isDragging ? 'dragging' : ''
+      }`}
+      style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      ref={containerRef}
-    />
+    >
+      <div
+        ref={containerRef}
+        className='mermaid-container w-full h-full'
+        data-panning={view.isPanActive}
+        style={{ ...transformStyle }}
+      />
+    </div>
   );
 }

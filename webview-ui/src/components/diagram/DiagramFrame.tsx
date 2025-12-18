@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import MermaidRenderer from './MermaidRenderer';
 import type { DiagramEntry } from '../../state/diagramTypes';
-import ViewTools from '../controls/ViewTools';
+import ViewTools from '../controls/viewContainer/ViewTools';
 import { postDiagramToSave } from '../../utils/vsCodeApi';
 import SaveButton from '../controls/viewNavigation/SaveButton';
 
@@ -76,10 +76,12 @@ export default function DiagramFrame({
   const content = (
     <div
       key={logKey}
-      style={{ padding: wrapperPadding }}
+      style={{ padding: wrapperPadding, isolation: 'isolate' }}
       className={`${panelClasses}`}
     >
-      <SaveButton clickFunc={handleSave} status={saveStatus} />
+      <div className='absolute top-5 left-5 z-[9999]'>
+        <SaveButton clickFunc={handleSave} status={saveStatus} />
+      </div>
       <MermaidRenderer
         logKey={logKey}
         code={diagram}
