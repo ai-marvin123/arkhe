@@ -21,7 +21,7 @@ export default function APIKeyButton() {
 
   return (
     <details className="api-key-accordion relative inline-block">
-      <summary className="api-key-trigger flex cursor-pointer items-center gap-2 rounded-full border border-[#03baa1] bg-[#03baa1] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#ffffff] transition-opacity hover:opacity-80">
+      <summary className="api-key-trigger flex cursor-pointer items-center gap-2 rounded-full border border-[#008c6e] bg-[#008c6e] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#ffffff] filter hover:brightness-125 transition duration-150 hover:opacity-90">
         <span>OpenAI API</span>
         <span
           className="api-key-trigger__icon text-[#ffffff]"
@@ -75,7 +75,7 @@ export default function APIKeyButton() {
         <div className="mt-4 flex items-center justify-end text-[0.65rem] text-[#6b7280]">
           <button
             type="submit"
-            className="rounded-full border border-[#03baa1] bg-[#03baa1] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#ffffff] transition hover:opacity-80">
+            className="rounded-full border border-[#008c6e] bg-[#008c6e] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#ffffff] filter hover:brightness-125 transition duration-150 hover:opacity-90">
             Save
           </button>
         </div>
