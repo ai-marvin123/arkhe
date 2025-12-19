@@ -1,54 +1,65 @@
-## Open File From Diagram Workflow
+# Open File/Folder Workflow
 
-**Goal:** Allow users to open source files directly from diagram nodes without losing diagram context.
-**Security:** The Webview never accesses the file system. All path resolution and file access are handled by the Extension Backend.
+**Goal:** Enable users to navigate from diagram nodes to source code without losing the visual context.
+**Security:** The Webview remains sandboxed. All path resolution and file system access are handled securely by the Extension Backend.
 
 ## 1. User Flow
-**Part 1: Diagram Interaction**
 
-**Context:** User is viewing an architecture diagram in the Webview.
-**Action:** User clicks a diagram node representing a file.
-**UI Event:** Webview captures the click.
-**Send:** Webview sends an `OPEN_FILE` command with the file’s relative path.
-**Resolve:** Backend resolves the path against the workspace root.
-**Open:** File opens side-by-side in the VS Code editor.
+1. **Interaction:** User clicks a node (File or Folder) in the architecture diagram.
+2. **Send:** Webview sends an `OPEN_FILE` or `OPEN_FOLDER` command with the path.
+3. **Resolve:** Backend resolves the relative path against the current **Workspace Root**.
+4. **Action:**
 
-**2. Message Protocol (Frontend ↔ Backend)**
+- **File:** Opens side-by-side in the Editor (`ViewColumn.Beside`).
+- **Folder:** Reveals and selects the folder in the VS Code Explorer sidebar.
 
-A. Frontend → Backend (Commands)
+## 2. Message Protocol (Frontend → Backend)
 
-| Command          |     Payload               | Action                          |
-| :----------------| :------------------------ | :------------------------------ |
-| `OPEN_FILE`      | `{ relativePath: string }`| Request to open a file by path. |
-| :----------------| :------------------------ | :------------------------------ |
+**Commands:**
 
+| Command           | Payload Structure  | Action                                 |
+| ----------------- | ------------------ | -------------------------------------- |
+| **`OPEN_FILE`**   | `{ path: string }` | Opens the specific file in the editor. |
+| **`OPEN_FOLDER`** | `{ path: string }` | Highlights the folder in the Explorer. |
 
-Example
+**Example Payload:**
 
-`{`
-  `"command": "OPEN_FILE",`
-  `"payload": { "relativePath": "src/index.ts" }`
-`}`
+```json
+{
+  "command": "OPEN_FILE",
+  "payload": {
+    "path": "src/index.ts"
+  }
+}
+```
 
+## 3. Backend Handling Strategy
 
-## B. Backend → Frontend (Events)
-- No response event required.
-- Errors are shown directly via VS Code notifications.
+**Path Resolution:**
 
-**3. Backend File Handling Strategy**
-Workspace Resolution
-**Root:** vscode.workspace.workspaceFolders[0]
-**Path:** workspaceRoot + relativePath
+- **Root:** `vscode.workspace.workspaceFolders[0].uri.fsPath`
+- **Sanitization:** Remove virtual prefixes (e.g., `/root`) if strictly necessary.
+- **Absolute Path:** `path.join(Root, payload.path)`
 
-Editor API
-- `vscode.workspace.openTextDocument`
-- `vscode.window.showTextDocument`
+**API Implementation:**
 
-`viewColumn: ViewColumn.Beside`
-`preview: false`
+- **For Files:**
 
-**4. Design Rationale**
+```typescript
+vscode.window.showTextDocument(uri, {
+  viewColumn: vscode.ViewColumn.Beside,
+  preview: false,
+});
+```
 
-- Preserves diagram visibility
-- Enables single-click navigation from architecture → code
-- Maintains strict FE/BE responsibility boundaries
+- **For Folders:**
+
+```typescript
+vscode.commands.executeCommand('revealInExplorer', uri);
+```
+
+## 4. Design Rationale
+
+- **Context:** Opens files "Beside" the diagram so the user doesn't lose their place.
+- **Separation of Concerns:** Frontend handles interaction; Backend handles File System (FS) operations.
+- **Simplicity:** Uses standard VS Code APIs for native navigation experience.

@@ -12,25 +12,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 import { StructureNode } from '../types';
 
-export const chatModelJson = new ChatOpenAI({
-  modelName: 'gpt-4o-mini',
-  temperature: 0,
-  apiKey: process.env.OPENAI_API_KEY,
-  modelKwargs: { response_format: { type: 'json_object' } },
-});
-
-export const chatModelText = new ChatOpenAI({
-  modelName: 'gpt-4o-mini',
-  temperature: 0.7,
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// 1. Initialize Model
-// const chatModel = new ChatGoogleGenerativeAI({
-//   model: 'gemini-2.5-flash-lite',
-//   temperature: 0.7,
-//   apiKey: process.env.GEMINI_API_KEY,
-// });
+import { ConfigManager } from '../managers/ConfigManager';
 
 const SYSTEM_PROMPT = `
 You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
@@ -78,6 +60,53 @@ RULES:
 `;
 
 class AiService {
+  private chatModelJson: ChatOpenAI | null = null;
+  private chatModelText: ChatOpenAI | null = null;
+
+  private async getModel(type: 'json' | 'text'): Promise<ChatOpenAI> {
+    // Check reset
+    if (type === 'json' && this.chatModelJson) {
+      return this.chatModelJson;
+    }
+    if (type === 'text' && this.chatModelText) {
+      return this.chatModelText;
+    }
+
+    const apiKey = await ConfigManager.getInstance().getApiKey();
+    const { model } = ConfigManager.getInstance().getConfig();
+
+    console.log('model: ', model);
+
+    if (!apiKey) {
+      throw new Error('API Key not configured.');
+    }
+
+    const instance = new ChatOpenAI({
+      modelName: model,
+      temperature: type === 'json' ? 0 : 0.7,
+      apiKey: apiKey,
+      modelKwargs:
+        type === 'json'
+          ? { response_format: { type: 'json_object' } }
+          : undefined,
+    });
+
+    if (type === 'json') {
+      this.chatModelJson = instance;
+    }
+    if (type === 'text') {
+      this.chatModelText = instance;
+    }
+
+    return instance;
+  }
+
+  updateModelConfiguration() {
+    console.log('[AiService] Clearing cached models due to config change.');
+    this.chatModelJson = null;
+    this.chatModelText = null;
+  }
+
   /**
    * Generates project structure using LCEL (LangChain Expression Language)
    */
@@ -106,7 +135,8 @@ class AiService {
       const parser = new JsonOutputParser();
 
       // D. Define the Chain (The Pipeline)
-      const chain = prompt.pipe(chatModelJson).pipe(parser);
+      const model = await this.getModel('json');
+      const chain = prompt.pipe(model).pipe(parser);
 
       console.log(`[AiService] Invoking chain for session: ${sessionId}`);
 
@@ -175,7 +205,8 @@ Do NOT use bullet points, headers, or markdown.
 `.trim();
 
     try {
-      const response = await chatModelText.invoke(prompt);
+      const model = await this.getModel('text');
+      const response = await model.invoke(prompt);
 
       // LangChain ChatOpenAI always returns a message object
       if ((response as any)?.content) {
