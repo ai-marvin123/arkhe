@@ -12,47 +12,18 @@ import { ChatOpenAI } from "@langchain/openai";
 import { generateMermaidFromJSON } from "../utils/mermaidGenerator";
 import { StructureNode } from "../types";
 
-import { ConfigManager } from "../managers/ConfigManager";
-
-// private chatModel: ChatOpenAI | null = null;
-// private chatModelText: ChatOpenAI | null = null;
-
-let apiKey;
-let model;
-
-async function getChatModel() {
-  apiKey = await ConfigManager.getInstance().getApiKey();
-  model = ConfigManager.getInstance().getConfig().model;
-};
-
-getChatModel();
-
 export const chatModelJson = new ChatOpenAI({
-  modelName: model, // assign the modelName
+  modelName: "gpt-4o-mini",
   temperature: 0,
-  apiKey: apiKey, // assign the api key
+  apiKey: process.env.OPENAI_API_KEY,
   modelKwargs: { response_format: { type: "json_object" } },
 });
 
 export const chatModelText = new ChatOpenAI({
-  modelName: model,
+  modelName: "gpt-4o-mini",
   temperature: 0.7,
-  apiKey: apiKey,
+  apiKey: process.env.OPENAI_API_KEY,
 });
-
-// // 1. Initialize Model
-// const chatModelJson = new ChatGoogleGenerativeAI({
-//   model: "gemini-2.5-flash-lite",
-//   temperature: 0.7,
-//   apiKey: process.env.GEMINI_API_KEY,
-//   // modelKwargs: { response_format: { type: "json_object" } },
-// });
-
-// const chatModelText = new ChatGoogleGenerativeAI({
-//   model: "gemini-2.5-flash-lite",
-//   temperature: 0.7,
-//   apiKey: process.env.GEMINI_API_KEY,
-// });
 
 const SYSTEM_PROMPT = `
 You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.

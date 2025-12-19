@@ -304,8 +304,8 @@ case "SAVE_SETTINGS": {
           // Store non-sensitive config
           await configManager.saveConfig(provider, model);
 
-          // 🔁 CRUCIAL: reset AI model so next call re-initializes
-          aiService.updateModelConfiguration();
+          // CRUCIAL: reset AI model so next call re-initializes
+          // aiService.updateModelConfiguration();
 
           this.panel.webview.postMessage({
             command: "SETTINGS_SAVED",
