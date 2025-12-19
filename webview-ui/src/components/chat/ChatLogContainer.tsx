@@ -10,6 +10,10 @@ import { startDriftCheck, executeSyncAction } from '../../utils/guidedFlow';
 import type { Dispatch } from '../../utils/guidedFlow';
 import OptionsButton from './Options';
 import type { GuidedAction } from '../../state/diagramTypes';
+import {
+  STARTER_OPTIONS,
+  createStarterAction,
+} from '../../utils/starterOptions';
 
 interface GuidedTextEntry {
   id: string;
@@ -21,11 +25,13 @@ export default function ChatLogContainer() {
   const state = useDiagramState();
   const { log } = state.chat;
   const { sessionId } = state.session;
-  const { isLoading } = state.view;
+  const { isLoading, showStarterOptions } = state.view;
 
   const dispatch = useDiagramDispatch();
 
-  console.log('🏳️‍🌈inside ChatLogContainer', log);
+  const handleStarterOptions = (prompt: string) => {
+    dispatch(createStarterAction(prompt));
+  };
 
   const handleGuidedChoice = (
     entryId: string,
@@ -72,6 +78,17 @@ export default function ChatLogContainer() {
   };
   return (
     <div className='chat-log-container'>
+      <div className='w-full flex justify-start mt-2 space-x-2'>
+        {showStarterOptions &&
+          log.length === 0 &&
+          STARTER_OPTIONS.map((opt) => (
+            <OptionsButton
+              key={opt.id}
+              text={opt.label}
+              clickFunc={() => handleStarterOptions(opt.prompt)}
+            />
+          ))}
+      </div>
       {log.map((entry) => {
         const logKey = entry.id;
         const isUser = entry.role === 'user';

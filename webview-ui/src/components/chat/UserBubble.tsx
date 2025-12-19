@@ -14,6 +14,8 @@ export default function UserBubble({ text, logKey }: UserBubbleProps) {
         px-4 py-2 max-w-[75%] text-sm leading-relaxed 
       '
       key={logKey}
+      role='group'
+      aria-label='Your input'
     >
       <p>{text}</p>
     </div>

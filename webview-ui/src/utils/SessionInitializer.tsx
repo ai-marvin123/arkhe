@@ -119,6 +119,7 @@ export default function SessionInitializer() {
             startGuidedFlowQ1(dispatch);
           } else if (payload.type === 'NO_SAVED_DIAGRAM') {
             dispatch({ type: 'enable_chat' });
+            dispatch({ type: 'show_starterOptions' });
           }
         } else if (response.command === 'ERROR') {
           throw new Error(

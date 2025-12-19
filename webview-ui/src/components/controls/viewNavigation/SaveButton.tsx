@@ -23,8 +23,9 @@ export default function SaveButton({ clickFunc, status }: SaveButtonProps) {
       onMouseEnter={() => console.log('ENTER button')}
       onMouseMove={() => console.log('MOVE button')}
       style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-      aria-label='save-diagram'
+      aria-label='Save diagram to your repo'
       onClick={clickFunc}
+      type='button'
     >
       {text}
     </button>

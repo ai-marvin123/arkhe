@@ -9,7 +9,7 @@ export default function FullscreenButton({ clickFunc }: FullscreenButtonProps) {
       className='
         view-buttons
       '
-      aria-label='display-diagram-in-fullscreen-mode'
+      aria-label='Display selected diagram in full screen'
       title='Toggle Fullscreen'
     >
       <span className='codicon codicon-screen-full' aria-hidden='true'></span>
