@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -115,11 +114,11 @@ class AiService {
         modelName: modelName, // Check if this key has access to this specific model
         temperature: 0,
         apiKey: apiKey,
-        maxTokens: 1, // Keep it minimal to save tokens/latency
+        maxTokens: 100, // Keep it minimal to save tokens/latency
       });
 
       // Send a ping message
-      await tempModel.invoke('Hello');
+      await tempModel.invoke('Ping');
 
       console.log('[AiService] Verification successful.');
       return true;
