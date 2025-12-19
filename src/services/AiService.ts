@@ -12,18 +12,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 import { StructureNode } from '../types';
 
-export const chatModel = new ChatOpenAI({
-  modelName: 'gpt-4.1-mini',
-  temperature: 0,
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// 1. Initialize Model
-// const chatModel = new ChatGoogleGenerativeAI({
-//   model: 'gemini-2.5-flash-lite',
-//   temperature: 0.7,
-//   apiKey: process.env.GEMINI_API_KEY,
-// });
+import { ConfigManager } from '../managers/ConfigManager';
 
 const SYSTEM_PROMPT = `
 You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
@@ -58,7 +47,7 @@ MODE B: INSUFFICIENT DATA. Format:
 }
 
 RULES:
-1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
+1. You MUST wrap the JSON output in markdown code blocks (e.g., \`\`\`json ... \`\`\`). Do NOT output plain text without the markdown wrapper.
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
 3. IDs must be unique.
 4. ROOT NODE RULE: There must be EXACTLY ONE root node. Its "id" must be "root". Its "label" must be "root". Its "parentId" must be null. Its "level" is 0. Its "path" must be "/root".
@@ -71,6 +60,53 @@ RULES:
 `;
 
 class AiService {
+  private chatModelJson: ChatOpenAI | null = null;
+  private chatModelText: ChatOpenAI | null = null;
+
+  private async getModel(type: 'json' | 'text'): Promise<ChatOpenAI> {
+    // Check reset
+    if (type === 'json' && this.chatModelJson) {
+      return this.chatModelJson;
+    }
+    if (type === 'text' && this.chatModelText) {
+      return this.chatModelText;
+    }
+
+    const apiKey = await ConfigManager.getInstance().getApiKey();
+    const { model } = ConfigManager.getInstance().getConfig();
+
+    console.log('model: ', model);
+
+    if (!apiKey) {
+      throw new Error('API Key not configured.');
+    }
+
+    const instance = new ChatOpenAI({
+      modelName: model,
+      temperature: type === 'json' ? 0 : 0.7,
+      apiKey: apiKey,
+      modelKwargs:
+        type === 'json'
+          ? { response_format: { type: 'json_object' } }
+          : undefined,
+    });
+
+    if (type === 'json') {
+      this.chatModelJson = instance;
+    }
+    if (type === 'text') {
+      this.chatModelText = instance;
+    }
+
+    return instance;
+  }
+
+  updateModelConfiguration() {
+    console.log('[AiService] Clearing cached models due to config change.');
+    this.chatModelJson = null;
+    this.chatModelText = null;
+  }
+
   /**
    * Generates project structure using LCEL (LangChain Expression Language)
    */
@@ -99,7 +135,8 @@ class AiService {
       const parser = new JsonOutputParser();
 
       // D. Define the Chain (The Pipeline)
-      const chain = prompt.pipe(chatModel).pipe(parser);
+      const model = await this.getModel('json');
+      const chain = prompt.pipe(model).pipe(parser);
 
       console.log(`[AiService] Invoking chain for session: ${sessionId}`);
 
@@ -158,21 +195,18 @@ class AiService {
     const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
 
     const prompt = `
-You are a Tech Lead.
-
-These files or folders are in the approved architecture plan
-but are missing from the actual repository:
+You are a Tech Lead. Analyze these missing files from the repository:
 
 ${list}
 
-Analyze why this might have happened (renamed, moved, deleted, typo, branch mismatch)
-and suggest concrete steps to fix the issue.
-
-Keep the response short and actionable.
+Provide a concise, plain-text explanation (max 50 words, 2-3 sentences).
+Focus only on the most likely cause (e.g., branch mismatch, accidental deletion, or rename) and the immediate action to verify or fix it.
+Do NOT use bullet points, headers, or markdown.
 `.trim();
 
     try {
-      const response = await chatModel.invoke(prompt);
+      const model = await this.getModel('text');
+      const response = await model.invoke(prompt);
 
       // LangChain ChatOpenAI always returns a message object
       if ((response as any)?.content) {
