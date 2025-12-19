@@ -117,15 +117,21 @@ export type AiPayload = z.infer<typeof AiPayloadSchema>; // Renamed from AiRespo
 // --- 4. MESSAGE PROTOCOLS (Frontend <-> Backend) ---
 
 export type MessageToBackend =
-  | { command: 'GENERATE_STRUCTURE'; payload: { sessionId: string; prompt: string } }
+  | {
+      command: 'GENERATE_STRUCTURE';
+      payload: { sessionId: string; prompt: string };
+    }
   | { command: 'RESET_SESSION'; payload: { sessionId: string } }
-  | { command: 'SAVE_DIAGRAM'; payload: { sessionId: string; diagramData: any } }
+  | {
+      command: 'SAVE_DIAGRAM';
+      payload: { sessionId: string; diagramData: any };
+    }
   | { command: 'LOAD_DIAGRAM'; payload: { sessionId: string } }
   | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
   | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } }
 
-  // ✅ NEW
   | { command: 'GET_SETTINGS'; payload: { sessionId: string } }
+
   | {
       command: 'SAVE_SETTINGS';
       payload: {
@@ -134,10 +140,33 @@ export type MessageToBackend =
         provider: string;
         model: string;
       };
-    };
+    }
 
+  | { command: 'OPEN_FILE'; payload: { path: string } }
+  | { command: 'OPEN_FOLDER'; payload: { path: string } };
 
 export type MessageToFrontend = // Renamed from BackendMessage
 
-    | { command: 'AI_RESPONSE'; payload: AiPayload }
-    | { command: 'ERROR'; payload: { message: string } };
+    | {
+        command: 'AI_RESPONSE';
+        payload: AiPayload;
+      }
+    | {
+        command: 'SETTINGS_STATUS';
+        payload: { isConfigured: boolean; config: any };
+      }
+    | {
+        command: 'SETTINGS_SAVED';
+        payload: { success: boolean };
+      }
+    | {
+        command: 'SETTINGS_ERROR';
+        payload: {
+          success: boolean;
+          message?: string;
+        };
+      }
+    | {
+        command: 'ERROR';
+        payload: { message: string };
+      };
