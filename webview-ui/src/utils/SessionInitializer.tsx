@@ -8,7 +8,6 @@ import {
   MOCK_UNTRACKED_DIAGRAM,
 } from '../../../src/mocks/driftMocks';
 import { startGuidedFlowQ1 } from './guidedFlow';
-
 import { checkUserApiKey } from '../utils/vsCodeApi';
 /**
  * DEV ONLY:
@@ -62,7 +61,7 @@ export default function SessionInitializer() {
     };
 
     const executeFlow = async () => {
-      // Step A: Check API Key Status (MUST AWAIT)
+      // // Step A: Check API Key Status (MUST AWAIT)
       const isConfigured = await initializeConnection();
       if (!isConfigured) {
         // Stop execution if key is missing or error occurred

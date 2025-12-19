@@ -37,6 +37,10 @@ export default function MermaidRenderer({
       startOnLoad: false,
       theme: 'default',
       securityLevel: 'loose',
+      flowchart: {
+        padding: 40,
+        useMaxWidth: false,
+      },
     });
 
     if (!containerRef.current) return;
@@ -106,7 +110,7 @@ export default function MermaidRenderer({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !containerRef.current) return;
 
     const deltaX = e.clientX - dragStartPosition.current.x;
     const deltaY = e.clientY - dragStartPosition.current.y;
@@ -114,10 +118,18 @@ export default function MermaidRenderer({
     const newPanX = view.panX + deltaX;
     const newPanY = view.panY + deltaY;
 
+    const frame = containerRef.current.getBoundingClientRect();
+
+    const limitX = frame.width - 5;
+    const limitY = frame.height - 5;
+
+    const clampedX = Math.max(-limitX, Math.min(limitX, newPanX));
+    const clampedY = Math.max(-limitY, Math.min(limitY, newPanY));
+
     console.log('panX before', view.panX);
     dispatch({
       type: 'update_logEntry',
-      payload: { id: logKey, panX: newPanX, panY: newPanY },
+      payload: { id: logKey, panX: clampedX, panY: clampedY },
     });
     dragStartPosition.current = {
       x: e.clientX,

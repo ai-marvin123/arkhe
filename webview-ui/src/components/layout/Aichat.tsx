@@ -68,6 +68,7 @@ export default function AIChat() {
           disabled={isLoading || !isChatEnabled}
         />
         <button
+          className='transition duration-150 hover:brightness-125'
           type='submit'
           aria-label='Send Message'
           disabled={isLoading || !isChatEnabled}

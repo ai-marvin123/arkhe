@@ -30,7 +30,7 @@ export default function ChatLogContainer() {
   const dispatch = useDiagramDispatch();
 
   const handleStarterOptions = (prompt: string) => {
-    dispatch(createStarterAction(prompt));
+    createStarterAction(prompt, sessionId, dispatch);
   };
 
   const handleGuidedChoice = (
@@ -78,17 +78,27 @@ export default function ChatLogContainer() {
   };
   return (
     <div className='chat-log-container'>
-      <div className='w-full flex justify-start mt-2 space-x-2'>
-        {showStarterOptions &&
-          log.length === 0 &&
-          STARTER_OPTIONS.map((opt) => (
-            <OptionsButton
-              key={opt.id}
-              text={opt.label}
-              clickFunc={() => handleStarterOptions(opt.prompt)}
+      {showStarterOptions && log.length === 0 && (
+        <>
+          <div className='w-full flex flex-col items-start'>
+            <AIBubble
+              logKey='welcome-message'
+              text='Select from below to get started, or type your own prompt to generate a repo structure.'
             />
-          ))}
-      </div>
+          </div>
+          <div className='w-full flex justify-start mt-2 space-x-2'>
+            {STARTER_OPTIONS.map((opt) => (
+              <OptionsButton
+                key={opt.id}
+                text={opt.label}
+                icon={opt.icon}
+                clickFunc={() => handleStarterOptions(opt.prompt)}
+              />
+            ))}{' '}
+          </div>
+        </>
+      )}
+
       {log.map((entry) => {
         const logKey = entry.id;
         const isUser = entry.role === 'user';

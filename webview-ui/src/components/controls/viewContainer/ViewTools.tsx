@@ -12,7 +12,7 @@ interface ViewToolstype {
 }
 
 const zoomStep = 0.1;
-const maxZoom = 5.0;
+const maxZoom = 10.0;
 const minZoom = 0.1;
 
 export default function ViewTools({ id, view }: ViewToolstype) {
@@ -60,6 +60,13 @@ export default function ViewTools({ id, view }: ViewToolstype) {
       type: 'update_logEntry',
       payload: { id, isFullscreen: newValue },
     });
+
+    if (!view.isFullscreen) {
+      dispatch({
+        type: 'update_logEntry',
+        payload: { id, panX: 0, panY: 0, zoomLevel: 1 },
+      });
+    }
   };
 
   // AI Message toggle

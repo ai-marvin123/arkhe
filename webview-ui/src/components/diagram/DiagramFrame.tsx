@@ -34,7 +34,7 @@ export default function DiagramFrame({
     };
   }, [isFullscreen]);
 
-  const panelClasses = `relative w-full max-w-full bg-[#1f1a24] rounded-lg p-5 overflow-hidden shadow-2xl ${
+  const panelClasses = `relative w-full max-w-full min-h-[300px] bg-[#1f1a24] rounded-lg p-5 overflow-hidden shadow-2xl ${
     isFullscreen ? 'h-full flex flex-col' : ''
   }`;
   const wrapperPadding = isFullscreen ? '0px' : '20px';
