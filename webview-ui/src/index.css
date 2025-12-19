@@ -142,3 +142,38 @@ body {
 .api-key-accordion[open] .when-closed {
   display: none;
 }
+
+/* for loading bubble */
+@keyframes ripple-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(0);
+    opacity: 0.3;
+  }
+}
+
+.ripple-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #9894a4;
+  line-height: 0;
+  animation: ripple-dot 1.4s infinite ease-in-out;
+}
+
+.delay-1 {
+  animation-delay: 0.2s;
+}
+
+.delay-2 {
+  animation-delay: 0.4s;
+}
