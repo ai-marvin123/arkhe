@@ -13,7 +13,18 @@ export default function AIBubble({ text, logKey }: AIBubbleProps) {
       '
       key={logKey}
     >
-      <p>{text}</p>
+      {text === 'AI_LOADING' ? (
+        <div className='flex items-center gap-2'>
+          <span>Loading</span>
+          <div className='flex items-center gap-1'>
+            <span className='ripple-dot' />
+            <span className='ripple-dot delay-1' />
+            <span className='ripple-dot delay-2' />
+          </div>
+        </div>
+      ) : (
+        <p>{text}</p>
+      )}
     </div>
   );
 }
