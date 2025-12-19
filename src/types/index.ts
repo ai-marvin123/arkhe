@@ -116,34 +116,26 @@ export type AiPayload = z.infer<typeof AiPayloadSchema>; // Renamed from AiRespo
 
 // --- 4. MESSAGE PROTOCOLS (Frontend <-> Backend) ---
 
-export type MessageToBackend = // Renamed from FrontendMessage
-  // Group A: Generation & Session
+export type MessageToBackend =
+  | { command: 'GENERATE_STRUCTURE'; payload: { sessionId: string; prompt: string } }
+  | { command: 'RESET_SESSION'; payload: { sessionId: string } }
+  | { command: 'SAVE_DIAGRAM'; payload: { sessionId: string; diagramData: any } }
+  | { command: 'LOAD_DIAGRAM'; payload: { sessionId: string } }
+  | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
+  | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } }
+
+  // ✅ NEW
+  | { command: 'GET_SETTINGS'; payload: { sessionId: string } }
   | {
-      command: 'GENERATE_STRUCTURE';
-      payload: { sessionId: string; prompt: string };
-    }
-  | {
-      command: 'RESET_SESSION';
-      payload: { sessionId: string };
-    }
-  // Group B: Persistence
-  | {
-      command: 'SAVE_DIAGRAM';
-      payload: { sessionId: string; diagramData: DiagramData };
-    }
-  | {
-      command: 'LOAD_DIAGRAM';
-      payload: { sessionId: string };
-    }
-  // Group C: Drift Detection
-  | {
-      command: 'CHECK_DRIFT';
-      payload: { sessionId: string };
-    }
-  | {
-      command: 'SYNC_TO_ACTUAL';
-      payload: { sessionId: string };
+      command: 'SAVE_SETTINGS';
+      payload: {
+        sessionId: string;
+        apiKey?: string;
+        provider: string;
+        model: string;
+      };
     };
+
 
 export type MessageToFrontend = // Renamed from BackendMessage
 

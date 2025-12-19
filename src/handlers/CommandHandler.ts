@@ -6,6 +6,7 @@ import { SessionManager } from '../managers/SessionManager';
 import { MessageToFrontend, MessageToBackend, AiPayload } from '../types';
 import { FileService } from '../services/FileService';
 import { DriftService } from '../services/DriftService';
+import { ConfigManager } from '../managers/ConfigManager';
 
 export class CommandHandler {
   constructor(
@@ -57,13 +58,24 @@ export class CommandHandler {
 
           await this.fileService.saveDiagram(sessionId, diagramData);
 
+          const successPayload = {
+            type: 'DIAGRAM_SAVED',
+            message: 'Diagram saved successfully.',
+          };
+
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
-            payload: {
-              type: 'DIAGRAM_SAVED',
-              message: 'Diagram saved successfully.',
-            },
+            payload: successPayload,
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'User manually saved the current architecture plan to disk.',
+            {
+              ...successPayload,
+              data: diagramData,
+            } as any
+          );
 
           break;
         }
@@ -255,6 +267,58 @@ export class CommandHandler {
             'Sync architecture plan to match actual codebase files.',
             responsePayload as any
           );
+
+          break;
+        }
+
+        case 'GET_SETTINGS': {
+          const configManager = ConfigManager.getInstance();
+
+          const isConfigured = await configManager.isConfigured();
+          const config = configManager.getConfig();
+
+          console.log('isConfigured: ', isConfigured);
+          console.log('config: ', config);
+
+          this.panel.webview.postMessage({
+            command: 'SETTINGS_STATUS',
+            payload: { isConfigured, config },
+          });
+
+          break;
+        } // ✅ THIS was missing
+
+        case 'SAVE_SETTINGS': {
+          console.log('SAVE_SETTINGS received:', msg.payload);
+          const { apiKey, provider, model } = msg.payload ?? {};
+
+          if (!provider || !model) {
+            this.sendError('SAVE_SETTINGS missing provider or model.');
+            break;
+          }
+
+          const configManager = ConfigManager.getInstance();
+
+          // Store API key only if provided
+          if (apiKey && apiKey.trim().length > 0) {
+            await configManager.setApiKey(apiKey);
+          }
+
+          // Store non-sensitive config
+          await configManager.saveConfig(provider, model);
+
+          // CRUCIAL: reset AI model so next call re-initializes
+          aiService.updateModelConfiguration();
+
+          this.panel.webview.postMessage({
+            command: 'SETTINGS_SAVED',
+            payload: { success: true },
+          });
+
+          // this.panel.webview.postMessage({
+          //   command: 'SETTINGS_ERROR',
+          //   payload: { success: false },
+          // });
 
           break;
         }

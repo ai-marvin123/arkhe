@@ -45,6 +45,8 @@ function getVsCodeApi(): VsCodeApi {
 
 //send command to check for saved OpenAI key
 export function checkUserApiKey(): Promise<SavedUserApiKey> {
+  console.log('checkUserApiKey');
+
   const vsCodeApi = getVsCodeApi();
   return new Promise((resolve, reject) => {
     const listener = (event: MessageEvent) => {
@@ -52,7 +54,7 @@ export function checkUserApiKey(): Promise<SavedUserApiKey> {
 
       if (message.command === 'SETTINGS_STATUS') {
         window.removeEventListener('message', listener);
-        resolve(message);
+        resolve(message.payload);
         return;
       }
       if (message.command === 'ERROR') {

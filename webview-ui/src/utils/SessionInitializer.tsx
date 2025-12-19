@@ -8,6 +8,7 @@ import {
   MOCK_UNTRACKED_DIAGRAM,
 } from '../../../src/mocks/driftMocks';
 import { startGuidedFlowQ1 } from './guidedFlow';
+
 import { checkUserApiKey } from '../utils/vsCodeApi';
 /**
  * DEV ONLY:
@@ -18,17 +19,28 @@ import { checkUserApiKey } from '../utils/vsCodeApi';
 export default function SessionInitializer() {
   const dispatch = useDiagramDispatch();
 
+  console.log('SessionInitializer');
+
   useEffect(() => {
-    // check if user has OpenAI API key saved
+    //check if user has OpenAI API key saved
+
     const initializeConnection = async () => {
       try {
         const response = await checkUserApiKey();
+
+        console.log('SessionInitializer - response: ', response);
+
         if (!response) {
           throw new Error(
             'No response object returned when inquiring saved user API key'
           );
         }
+
+        console.log('response.isConfigured', response.isConfigured);
+        console.log('response.config', response.config);
+
         if (response.isConfigured === true) {
+          console.log('response.isConfigured === true');
           return true;
         } else {
           dispatch({
@@ -48,6 +60,7 @@ export default function SessionInitializer() {
         return false;
       }
     };
+
     const executeFlow = async () => {
       // Step A: Check API Key Status (MUST AWAIT)
       const isConfigured = await initializeConnection();
