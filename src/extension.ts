@@ -1,12 +1,14 @@
-import * as dotenv from 'dotenv';
+// import * as dotenv from 'dotenv';
 import * as vscode from 'vscode';
 import * as path from 'path'; // Need path for joinPath
 import * as fs from 'fs'; // Need fs to read the built index.html
 import { MessageToBackend } from './types';
 import { CommandHandler } from './handlers/CommandHandler';
+import { ConfigManager } from './managers/ConfigManager';
 
 export function activate(context: vscode.ExtensionContext) {
-  dotenv.config({ path: path.join(context.extensionPath, '.env') });
+  ConfigManager.getInstance().initialize(context);
+  // dotenv.config({ path: path.join(context.extensionPath, '.env') });
 
   console.log('Arkhe Extension is active!');
 
