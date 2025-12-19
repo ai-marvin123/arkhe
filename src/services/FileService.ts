@@ -16,7 +16,21 @@ export class FileService {
     }
     return folders[0].uri.fsPath;
   }
+static resolveAbsolutePath(virtualPath: string): string | null {
+    const root = this.getWorkspaceRoot();
+    if (!root) {
+      return null;
+    }
 
+    const cleanedPath = virtualPath.replace(/^\/root\/?/, '');
+    const absolutePath = path.join(root, cleanedPath);
+
+    if (!fs.existsSync(absolutePath)) {
+      return null;
+    }
+
+    return absolutePath;
+  }
   private static ensureWorkspace(): string | null {
     const root = this.getWorkspaceRoot();
     if (!root) {

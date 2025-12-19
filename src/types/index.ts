@@ -130,8 +130,8 @@ export type MessageToBackend =
   | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
   | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } }
 
-  // ✅ NEW
   | { command: 'GET_SETTINGS'; payload: { sessionId: string } }
+
   | {
       command: 'SAVE_SETTINGS';
       payload: {
@@ -140,7 +140,10 @@ export type MessageToBackend =
         provider: string;
         model: string;
       };
-    };
+    }
+
+  | { command: 'OPEN_FILE'; payload: { path: string } }
+  | { command: 'OPEN_FOLDER'; payload: { path: string } };
 
 export type MessageToFrontend = // Renamed from BackendMessage
 
