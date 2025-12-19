@@ -286,12 +286,13 @@ export class CommandHandler {
           });
 
           break;
-        } // ✅ THIS was missing
+        }
 
         case 'SAVE_SETTINGS': {
           console.log('SAVE_SETTINGS received:', msg.payload);
           const { apiKey, provider, model } = msg.payload ?? {};
 
+          // Basic validation
           if (!provider || !model) {
             this.sendError('SAVE_SETTINGS missing provider or model.');
             break;
@@ -299,26 +300,65 @@ export class CommandHandler {
 
           const configManager = ConfigManager.getInstance();
 
-          // Store API key only if provided
+          // 1. RESOLVE CANDIDATE KEY (The key to be verified)
+          // Scenario A: User entered a NEW key -> Verify this new key.
+          // Scenario B: User left key blank (only changing model) -> Fetch existing key to verify against new model.
+          let keyToVerify = apiKey?.trim();
+
+          if (!keyToVerify) {
+            keyToVerify = await configManager.getApiKey();
+          }
+
+          // Edge Case: No key provided AND no key in storage (First time setup with empty field)
+          if (!keyToVerify) {
+            this.panel.webview.postMessage({
+              command: 'SETTINGS_ERROR',
+              payload: {
+                success: false,
+                // message: 'API Key is required.',
+              },
+            });
+            break;
+          }
+
+          // 2. VERIFY CONNECTION (Ping OpenAI)
+          // We must ensure the (Key + Model) combination works before saving.
+          const isValid = await aiService.verifyApiKey(keyToVerify, model);
+
+          if (!isValid) {
+            // ❌ FAILURE: Send error to Frontend and STOP.
+            this.panel.webview.postMessage({
+              command: 'SETTINGS_ERROR',
+              payload: {
+                success: false,
+                // message:
+                //   'Connection failed. Please check your API Key and Model permissions.',
+              },
+            });
+            break; // Do NOT save anything
+          }
+
+          // 3. SAVE TO STORAGE (Only if verified)
+
+          // Only update SecretStorage if the user explicitly provided a NEW key string.
+          // If they left it blank, we keep the old valid key.
           if (apiKey && apiKey.trim().length > 0) {
             await configManager.setApiKey(apiKey);
           }
 
-          // Store non-sensitive config
+          // Always update non-sensitive config (Provider, Model)
           await configManager.saveConfig(provider, model);
 
-          // CRUCIAL: reset AI model so next call re-initializes
+          // 4. RESET & CONFIRM
+
+          // Important: Clear cached model instances in AiService so the next request uses the new settings.
           aiService.updateModelConfiguration();
 
+          // ✅ SUCCESS: Tell Frontend everything is good.
           this.panel.webview.postMessage({
             command: 'SETTINGS_SAVED',
             payload: { success: true },
           });
-
-          // this.panel.webview.postMessage({
-          //   command: 'SETTINGS_ERROR',
-          //   payload: { success: false },
-          // });
 
           break;
         }
