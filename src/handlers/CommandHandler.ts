@@ -57,13 +57,24 @@ export class CommandHandler {
 
           await this.fileService.saveDiagram(sessionId, diagramData);
 
+          const successPayload = {
+            type: 'DIAGRAM_SAVED',
+            message: 'Diagram saved successfully.',
+          };
+
           this.panel.webview.postMessage({
             command: 'AI_RESPONSE',
-            payload: {
-              type: 'DIAGRAM_SAVED',
-              message: 'Diagram saved successfully.',
-            },
+            payload: successPayload,
           });
+
+          await aiService.saveContext(
+            sessionId,
+            'User manually saved the current architecture plan to disk.',
+            {
+              ...successPayload,
+              data: diagramData,
+            } as any
+          );
 
           break;
         }

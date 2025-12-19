@@ -12,9 +12,16 @@ import { ChatOpenAI } from '@langchain/openai';
 import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 import { StructureNode } from '../types';
 
-export const chatModel = new ChatOpenAI({
-  modelName: 'gpt-4.1-mini',
+export const chatModelJson = new ChatOpenAI({
+  modelName: 'gpt-4o-mini',
   temperature: 0,
+  apiKey: process.env.OPENAI_API_KEY,
+  modelKwargs: { response_format: { type: 'json_object' } },
+});
+
+export const chatModelText = new ChatOpenAI({
+  modelName: 'gpt-4o-mini',
+  temperature: 0.7,
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -58,7 +65,7 @@ MODE B: INSUFFICIENT DATA. Format:
 }
 
 RULES:
-1. Output RAW JSON only. Do NOT use markdown backticks like \`\`\`json.
+1. You MUST wrap the JSON output in markdown code blocks (e.g., \`\`\`json ... \`\`\`). Do NOT output plain text without the markdown wrapper.
 2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
 3. IDs must be unique.
 4. ROOT NODE RULE: There must be EXACTLY ONE root node. Its "id" must be "root". Its "label" must be "root". Its "parentId" must be null. Its "level" is 0. Its "path" must be "/root".
@@ -99,7 +106,7 @@ class AiService {
       const parser = new JsonOutputParser();
 
       // D. Define the Chain (The Pipeline)
-      const chain = prompt.pipe(chatModel).pipe(parser);
+      const chain = prompt.pipe(chatModelJson).pipe(parser);
 
       console.log(`[AiService] Invoking chain for session: ${sessionId}`);
 
@@ -158,21 +165,17 @@ class AiService {
     const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
 
     const prompt = `
-You are a Tech Lead.
-
-These files or folders are in the approved architecture plan
-but are missing from the actual repository:
+You are a Tech Lead. Analyze these missing files from the repository:
 
 ${list}
 
-Analyze why this might have happened (renamed, moved, deleted, typo, branch mismatch)
-and suggest concrete steps to fix the issue.
-
-Keep the response short and actionable.
+Provide a concise, plain-text explanation (max 50 words, 2-3 sentences).
+Focus only on the most likely cause (e.g., branch mismatch, accidental deletion, or rename) and the immediate action to verify or fix it.
+Do NOT use bullet points, headers, or markdown.
 `.trim();
 
     try {
-      const response = await chatModel.invoke(prompt);
+      const response = await chatModelText.invoke(prompt);
 
       // LangChain ChatOpenAI always returns a message object
       if ((response as any)?.content) {

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { StructureNode, DiagramData } from '../types';
 import ignore from 'ignore'; // npm install ignore
+import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 
 const PLAN_FILENAME = '.repoplan.json';
 
@@ -39,9 +40,33 @@ export class FileService {
     const filePath = path.join(root, PLAN_FILENAME);
 
     try {
+      // 1. CLEANUP: Remove 'status' field from all nodes
+      const cleanNodes = diagram.jsonStructure.nodes.map((node) => {
+        const { status, ...cleanNode } = node;
+        return cleanNode;
+      });
+
+      // 2. CONSTRUCT CLEAN DATA
+      const cleanDiagram: DiagramData = {
+        ...diagram,
+        jsonStructure: {
+          ...diagram.jsonStructure,
+          nodes: cleanNodes as any,
+        },
+      };
+
+      console.log('cleanDiagram.jsonStructure: ', cleanDiagram.jsonStructure);
+
+      // 3. RE-GENERATE MERMAID (Based on clean data)
+      if (cleanDiagram.jsonStructure) {
+        cleanDiagram.mermaidSyntax = generateMermaidFromJSON(
+          cleanDiagram.jsonStructure
+        );
+      }
+
       await fs.promises.writeFile(
         filePath,
-        JSON.stringify(diagram, null, 2),
+        JSON.stringify(cleanDiagram, null, 2),
         'utf8'
       );
 
