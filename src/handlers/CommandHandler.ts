@@ -315,6 +315,11 @@ export class CommandHandler {
             payload: { success: true },
           });
 
+          // this.panel.webview.postMessage({
+          //   command: 'SETTINGS_ERROR',
+          //   payload: { success: false },
+          // });
+
           break;
         }
       }
