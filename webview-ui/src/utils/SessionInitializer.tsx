@@ -9,7 +9,7 @@ import {
 } from '../../../src/mocks/driftMocks';
 import { startGuidedFlowQ1 } from './guidedFlow';
 
-// import { checkUserApiKey } from '../utils/vsCodeApi';
+import { checkUserApiKey } from '../utils/vsCodeApi';
 /**
  * DEV ONLY:
  * Change this value to test different drift states
@@ -19,43 +19,55 @@ import { startGuidedFlowQ1 } from './guidedFlow';
 export default function SessionInitializer() {
   const dispatch = useDiagramDispatch();
 
+  console.log('SessionInitializer');
+
   useEffect(() => {
     //check if user has OpenAI API key saved
-    // const initializeConnection = async () => {
-    //   try {
-    //     const response = await checkUserApiKey();
-    //     if (!response) {
-    //       throw new Error(
-    //         'No response object returned when inquiring saved user API key'
-    //       );
-    //     }
-    //     if (response.isConfigured === true) {
-    //       return true;
-    //     } else {
-    //       dispatch({
-    //         type: 'load_textOnly',
-    //         payload: {
-    //           message:
-    //             'Please enter your OpenAI API key and model by clicking on the green settings icon above.',
-    //         },
-    //       });
-    //       return false;
-    //     }
-    //   } catch (error) {
-    //     console.error(
-    //       'There was an error initializing connection with user API key',
-    //       error
-    //     );
-    //     return false;
-    //   }
-    // };
+
+    const initializeConnection = async () => {
+      try {
+        const response = await checkUserApiKey();
+
+        console.log('SessionInitializer - response: ', response);
+
+        if (!response) {
+          throw new Error(
+            'No response object returned when inquiring saved user API key'
+          );
+        }
+
+        console.log('response.isConfigured', response.isConfigured);
+        console.log('response.config', response.config);
+
+        if (response.isConfigured === true) {
+          console.log('response.isConfigured === true');
+          return true;
+        } else {
+          dispatch({
+            type: 'load_textOnly',
+            payload: {
+              message:
+                'Please enter your OpenAI API key and model by clicking on the green settings icon above.',
+            },
+          });
+          return false;
+        }
+      } catch (error) {
+        console.error(
+          'There was an error initializing connection with user API key',
+          error
+        );
+        return false;
+      }
+    };
+
     const executeFlow = async () => {
-      // // Step A: Check API Key Status (MUST AWAIT)
-      // const isConfigured = await initializeConnection();
-      // if (!isConfigured) {
-      //   // Stop execution if key is missing or error occurred
-      //   return;
-      // }
+      // Step A: Check API Key Status (MUST AWAIT)
+      const isConfigured = await initializeConnection();
+      if (!isConfigured) {
+        // Stop execution if key is missing or error occurred
+        return;
+      }
       const newSessionId = crypto.randomUUID();
 
       dispatch({
