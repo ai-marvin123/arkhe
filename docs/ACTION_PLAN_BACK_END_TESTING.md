@@ -18,7 +18,7 @@ npm install --save-dev jest ts-jest @types/jest
 
 ```
 
-- [ ] **2. Create `jest.config.js` (Root):**
+- [x] **2. Create `jest.config.js` (Root):**
 
 ```javascript
 module.exports = {
@@ -74,28 +74,28 @@ export const ViewColumn = { Beside: 1 };
 
 _These have no dependencies and are easiest to test._
 
-- [ ] **Test `DriftService.test.ts`:**
-- [ ] Create 2 mock lists: `planNodes` (Plan) vs `actualNodes` (Disk).
-- [ ] **Case A:** `missing` (In Plan, not on Disk).
-- [ ] **Case B:** `untracked` (On Disk, not in Plan).
-- [ ] **Case C:** `matched` (ID matches).
+- [x] **Test `DriftService.test.ts`:**
+- [x] Create 2 mock lists: `planNodes` (Plan) vs `actualNodes` (Disk).
+- [x] **Case A:** `missing` (In Plan, not on Disk).
+- [x] **Case B:** `untracked` (On Disk, not in Plan).
+- [x] **Case C:** `matched` (ID matches).
 
-- [ ] **Test `mermaidGenerator.test.ts`:**
-- [ ] Input: A JSON Structure object.
-- [ ] Output: Assert the returned string contains `graph TD;`.
+- [x] **Test `mermaidGenerator.test.ts`:**
+- [x] Input: A JSON Structure object.
+- [x] Output: Assert the returned string contains `graph TD;`.
 
 ### 🟡 Priority 2: Command Handler (The Brain)
 
 _Test if the backend routes commands correctly._
 
-- [ ] **Test `CommandHandler.test.ts`:**
-- [ ] **Setup:** Mock `webviewPanel.postMessage`.
-- [ ] **Mock Service:** Mock `AiService.generateStructure` to return fake JSON.
-- [ ] **Test `GENERATE_STRUCTURE`:**
+- [x] **Test `CommandHandler.test.ts`:**
+- [x] **Setup:** Mock `webviewPanel.postMessage`.
+- [x] **Mock Service:** Mock `AiService.generateStructure` to return fake JSON.
+- [x] **Test `GENERATE_STRUCTURE`:**
 - Call `handle({ command: 'GENERATE_STRUCTURE', ... })`.
 - Expect `postMessage` to be called with `AI_RESPONSE`.
 
-- [ ] **Test `SAVE_SETTINGS`:**
+- [x] **Test `SAVE_SETTINGS`:**
 - Call `handle({ command: 'SAVE_SETTINGS', payload: { apiKey: 'sk-test' ... } })`.
 - Expect `ConfigManager.setApiKey` to be called.
 - Expect `AiService.verifyApiKey` to be called.
@@ -104,14 +104,14 @@ _Test if the backend routes commands correctly._
 
 ## 📅 Phase 4: Execution
 
-- [ ] **Run Tests:**
+- [x] **Run Tests:**
 
 ```bash
 npx jest
 
 ```
 
-- [ ] **Watch Mode (Dev):**
+- [x] **Watch Mode (Dev):**
 
 ```bash
 npx jest --watch

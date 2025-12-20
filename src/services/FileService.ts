@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { StructureNode, DiagramData } from '../types';
-import ignore from 'ignore'; // npm install ignore
+import ignore = require('ignore');
 import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 
 const PLAN_FILENAME = '.repoplan.json';
