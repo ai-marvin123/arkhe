@@ -1,4 +1,4 @@
-import type { DiagramData } from '../state/diagramTypes';
+import type { DiagramData } from './diagramTypes';
 
 export type SavedUserApiKey = {
   isConfigured: boolean;

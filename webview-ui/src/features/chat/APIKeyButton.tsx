@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { useRef, useState } from "react";
-import { sendUserApiKey } from "../../../utils/vsCodeApi";
+import { sendUserApiKey } from "../../shared/utils/vsCodeApi";
 
 const MODEL_OPTIONS = [
   {
