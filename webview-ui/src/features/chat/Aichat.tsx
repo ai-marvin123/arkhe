@@ -3,7 +3,7 @@ import {
   useDiagramState,
   useDiagramDispatch,
 } from '../../state/diagramContext';
-import { requestStructure } from '../../utils/vsCodeApi';
+import { requestStructure } from '../../shared/utils/vsCodeApi';
 
 export default function AIChat() {
   const dispatch = useDiagramDispatch();

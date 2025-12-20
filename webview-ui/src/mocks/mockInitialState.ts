@@ -1,16 +1,15 @@
-import type { Node, Edge, ChatLog } from '../types/diagramTypes';
-
-//define initalState structure
-export const initialState = {
+import type { DiagramState } from '../types/diagramTypes';
+export const mockInitialState: DiagramState = {
   //A. Session id to send to BE
   session: {
     sessionId: '',
   },
   // B. Current diagram
   diagram: {
-    jsonStructure: { nodes: [] as Node[], edges: [] as Edge[] },
+    jsonStructure: { nodes: [], edges: [] },
     mermaidSyntax: '',
   },
+
   // C. Current view
   view: {
     zoomLevel: 1.0,
@@ -18,16 +17,16 @@ export const initialState = {
     panY: 0,
     isFullscreen: false,
     isLoading: false,
-    showStarterOptions: false,
     isPanActive: false,
-    isChatEnabled: true, //NEW - added this for drift feature
+    showStarterOptions: false,
+    isChatEnabled: false,
     lastLLMMessage: '',
     isAIOpen: false,
     driftCheckStep: 'IDLE',
   },
   // D. AI Chat log
   chat: {
-    log: [] as ChatLog,
+    log: [], // Array of { id, role, text, type, diagramData, viewSettings, ... }
     currentInput: '',
   },
 };

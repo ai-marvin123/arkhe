@@ -1,4 +1,4 @@
-import type { AiPayload } from '../types';
+import type { AiPayload } from '../types/ipcTypes';
 
 export const simpleChatMock: AiPayload = {
   type: 'TEXT' as const,
