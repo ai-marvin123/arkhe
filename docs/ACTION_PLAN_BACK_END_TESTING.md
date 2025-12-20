@@ -11,7 +11,7 @@ Setup a lightweight Unit Testing environment using **Jest**.
 
 **Goal:** Install runner and configure TypeScript support.
 
-- [ ] **1. Install Dependencies:**
+- [x] **1. Install Dependencies:**
 
 ```bash
 npm install --save-dev jest ts-jest @types/jest
@@ -37,8 +37,8 @@ module.exports = {
 
 **Goal:** Fake the VS Code API so tests don't crash in Node.js.
 
-- [ ] **1. Create Mock Directory:** `src/test/__mocks__`
-- [ ] **2. Create `vscode.ts`:**
+- [x] **1. Create Mock Directory:** `src/test/__mocks__`
+- [x] **2. Create `vscode.ts`:**
 
 ```typescript
 // src/test/__mocks__/vscode.ts
