@@ -1,7 +1,13 @@
-import type { DiagramAction, DiagramState, TextEntry } from './diagramTypes';
-import { initialState } from './initialState';
-import { applyMermaidStyling } from '../utils/mermaidGenerator';
-import { generateId } from '../utils/idGenerator';
+import type {
+  DiagramAction,
+  DiagramState,
+  TextEntry,
+  DiagramEntry,
+  ChatLog,
+} from "../types/diagramTypes";
+import { initialState } from "./initialState";
+import { applyMermaidStyling } from "../features/diagram/mermaidGenerator";
+import { generateId } from "../shared/utils/idgenerator";
 
 //reducer functions
 export function chatReducer(
@@ -10,7 +16,7 @@ export function chatReducer(
 ): DiagramState {
   //save session ID
   switch (action.type) {
-    case 'initialize_session': {
+    case "initialize_session": {
       return {
         ...state,
         session: {
@@ -19,7 +25,7 @@ export function chatReducer(
       };
     }
     //enable chat if no saved diagram
-    case 'enable_chat': {
+    case "enable_chat": {
       return {
         ...state,
         view: {
@@ -30,7 +36,7 @@ export function chatReducer(
       };
     }
     //show options for new diagram creation
-    case 'show_starterOptions': {
+    case "show_starterOptions": {
       return {
         ...state,
         view: {
@@ -40,12 +46,12 @@ export function chatReducer(
       };
     }
     //send option prompt to BE
-    case 'send_starterOption': {
+    case "send_starterOption": {
       const prompt = action.payload;
       const optionPrompt = {
         id: generateId(),
-        role: 'user',
-        type: 'TEXT_INPUT' as const,
+        role: "user",
+        type: "TEXT_INPUT" as const,
         text: prompt,
         timestamp: Date.now(),
       };
@@ -63,7 +69,7 @@ export function chatReducer(
       };
     }
     //update user input while typing
-    case 'set_userInput': {
+    case "set_userInput": {
       return {
         ...state,
         chat: {
@@ -73,11 +79,11 @@ export function chatReducer(
       };
     }
     //dispatched on submit: save latest user input in log
-    case 'send_userInput': {
+    case "send_userInput": {
       const archivedUserInput = {
         id: generateId(),
-        role: 'user',
-        type: 'TEXT_INPUT' as const,
+        role: "user",
+        type: "TEXT_INPUT" as const,
         text: state.chat.currentInput,
         timestamp: Date.now(),
       };
@@ -89,14 +95,14 @@ export function chatReducer(
         },
         chat: {
           ...state.chat,
-          currentInput: '',
+          currentInput: "",
           log: [...state.chat.log, archivedUserInput],
         },
       };
     }
 
     //after receiving data from BE - update current state with new diagram data
-    case 'load_newDiagram': {
+    case "load_newDiagram": {
       const styledMermaidSyntax = applyMermaidStyling(
         action.payload.data.jsonStructure,
         action.payload.data.mermaidSyntax
@@ -110,9 +116,9 @@ export function chatReducer(
       const newDiagramId = generateId();
       const newAssistantEntry = {
         id: newDiagramId,
-        role: 'assistant',
+        role: "assistant",
         text: action.payload.message,
-        type: 'DIAGRAM_CONTENT' as const, // NEW TYPE: Signals this entry holds unique content
+        type: "DIAGRAM_CONTENT" as const, // NEW TYPE: Signals this entry holds unique content
         diagramData: {
           jsonStructure: action.payload.data.jsonStructure,
           mermaidSyntax: styledMermaidSyntax,
@@ -141,12 +147,12 @@ export function chatReducer(
       };
     }
     //dispatched when AI responds with message only
-    case 'load_textOnly': {
+    case "load_textOnly": {
       const newAssistantEntry = {
         id: generateId(),
-        role: 'assistant',
+        role: "assistant",
         text: action.payload.message,
-        type: 'TEXT_RESPONSE' as const,
+        type: "TEXT_RESPONSE" as const,
         timestamp: Date.now(),
       };
       return {
@@ -163,20 +169,22 @@ export function chatReducer(
       };
     }
     //diapatched when user uses view tools in any diagram of choice: updates view
-    case 'update_logEntry': {
+    case "update_logEntry": {
       const { id, ...viewUpdates } = action.payload;
-      const newLog = state.chat.log.map((entry) => {
-        if (entry.id === id && entry.type === 'DIAGRAM_CONTENT') {
-          return {
-            ...entry,
-            viewSettings: {
-              ...entry.viewSettings,
-              ...viewUpdates,
-            },
-          };
+      const newLog: ChatLog = state.chat.log.map(
+        (entry: TextEntry | DiagramEntry) => {
+          if (entry.id === id && entry.type === "DIAGRAM_CONTENT") {
+            return {
+              ...entry,
+              viewSettings: {
+                ...entry.viewSettings,
+                ...viewUpdates,
+              },
+            } as DiagramEntry;
+          }
+          return entry;
         }
-        return entry;
-      });
+      );
       return {
         ...state,
         chat: {
@@ -186,16 +194,16 @@ export function chatReducer(
       };
     }
     // advances guided flow during drift check
-    case 'proceed_guidedFlow': {
+    case "proceed_guidedFlow": {
       const { aiScriptText, nextStep, options } = action.payload;
       console.log(
-        '✅inside proceed_guidedFlow, shwoing drift step',
+        "✅inside proceed_guidedFlow, shwoing drift step",
         state.view.driftCheckStep
       );
       const aiEntry = {
         id: generateId(),
-        role: 'assistant',
-        type: 'TEXT_RESPONSE' as const,
+        role: "assistant",
+        type: "TEXT_RESPONSE" as const,
         text: aiScriptText,
         options: options || [],
         timestamp: Date.now(),
@@ -214,19 +222,19 @@ export function chatReducer(
       };
     }
     //adds user choice to chat log and removes options during guided flow
-    case 'log_userChoice': {
+    case "log_userChoice": {
       const { logEntryId, chosenText } = action.payload;
       const userEntry: TextEntry = {
         id: generateId(),
-        role: 'user' as const,
-        type: 'TEXT_INPUT' as const,
+        role: "user" as const,
+        type: "TEXT_INPUT" as const,
         text: chosenText,
         timestamp: Date.now(),
       };
 
-      const newLog = state.chat.log.map((entry) => {
+      const newLog = state.chat.log.map((entry: TextEntry | DiagramEntry) => {
         if (entry.id === logEntryId) {
-          if ('options' in entry) {
+          if ("options" in entry) {
             const newEntry = { ...(entry as TextEntry) };
             delete newEntry.options;
             return newEntry;

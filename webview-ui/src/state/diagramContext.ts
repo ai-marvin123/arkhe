@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { DiagramState, DiagramDispatch } from './diagramTypes';
+import type { DiagramState, DiagramDispatch } from '../types/diagramTypes';
 
 //context
 export const DiagramContext = createContext<DiagramState | null>(null);

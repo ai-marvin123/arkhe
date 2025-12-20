@@ -35,18 +35,16 @@ export default function MermaidRenderer({
     // 1. Initialize Mermaid
     mermaid.initialize({
       startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'loose',
+      securityLevel: "loose",
       flowchart: {
         padding: 10,
         useMaxWidth: false,
       },
       theme: "dark",
       themeVariables: {
-        lineColor: '#5B5967',
-        arrowheadColor: '5B5967',
+        lineColor: "#5B5967",
+        arrowheadColor: "5B5967",
       },
-      securityLevel: "loose",
     });
 
     if (!containerRef.current) return;
@@ -118,7 +116,7 @@ export default function MermaidRenderer({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
 
-    const svgElement = containerRef.current.querySelector('svg');
+    const svgElement = containerRef.current.querySelector("svg");
     if (!svgElement) return;
 
     const svgBox = svgElement.getBBox();
@@ -140,9 +138,9 @@ export default function MermaidRenderer({
     const clampedX = Math.max(-limitX, Math.min(limitX, newPanX));
     const clampedY = Math.max(-limitY, Math.min(limitY, newPanY));
 
-    console.log('panX before', view.panX);
+    console.log("panX before", view.panX);
     dispatch({
-      type: 'update_logEntry',
+      type: "update_logEntry",
       payload: { id: logKey, panX: clampedX, panY: clampedY },
     });
     dragStartPosition.current = {
@@ -162,7 +160,7 @@ export default function MermaidRenderer({
   return (
     <div
       className={`relative w-full h-full overflow-hidden flex items-center justify-center${
-        isDragging ? 'dragging' : ''
+        isDragging ? "dragging" : ""
       }`}
       style={{ cursor: cursorStyle, pointerEvents: "auto" }}
       onMouseDown={handleMouseDown}
@@ -170,13 +168,13 @@ export default function MermaidRenderer({
       onMouseUp={handleMouseUp}>
       <div
         ref={containerRef}
-        className='mermaid-container'
+        className="mermaid-container"
         data-panning={view.isPanActive}
         style={{
           ...transformStyle,
-          display: 'block',
-          width: 'max-content',
-          margin: 'auto',
+          display: "block",
+          width: "max-content",
+          margin: "auto",
         }}
       />
     </div>

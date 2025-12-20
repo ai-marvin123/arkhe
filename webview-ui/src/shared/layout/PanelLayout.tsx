@@ -1,6 +1,6 @@
-import AIChat from "./Aichat";
-import ChatLogContainer from "../chat/ChatLogContainer";
-import APIKeyButton from "../controls/viewNavigation/APIKeyButton";
+import AIChat from "../../features/chat/Aichat";
+import ChatLogContainer from "../../features/chat/ChatLogContainer";
+import APIKeyButton from "../../features/chat/APIKeyButton";
 
 export default function PanelLayout() {
   return (

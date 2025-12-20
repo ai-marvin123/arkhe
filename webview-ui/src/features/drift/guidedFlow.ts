@@ -2,8 +2,11 @@ import type {
   DiagramAction,
   DiagramData,
   Options,
-} from '../state/diagramTypes';
-import { requestAlignmentCheck, requestDiagramSync } from './vsCodeApi';
+} from '../../types/diagramTypes';
+import {
+  requestAlignmentCheck,
+  requestDiagramSync,
+} from '../../shared/utils/vsCodeApi';
 
 export type Dispatch = (action: DiagramAction) => void;
 

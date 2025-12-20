@@ -1,4 +1,4 @@
-import { initialState } from './initialState.js';
+import { initialState } from '../state/initialState';
 
 export type DiagramState = typeof initialState;
 export type DiagramDispatch = (action: DiagramAction) => void;
