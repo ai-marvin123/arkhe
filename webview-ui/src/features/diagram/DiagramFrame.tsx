@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import MermaidRenderer from './MermaidRenderer';
-import type { DiagramEntry } from '../../state/diagramTypes';
-import ViewTools from '../controls/viewContainer/ViewTools';
-import { postDiagramToSave } from '../../utils/vsCodeApi';
-import SaveButton from '../controls/viewNavigation/SaveButton';
+import type { DiagramEntry } from '../../types/diagramTypes';
+import ViewTools from './ViewTools';
+import { postDiagramToSave } from '../../shared/utils/vsCodeApi';
+import SaveButton from './viewButtons/SaveButton';
 
 interface diagramFrameType {
   sessionId: string;

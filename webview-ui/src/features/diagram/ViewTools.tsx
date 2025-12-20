@@ -1,9 +1,9 @@
-import { useDiagramDispatch } from '../../../state/diagramContext';
-import type { ViewSettings } from '../../../state/diagramTypes';
-import PanButton from '../viewNavigation/PanButton';
-import ZoomInButton from '../viewNavigation/ZoomInButton';
-import ZoomOutButton from '../viewNavigation/ZoomOutButton';
-import FullscreenButton from '../viewNavigation/FullScreenButton';
+import { useDiagramDispatch } from '../../state/diagramContext';
+import type { ViewSettings } from '../../types/diagramTypes';
+import PanButton from './viewButtons/PanButton';
+import ZoomInButton from './viewButtons/ZoomInButton';
+import ZoomOutButton from './viewButtons/ZoomOutButton';
+import FullscreenButton from './viewButtons/FullScreenButton';
 // import ViewAiMessageButton from './viewNavigation/ViewAiMessage';
 
 interface ViewToolstype {
