@@ -347,7 +347,10 @@ export class CommandHandler {
           }
 
           // Always update non-sensitive config (Provider, Model)
+
           await configManager.saveConfig(provider, model);
+
+          // await configManager.saveConfig(provider, 'gpt-4o-mini');
 
           // 4. RESET & CONFIRM
 
