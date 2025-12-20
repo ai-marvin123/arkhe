@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -105,6 +104,28 @@ class AiService {
     console.log('[AiService] Clearing cached models due to config change.');
     this.chatModelJson = null;
     this.chatModelText = null;
+  }
+
+  async verifyApiKey(apiKey: string, modelName: string): Promise<boolean> {
+    try {
+      console.log(`[AiService] Verifying key for model: ${modelName}...`);
+
+      const tempModel = new ChatOpenAI({
+        modelName: modelName, // Check if this key has access to this specific model
+        temperature: 0,
+        apiKey: apiKey,
+        maxTokens: 100, // Keep it minimal to save tokens/latency
+      });
+
+      // Send a ping message
+      await tempModel.invoke('Ping');
+
+      console.log('[AiService] Verification successful.');
+      return true;
+    } catch (error) {
+      console.error('[AiService] Key verification failed:', error);
+      return false;
+    }
   }
 
   /**
