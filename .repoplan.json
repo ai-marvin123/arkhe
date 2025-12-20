@@ -1,7 +1,0 @@
-{
-  "mermaidSyntax": "graph TD; A-->B; Nam Test",
-  "jsonStructure": {
-    "nodes": [],
-    "edges": []
-  }
-}
