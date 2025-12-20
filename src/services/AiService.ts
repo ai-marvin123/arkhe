@@ -128,6 +128,16 @@ class AiService {
     }
   }
 
+  private minifyPayload(payload: AiPayload): string {
+    const clone = JSON.parse(JSON.stringify(payload));
+
+    if (clone.data?.mermaidSyntax) {
+      delete clone.data.mermaidSyntax;
+    }
+
+    return JSON.stringify(clone);
+  }
+
   /**
    * Generates project structure using LCEL (LangChain Expression Language)
    */
@@ -199,7 +209,7 @@ class AiService {
       // G. Update Memory (Manually add this turn)
       await history.addUserMessage(userPrompt);
 
-      await history.addAIMessage(JSON.stringify(validatedData));
+      await history.addAIMessage(this.minifyPayload(validatedData));
 
       return validatedData;
     } catch (error) {
@@ -254,7 +264,7 @@ Do NOT use bullet points, headers, or markdown.
 
       await history.addUserMessage(userAction);
 
-      await history.addAIMessage(JSON.stringify(aiPayload));
+      await history.addAIMessage(this.minifyPayload(aiPayload));
 
       console.log(`[AiService] Saved context for action: "${userAction}"`);
     } catch (error) {
