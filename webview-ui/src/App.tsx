@@ -1,6 +1,6 @@
 import { DiagramProvider } from './state/diagramStore';
-import PanelLayout from './components/layout/PanelLayout';
-import SessionInitializer from './utils/SessionInitializer';
+import PanelLayout from './shared/layout/PanelLayout';
+import SessionInitializer from './features/start/SessionInitializer';
 
 export default function App() {
   console.log('App is running');

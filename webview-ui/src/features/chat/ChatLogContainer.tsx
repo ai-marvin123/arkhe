@@ -3,17 +3,14 @@ import {
   useDiagramDispatch,
 } from '../../state/diagramContext';
 import UserBubble from './UserBubble';
-import AIBubble from './AIBubble';
+import AIBubble from './AiBubble';
 import DiagramFrame from '../diagram/DiagramFrame';
 import AiMessageAccordion from './AiMessageAccordion';
-import { startDriftCheck, executeSyncAction } from '../../utils/guidedFlow';
-import type { Dispatch } from '../../utils/guidedFlow';
-import OptionsButton from './Options';
-import type { GuidedAction } from '../../state/diagramTypes';
-import {
-  STARTER_OPTIONS,
-  createStarterAction,
-} from '../../utils/starterOptions';
+import { startDriftCheck, executeSyncAction } from '../drift/guidedFlow';
+import type { Dispatch } from '../drift/guidedFlow';
+import OptionsButton from '../drift/Options';
+import type { GuidedAction } from '../../types/diagramTypes';
+import { STARTER_OPTIONS, createStarterAction } from '../start/starterOptions';
 
 interface GuidedTextEntry {
   id: string;
