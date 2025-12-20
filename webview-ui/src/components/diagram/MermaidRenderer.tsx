@@ -35,6 +35,12 @@ export default function MermaidRenderer({
     // 1. Initialize Mermaid
     mermaid.initialize({
       startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: {
+        padding: 10,
+        useMaxWidth: false,
+      },
       theme: "dark",
       themeVariables: {
         lineColor: '#5B5967',
@@ -110,7 +116,12 @@ export default function MermaidRenderer({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !containerRef.current) return;
+
+    const svgElement = containerRef.current.querySelector('svg');
+    if (!svgElement) return;
+
+    const svgBox = svgElement.getBBox();
 
     const deltaX = e.clientX - dragStartPosition.current.x;
     const deltaY = e.clientY - dragStartPosition.current.y;
@@ -118,10 +129,21 @@ export default function MermaidRenderer({
     const newPanX = view.panX + deltaX;
     const newPanY = view.panY + deltaY;
 
-    console.log("panX before", view.panX);
+    // const frame = containerRef.current.getBoundingClientRect();
+
+    // const limitX = frame.width - 5;
+    // const limitY = frame.height - 5;
+
+    const limitX = svgBox.width + 100;
+    const limitY = svgBox.height + 100;
+
+    const clampedX = Math.max(-limitX, Math.min(limitX, newPanX));
+    const clampedY = Math.max(-limitY, Math.min(limitY, newPanY));
+
+    console.log('panX before', view.panX);
     dispatch({
-      type: "update_logEntry",
-      payload: { id: logKey, panX: newPanX, panY: newPanY },
+      type: 'update_logEntry',
+      payload: { id: logKey, panX: clampedX, panY: clampedY },
     });
     dragStartPosition.current = {
       x: e.clientX,
@@ -139,8 +161,8 @@ export default function MermaidRenderer({
   // The component returns a div that will hold the rendered diagram
   return (
     <div
-      className={`relative w-full h-full overflow-hidden ${
-        isDragging ? "dragging" : ""
+      className={`relative w-full h-full overflow-hidden flex items-center justify-center${
+        isDragging ? 'dragging' : ''
       }`}
       style={{ cursor: cursorStyle, pointerEvents: "auto" }}
       onMouseDown={handleMouseDown}
@@ -148,9 +170,14 @@ export default function MermaidRenderer({
       onMouseUp={handleMouseUp}>
       <div
         ref={containerRef}
-        className="mermaid-container w-full h-full"
+        className='mermaid-container'
         data-panning={view.isPanActive}
-        style={{ ...transformStyle }}
+        style={{
+          ...transformStyle,
+          display: 'block',
+          width: 'max-content',
+          margin: 'auto',
+        }}
       />
     </div>
   );

@@ -6,6 +6,8 @@ export type DiagramDispatch = (action: DiagramAction) => void;
 export type DiagramAction =
   | { type: 'initialize_session'; payload: { sessionId: string } }
   | { type: 'enable_chat'; payload?: void }
+  | { type: 'show_starterOptions'; payload?: void }
+  | { type: 'send_starterOption'; payload: string }
   | { type: 'set_userInput'; payload: string }
   | { type: 'send_userInput'; payload?: void }
   | {
@@ -53,6 +55,7 @@ export type ViewSettings = {
   panY: number;
   isChatEnabled: boolean;
   isFullscreen: boolean;
+  showStarterOptions: boolean;
   isLoading: boolean;
   isPanActive: boolean;
   lastLLMMessage: string;

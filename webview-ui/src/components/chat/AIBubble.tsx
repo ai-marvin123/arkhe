@@ -4,6 +4,7 @@ interface AIBubbleProps {
 }
 
 export default function AIBubble({ text, logKey }: AIBubbleProps) {
+  const isLoading = text === 'AI_LOADING';
   return (
     <div
       className='
@@ -11,12 +12,14 @@ export default function AIBubble({ text, logKey }: AIBubbleProps) {
         rounded-xl rounded-br-md
         px-4 py-2 max-w-[75%] text-sm leading-relaxed 
       '
+      role={isLoading ? 'status' : undefined}
+      aria-live={isLoading ? 'polite' : undefined}
       key={logKey}
     >
       {text === 'AI_LOADING' ? (
         <div className='flex items-center gap-2'>
           <span>Loading</span>
-          <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-1' aria-hidden='true'>
             <span className='ripple-dot' />
             <span className='ripple-dot delay-1' />
             <span className='ripple-dot delay-2' />

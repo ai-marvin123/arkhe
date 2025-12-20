@@ -1,7 +1,7 @@
 import type { DiagramAction, DiagramState, TextEntry } from './diagramTypes';
 import { initialState } from './initialState';
 import { applyMermaidStyling } from '../utils/mermaidGenerator';
-import { generateId } from '../utils/idgenerator';
+import { generateId } from '../utils/idGenerator';
 
 //reducer functions
 export function chatReducer(
@@ -26,6 +26,39 @@ export function chatReducer(
           ...state.view,
           isChatEnabled: true,
           isLoading: false,
+        },
+      };
+    }
+    //show options for new diagram creation
+    case 'show_starterOptions': {
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          showStarterOptions: true,
+        },
+      };
+    }
+    //send option prompt to BE
+    case 'send_starterOption': {
+      const prompt = action.payload;
+      const optionPrompt = {
+        id: generateId(),
+        role: 'user',
+        type: 'TEXT_INPUT' as const,
+        text: prompt,
+        timestamp: Date.now(),
+      };
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          showStarterOptions: false,
+          isLoading: true,
+        },
+        chat: {
+          ...state.chat,
+          log: [...state.chat.log, optionPrompt],
         },
       };
     }
@@ -155,7 +188,10 @@ export function chatReducer(
     // advances guided flow during drift check
     case 'proceed_guidedFlow': {
       const { aiScriptText, nextStep, options } = action.payload;
- console.log('✅inside proceed_guidedFlow, shwoing drift step', state.view.driftCheckStep );
+      console.log(
+        '✅inside proceed_guidedFlow, shwoing drift step',
+        state.view.driftCheckStep
+      );
       const aiEntry = {
         id: generateId(),
         role: 'assistant',
@@ -180,7 +216,6 @@ export function chatReducer(
     //adds user choice to chat log and removes options during guided flow
     case 'log_userChoice': {
       const { logEntryId, chosenText } = action.payload;
- console.log('🐸inside log_userChoice');
       const userEntry: TextEntry = {
         id: generateId(),
         role: 'user' as const,
