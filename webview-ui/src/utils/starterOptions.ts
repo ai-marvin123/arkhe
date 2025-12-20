@@ -6,7 +6,7 @@ export const STARTER_OPTIONS = [
     label: 'Full-Stack Web App',
     icon: 'globe',
     prompt:
-      'Generate a comprehensive repository structure for a full-stack web application. Include a React frontend (TypeScript), a Node.js Express backend, and a Dockerized PostgreSQL setup. Show the folder hierarchy for components, routes, and middleware.',
+      'Generate a simple repository structure for a full-stack web application. Include a React frontend (TypeScript), a Node.js Express backend, and a Dockerized PostgreSQL setup. Show the folder hierarchy for components, routes, and middleware.',
   },
   {
     id: 'starter_data_science',

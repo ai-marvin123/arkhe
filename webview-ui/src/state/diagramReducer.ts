@@ -1,7 +1,7 @@
 import type { DiagramAction, DiagramState, TextEntry } from './diagramTypes';
 import { initialState } from './initialState';
 import { applyMermaidStyling } from '../utils/mermaidGenerator';
-import { generateId } from '../utils/idgenerator';
+import { generateId } from '../utils/idGenerator';
 
 //reducer functions
 export function chatReducer(
