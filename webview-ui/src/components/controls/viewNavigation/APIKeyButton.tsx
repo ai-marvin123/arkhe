@@ -1,26 +1,64 @@
 import type { FormEvent } from "react";
+import { useRef, useState } from "react";
 import { sendUserApiKey } from "../../../utils/vsCodeApi";
 
 const MODEL_OPTIONS = ["gpt-5.2", "gpt-5.1", "gpt-4.1"] as const;
 const PROVIDER = "openai";
 
 export default function APIKeyButton() {
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const model = (formData.get("openai-model") as string) || MODEL_OPTIONS[0];
-    const apiKey = (formData.get("openai-key") as string) || undefined;
+    const apiKeyInput = apiKey.trim();
+
+    if (!apiKeyInput || !model) {
+      setError("OpenAI key and model are required.");
+      return;
+    }
 
     try {
-      await sendUserApiKey(PROVIDER, model, apiKey);
-      // TODO: surface toast once notifications are ready.
+      type SaveResponse = {
+        success?: boolean;
+        message?: string;
+        payload?: { success?: boolean; message?: string };
+      };
+
+      const response: SaveResponse = await sendUserApiKey(
+        PROVIDER,
+        model,
+        apiKeyInput
+      );
+      const success = response.payload?.success ?? response.success ?? false;
+      const message = response.payload?.message ?? response.message;
+
+      if (!success) {
+        setError(message ?? "");
+        return;
+      }
+
+      setError(null);
+      setApiKey("");
+      // Close the popup on successful save.
+      detailsRef.current?.removeAttribute("open");
     } catch (error) {
       console.error("Failed to save OpenAI settings:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to save settings. Try again.";
+      setError(message);
     }
   };
 
   return (
-    <details className="api-key-accordion relative inline-block">
+    <details
+      ref={detailsRef}
+      className="api-key-accordion relative inline-block">
       <summary className="api-key-trigger flex cursor-pointer items-center gap-2 rounded-full border border-[#008c6e] bg-[#008c6e] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-[#ffffff] filter hover:brightness-125 transition duration-150 hover:opacity-90">
         <span>OpenAI API</span>
         <span
@@ -44,12 +82,26 @@ export default function APIKeyButton() {
             id="openai-key"
             name="openai-key"
             type="password"
+            required
             placeholder="sk-..."
+            value={apiKey}
+            onChange={(event) => {
+              setApiKey(event.target.value);
+              if (error) setError(null);
+            }}
             className="w-full rounded-md border border-[#2f2537] bg-[#140f1a] px-3 py-2 text-sm text-[#f9fafb] placeholder:text-[#6b7280] focus:border-[#a78bfa] focus:outline-none"
           />
           <p className="text-[0.6rem] text-[#6b7280]">
             Stored locally in VS Code.
           </p>
+          {error && (
+            <p
+              className="text-[0.6rem] text-[#f87171]"
+              role="alert"
+              aria-live="polite">
+              {error}
+            </p>
+          )}
         </div>
 
         <div className="mt-4 space-y-2">
