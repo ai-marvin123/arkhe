@@ -61,7 +61,7 @@ export default function ViewTools({ id, view }: ViewToolstype) {
       payload: { id, isFullscreen: newValue },
     });
 
-    if (!view.isFullscreen) {
+    if (newValue === false) {
       dispatch({
         type: 'update_logEntry',
         payload: { id, panX: 0, panY: 0, zoomLevel: 1 },

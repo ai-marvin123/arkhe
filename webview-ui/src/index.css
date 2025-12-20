@@ -177,3 +177,18 @@ body {
 .delay-2 {
   animation-delay: 0.4s;
 }
+
+@keyframes fillOverlay {
+  0% {
+    transform: scaleY(0);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scaleY(0.9);
+    opacity: 0.85;
+  }
+}
+
+.animate-fillOverlay {
+  animation: fillOverlay 1000ms ease-out both;
+}

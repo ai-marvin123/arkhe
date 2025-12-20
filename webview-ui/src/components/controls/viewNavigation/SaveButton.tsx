@@ -4,30 +4,43 @@ interface SaveButtonProps {
 }
 
 export default function SaveButton({ clickFunc, status }: SaveButtonProps) {
-  let text = 'Save';
+  const isSaving = status === 'saving';
+  const isSaved = status === 'saved';
+  const isError = status === 'error';
 
-  if (status === 'saving') {
-    text = 'Saving...';
-  } else if (status === 'saved') {
-    text = 'Saved!';
-  } else if (status === 'error') {
-    text = 'error';
-  }
+  const overlayClasses = isSaved
+    ? 'scale-y-100 opacity-100 duration-200'
+    : isSaving
+    ? 'animate-fillOverlay'
+    : 'scale-y-0 opacity-0';
+  const overlayColor = isError ? 'bg-[#CF6679]' : 'bg-[#8B50DA]';
 
   return (
     <button
-      className='save-button cursor-pointer px-2 py-1 rounded bg-[#332940] filter
+      className='relative save-button cursor-pointer px-3.5 py-2 w-16 filter
     hover:brightness-125
     transition
     duration-150'
-      onMouseEnter={() => console.log('ENTER button')}
-      onMouseMove={() => console.log('MOVE button')}
       style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-      aria-label='Save diagram to your repo'
+      aria-label={status ? status : 'Save diagram to your repo'}
       onClick={clickFunc}
       type='button'
     >
-      {text}
+      <div className='pointer-events-none absolute inset-0 z-[-20] rounded bg-[#332940]' />
+      <span className='relative z-10'>
+        {status === 'saved' ? 'Saved!' : 'Save'}
+      </span>
+      <div
+        className={[
+          'pointer-events-none absolute inset-0 z-0 rounded',
+          'origin-bottom transform-gpu',
+          overlayColor,
+          'rounded',
+          'transition-[transform,opacity] ease-out',
+          overlayClasses,
+        ].join(' ')}
+        style={{ transitionDuration: status === 'idle' ? '700ms' : '200ms' }}
+      />
     </button>
   );
 }

@@ -38,7 +38,7 @@ export default function MermaidRenderer({
       theme: 'default',
       securityLevel: 'loose',
       flowchart: {
-        padding: 40,
+        padding: 10,
         useMaxWidth: false,
       },
     });
@@ -112,16 +112,24 @@ export default function MermaidRenderer({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
 
+    const svgElement = containerRef.current.querySelector('svg');
+    if (!svgElement) return;
+
+    const svgBox = svgElement.getBBox();
+
     const deltaX = e.clientX - dragStartPosition.current.x;
     const deltaY = e.clientY - dragStartPosition.current.y;
 
     const newPanX = view.panX + deltaX;
     const newPanY = view.panY + deltaY;
 
-    const frame = containerRef.current.getBoundingClientRect();
+    // const frame = containerRef.current.getBoundingClientRect();
 
-    const limitX = frame.width - 5;
-    const limitY = frame.height - 5;
+    // const limitX = frame.width - 5;
+    // const limitY = frame.height - 5;
+
+    const limitX = svgBox.width + 100;
+    const limitY = svgBox.height + 100;
 
     const clampedX = Math.max(-limitX, Math.min(limitX, newPanX));
     const clampedY = Math.max(-limitY, Math.min(limitY, newPanY));
@@ -147,7 +155,7 @@ export default function MermaidRenderer({
   // The component returns a div that will hold the rendered diagram
   return (
     <div
-      className={`relative w-full h-full overflow-hidden ${
+      className={`relative w-full h-full overflow-hidden flex items-center justify-center${
         isDragging ? 'dragging' : ''
       }`}
       style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
@@ -157,9 +165,14 @@ export default function MermaidRenderer({
     >
       <div
         ref={containerRef}
-        className='mermaid-container w-full h-full'
+        className='mermaid-container'
         data-panning={view.isPanActive}
-        style={{ ...transformStyle }}
+        style={{
+          ...transformStyle,
+          display: 'block',
+          width: 'max-content',
+          margin: 'auto',
+        }}
       />
     </div>
   );
