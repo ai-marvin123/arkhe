@@ -49,7 +49,7 @@ await vscode.window.showTextDocument(uri, {
 - [x] **Execute:**
 
 ```typescript
-await vscode.commands.executeCommand('revealInExplorer', uri);
+await vscode.commands.executeCommand("revealInExplorer", uri);
 ```
 
 - [x] **Error Handling:** Wrap in `try/catch`.
