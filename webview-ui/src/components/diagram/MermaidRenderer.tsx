@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
-import mermaid from 'mermaid';
-import type { ViewSettings, Node } from '../../state/diagramTypes';
-import { useDiagramDispatch } from '../../state/diagramContext';
-import { openFileOnClick, openFolderOnClick } from '../../utils/vsCodeApi';
+import { useEffect, useState, useRef } from "react";
+import mermaid from "mermaid";
+import type { ViewSettings, Node } from "../../state/diagramTypes";
+import { useDiagramDispatch } from "../../state/diagramContext";
+import { openFileOnClick, openFolderOnClick } from "../../utils/vsCodeApi";
 
 interface MermaidRenderResult {
   view: ViewSettings;
@@ -26,7 +26,7 @@ export default function MermaidRenderer({
   //styling the diagram according view features
   const transformStyle = {
     transform: `translate3d(${view.panX}px, ${view.panY}px, 0) scale(${view.zoomLevel})`,
-    transformOrigin: '0 0',
+    transformOrigin: "0 0",
   };
 
   console.log(transformStyle);
@@ -41,12 +41,18 @@ export default function MermaidRenderer({
         padding: 10,
         useMaxWidth: false,
       },
+      theme: "dark",
+      themeVariables: {
+        lineColor: '#5B5967',
+        arrowheadColor: '5B5967',
+      },
+      securityLevel: "loose",
     });
 
     if (!containerRef.current) return;
 
     // 2. Generate a unique ID for the Mermaid diagram
-    const id = 'mermaid-' + Math.random().toString(36).substring(2);
+    const id = "mermaid-" + Math.random().toString(36).substring(2);
 
     // 3. Render the Mermaid code
     mermaid
@@ -57,7 +63,7 @@ export default function MermaidRenderer({
         containerRef.current.onclick = (e: MouseEvent) => {
           if (view.isPanActive) return;
 
-          const nodeElement = (e.target as Element).closest('.node');
+          const nodeElement = (e.target as Element).closest(".node");
           if (!nodeElement) return;
 
           const mermaidId = nodeElement.id;
@@ -72,11 +78,11 @@ export default function MermaidRenderer({
             e.preventDefault();
             e.stopPropagation();
 
-            if (matchedNode.type === 'FILE') {
-              console.log('📗file clicked!');
+            if (matchedNode.type === "FILE") {
+              console.log("📗file clicked!");
               openFileOnClick(matchedNode.path);
-            } else if (matchedNode.type === 'FOLDER') {
-              console.log('📕 folder clicked!');
+            } else if (matchedNode.type === "FOLDER") {
+              console.log("📕 folder clicked!");
               openFolderOnClick(matchedNode.path);
             }
           }
@@ -84,7 +90,7 @@ export default function MermaidRenderer({
       })
       .catch((err: Error) => {
         // Handle rendering errors and display them
-        console.error('MERMAID ERROR:', err);
+        console.error("MERMAID ERROR:", err);
         containerRef.current!.innerHTML = `<pre style="color:red; white-space: pre-wrap; word-break: break-all;">Mermaid Rendering Error: ${String(
           err
         )}</pre>`;
@@ -94,8 +100,8 @@ export default function MermaidRenderer({
   //change cursor to grab if pan is activated
   const cursorStyle = view.isPanActive
     ? isDragging
-      ? 'grabbing'
-      : 'grab'
+      ? "grabbing"
+      : "grab"
     : undefined;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -105,7 +111,7 @@ export default function MermaidRenderer({
       x: e.clientX,
       y: e.clientY,
     };
-    console.log('is dragging', isDragging);
+    console.log("is dragging", isDragging);
     e.preventDefault();
   };
 
@@ -143,7 +149,7 @@ export default function MermaidRenderer({
       x: e.clientX,
       y: e.clientY,
     };
-    console.log('panX after', view.panX);
+    console.log("panX after", view.panX);
   };
 
   const handleMouseUp = () => {
@@ -158,11 +164,10 @@ export default function MermaidRenderer({
       className={`relative w-full h-full overflow-hidden flex items-center justify-center${
         isDragging ? 'dragging' : ''
       }`}
-      style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
+      style={{ cursor: cursorStyle, pointerEvents: "auto" }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
+      onMouseUp={handleMouseUp}>
       <div
         ref={containerRef}
         className='mermaid-container'
