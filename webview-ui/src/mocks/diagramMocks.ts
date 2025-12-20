@@ -1,4 +1,4 @@
-import type { AiPayload } from '../types';
+import type { AiPayload } from '../types/ipcTypes';
 
 export const simpleDiagramMock: AiPayload = {
   type: 'DIAGRAM' as const,
@@ -14,4 +14,4 @@ export const simpleDiagramMock: AiPayload = {
       edges: [{ source: 'A', target: 'B' }],
     },
   },
-};
+} as const;

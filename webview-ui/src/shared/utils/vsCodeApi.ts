@@ -1,14 +1,14 @@
-import type { DiagramData } from '../state/diagramTypes';
-import type { Dispatch } from './guidedFlow';
+import type { DiagramData } from '../../types/diagramTypes';
+import type { Dispatch } from '../../features/drift/guidedFlow';
 import type {
   MessageToFrontend,
   SaveResponse,
   LoadSavedDiagramResponse,
   SavedUserApiKey,
   UserApiKeySuccess,
-} from '../utils/ipcTypes';
-import { handleDriftCheckReport } from './guidedFlow';
-import type { DriftPayload } from './guidedFlow';
+} from '../../types/ipcTypes';
+import { handleDriftCheckReport } from '../../features/drift/guidedFlow';
+import type { DriftPayload } from '../../features/drift/guidedFlow';
 
 declare global {
   interface VsCodeApi {

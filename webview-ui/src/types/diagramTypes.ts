@@ -101,6 +101,7 @@ export type GuidedAction =
 
 type DiagramEntryType = 'DIAGRAM_CONTENT' | 'VIEW_ARCHIVE';
 type TextEntryType = 'TEXT_INPUT' | 'TEXT_RESPONSE';
+
 export type Options = {
   text: string;
   action: GuidedAction;
