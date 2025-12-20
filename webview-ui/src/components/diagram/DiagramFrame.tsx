@@ -34,7 +34,7 @@ export default function DiagramFrame({
     };
   }, [isFullscreen]);
 
-  const panelClasses = `relative w-full max-w-full bg-[#1f1a24] rounded-lg p-5 overflow-hidden shadow-2xl ${
+  const panelClasses = `relative w-full max-w-full min-h-[300px] bg-[#1f1a24] rounded-lg p-5 overflow-hidden shadow-2xl ${
     isFullscreen ? 'h-full flex flex-col' : ''
   }`;
   const wrapperPadding = isFullscreen ? '0px' : '20px';
@@ -43,30 +43,46 @@ export default function DiagramFrame({
     return;
   }
 
+  const minSaving = 1000;
+
   const handleSave = async () => {
     if (saveStatus === 'saving') return;
     if (!entry || !entry.diagramData) return null;
 
     const { diagramData } = entry;
 
+    const startedAt = Date.now();
     setSaveStatus('saving');
 
     try {
       const response = await postDiagramToSave(sessionId, diagramData);
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, minSaving - elapsed);
+
       if (response.command === 'AI_RESPONSE') {
         if (response.payload.type === 'DIAGRAM_SAVED') {
-          setSaveStatus('saved');
-          setTimeout(() => setSaveStatus('idle'), 3000);
+          window.setTimeout(() => {
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+          }, remaining);
         } else {
-          setSaveStatus('error');
-          console.error('save failed'); //change this line later so user sees different feedback
+          window.setTimeout(() => {
+            setSaveStatus('error');
+          }, remaining);
         }
       } else if (response.command === 'ERROR') {
-        setSaveStatus('error');
+        window.setTimeout(() => {
+          setSaveStatus('error');
+        }, remaining);
         console.error('Backend Error:', response.payload.message);
       }
     } catch (error) {
-      setSaveStatus('error');
+      const elapsed = Date.now() - startedAt;
+      const remaining = Math.max(0, minSaving - elapsed);
+
+      window.setTimeout(() => {
+        setSaveStatus('error');
+      }, remaining);
       throw new Error(`there was an error while saving diagram, ${error}`);
     }
   };

@@ -18,6 +18,7 @@ export const initialState = {
     panY: 0,
     isFullscreen: false,
     isLoading: false,
+    showStarterOptions: false,
     isPanActive: false,
     isChatEnabled: true, //NEW - added this for drift feature
     lastLLMMessage: '',

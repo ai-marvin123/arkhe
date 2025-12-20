@@ -62,10 +62,13 @@ export default function AIChat() {
           type='text'
           value={prompt}
           onChange={handleOnChange}
+          aria-label='Chat with AI to create and edit diagram'
+          role='textbox'
           placeholder='Type here'
           disabled={isLoading || !isChatEnabled}
         />
         <button
+          className='transition duration-150 hover:brightness-125'
           type='submit'
           aria-label='Send Message'
           disabled={isLoading || !isChatEnabled}
