@@ -1,4 +1,4 @@
-import type { DiagramEntry } from "../../state/diagramTypes";
+import type { DiagramEntry } from "../../types/diagramTypes";
 import { useDiagramDispatch } from "../../state/diagramContext";
 
 interface AiMessageAccordionProps {

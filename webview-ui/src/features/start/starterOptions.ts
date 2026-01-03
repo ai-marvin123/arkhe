@@ -1,5 +1,5 @@
-import { requestStructure } from './vsCodeApi';
-import type { DiagramAction } from '../state/diagramTypes';
+import { requestStructure } from '../../shared/utils/vsCodeApi';
+import type { DiagramAction } from '../../types/diagramTypes';
 export const STARTER_OPTIONS = [
   {
     id: 'starter_web',

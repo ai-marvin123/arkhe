@@ -1,8 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import mermaid from "mermaid";
-import type { ViewSettings, Node } from "../../state/diagramTypes";
+import type { ViewSettings, Node } from "../../types/diagramTypes";
 import { useDiagramDispatch } from "../../state/diagramContext";
-import { openFileOnClick, openFolderOnClick } from "../../utils/vsCodeApi";
+import {
+  openFileOnClick,
+  openFolderOnClick,
+} from "../../shared/utils/vsCodeApi";
 
 interface MermaidRenderResult {
   view: ViewSettings;
