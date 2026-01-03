@@ -382,7 +382,7 @@ export class CommandHandler {
               preview: false,
             });
           } catch (err) {
-            console.error('[CommandHandler] OPEN_FILE failed:', err);
+            console.error('[CommandHandler] OPEN_FILE failed!');
             this.sendError('Failed to open file.');
           }
           break;
@@ -400,7 +400,7 @@ export class CommandHandler {
 
             await vscode.commands.executeCommand('revealInExplorer', uri);
           } catch (err) {
-            console.error('[CommandHandler] OPEN_FOLDER failed:', err);
+            console.error('[CommandHandler] OPEN_FOLDER failed!');
             this.sendError('Failed to reveal folder in Explorer.');
           }
           break;

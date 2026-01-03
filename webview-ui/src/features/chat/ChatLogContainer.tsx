@@ -6,17 +6,11 @@ import UserBubble from './UserBubble';
 import AIBubble from './AiBubble';
 import DiagramFrame from '../diagram/DiagramFrame';
 import AiMessageAccordion from './AiMessageAccordion';
-import {
-  startDriftCheck,
-  executeSyncAction,
-} from '../drift/guidedFlow';
+import { startDriftCheck, executeSyncAction } from '../drift/guidedFlow';
 import type { Dispatch } from '../drift/guidedFlow';
 import OptionsButton from '../drift/Options';
 import type { GuidedAction } from '../../types/diagramTypes';
-import {
-  STARTER_OPTIONS,
-  createStarterAction,
-} from '../start/starterOptions';
+import { STARTER_OPTIONS, createStarterAction } from '../start/starterOptions';
 
 interface GuidedTextEntry {
   id: string;
