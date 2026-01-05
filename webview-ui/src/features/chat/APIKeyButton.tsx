@@ -35,6 +35,12 @@ export default function APIKeyButton() {
       setError("Please fill out this field");
       return;
     }
+    // quick client-side sanity check before hitting backend
+    const looksLikeOpenAIKey = /^sk-[A-Za-z0-9]{20,}$/.test(apiKeyInput);
+    if (!looksLikeOpenAIKey) {
+      setError("Please enter a valid API key");
+      return;
+    }
 
     try {
       type SaveResponse = {
@@ -49,7 +55,10 @@ export default function APIKeyButton() {
         apiKeyInput
       );
       const success = response.payload?.success ?? response.success ?? false;
-      const message = response.payload?.message ?? response.message;
+      const message =
+        response.payload?.message ??
+        response.message ??
+        "Please enter a valid API key.";
 
       if (!success) {
         setError(message ?? "");
@@ -116,7 +125,7 @@ export default function APIKeyButton() {
           </div>
           {apiKey.trim().length > 0 && (
             <p className="text-[0.6rem] text-[#6b7280]">
-              Your key willl be saved locally on VScode
+              Your key will be saved locally on VScode
             </p>
           )}
           {error && (

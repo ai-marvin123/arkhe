@@ -92,6 +92,16 @@ export function sendUserApiKey(
         resolve(message);
         return;
       }
+      if (message.command === 'SETTINGS_ERROR') {
+        window.removeEventListener('message', listener);
+        reject(
+          new Error(
+            message.payload?.message ||
+              'Invalid API key. Please check the key and try again.'
+          )
+        );
+        return;
+      }
       if (message.command === 'ERROR') {
         window.removeEventListener('message', listener);
         reject(
