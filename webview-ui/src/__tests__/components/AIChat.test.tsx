@@ -1,98 +1,104 @@
-// import { describe, test, expect, vi, beforeEach } from 'vitest';
-// import { render, fireEvent, screen } from '@testing-library/react';
-// import AIChat from '../../components/layout/Aichat';
-// import type { requestStructure } from '../../utils/vsCodeApi';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render, fireEvent, screen } from '@testing-library/react';
+import AIChat from '../../features/chat/Aichat';
+import { requestStructure } from '../../shared/utils/vsCodeApi';
+import {
+  useDiagramState,
+  useDiagramDispatch,
+} from '../../state/diagramContext';
+import { mockInitialState } from '../../mocks/mockInitialState';
+import type { DiagramState } from '../../types/diagramTypes';
+vi.mock('../../shared/utils/vsCodeApi', () => ({
+  requestStructure: vi.fn(),
+}));
 
-// vi.mock('../../utils/vsCodeApi', () => ({
-//   requestStructure: mockRequestStructure,
-// }));
+vi.mock('../../state/diagramContext', () => ({
+  useDiagramState: vi.fn(),
+  useDiagramDispatch: vi.fn(),
+}));
 
-// // Set up the mocks for imports
-// vi.mock('../../state/diagramContext', () => ({
-//   useDiagramState: () => mockState,
-//   useDiagramDispatch: () => mockDispatch,
-// }));
+describe('AIChat Component - API Response Handling', () => {
+  const mockDispatch = vi.fn();
 
-// // Mock the custom hooks used by the component
-// const mockDispatch = vi.fn();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useDiagramDispatch).mockReturnValue(mockDispatch);
+    vi.mocked(useDiagramState).mockReturnValue({
+      ...mockInitialState,
+      chat: {
+        ...mockInitialState.chat,
+        currentInput: 'Update my diagram',
+      },
+      view: {
+        ...mockInitialState.view,
+        isLoading: false,
+        isChatEnabled: true,
+      },
+    } as DiagramState);
+  });
 
-// // Mock the API service call (Crucial for controlling the async response)
-// const mockRequestStructure = vi.fn();
+  test('should dispatch load_newDiagram when payload type is DIAGRAM', async () => {
+    const mockDiagramRes = {
+      command: 'AI_RESPONSE' as const,
+      payload: {
+        type: 'DIAGRAM' as const,
+        message: 'Success!',
+        data: {
+          mermaidSyntax: 'graph TD; A-->B',
+          jsonStructure: { nodes: [], edges: [] },
+        },
+      },
+    };
+    vi.mocked(requestStructure).mockResolvedValue(mockDiagramRes);
 
-// const mockState = {
-//   chat: { currentInput: 'test prompt' },
-//   session: { sessionId: 'TEST-SESSION-123' },
-//   view: { isLoading: false },
-// };
+    render(<AIChat />);
+    fireEvent.click(screen.getByRole('button', { name: /send message/i }));
 
-// // Define the FULL MessageToFrontend structure for success
-// const mockMessageToFrontendSuccess = {
-//   command: 'AI_RESPONSE' as const,
-//   payload: {
-//     type: 'DIAGRAM' as const,
-//     message: 'Blueprint V2 successfully generated.',
-//     data: {
-//       mermaidSyntax: 'STYLED::graph TD; A[App];',
-//       jsonStructure: {
-//         nodes: [
-//           /* ... */
-//         ],
-//         edges: [],
-//       },
-//     },
-//   },
-// };
+    await vi.waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'load_newDiagram',
+        payload: { message: 'Success!', data: mockDiagramRes.payload.data },
+      });
+    });
+  });
 
-// // Define the FULL MessageToFrontend structure for text-only
-// const mockMessageToFrontendText = {
-//   command: 'AI_RESPONSE' as const,
-//   payload: {
-//     type: 'TEXT' as const,
-//     message: 'Error: Please clarify your prompt.',
-//     data: null,
-//   },
-// };
+  // --- BRANCH 2: TEXT RESPONSE ---
+  test('should dispatch load_textOnly when payload type is TEXT', async () => {
+    const mockTextRes = {
+      command: 'AI_RESPONSE' as const,
+      payload: {
+        type: 'TEXT' as const,
+        message: 'I need more information.',
+      },
+    };
+    vi.mocked(requestStructure).mockResolvedValue(mockTextRes);
 
-// describe('AIChatInput Submission Flow', () => {
-//   beforeEach(() => {
-//     vi.clearAllMocks();
-//     // Control the API response for success
-//     mockRequestStructure.mockResolvedValue(mockMessageToFrontendSuccess);
-//   });
+    render(<AIChat />);
+    fireEvent.click(screen.getByRole('button', { name: /send message/i }));
 
-//   test('should dispatch send_userInput and load_textOnly on error/text response', async () => {
-//     // ARRANGE 1: Set the API to return the text-only error immediately
-//     mockRequestStructure.mockResolvedValue(mockMessageToFrontendText);
+    await vi.waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'load_textOnly',
+        payload: { message: 'I need more information.' },
+      });
+    });
+  });
 
-//     // ARRANGE 2: Render the component into the simulated DOM
-//     render(<AIChat />);
+  // --- BRANCH 3: CATCH ERROR ---
+  test('should dispatch load_textOnly with error message when API call fails', async () => {
+    const errorMsg = 'Timeout';
+    vi.mocked(requestStructure).mockRejectedValue(errorMsg);
 
-//     // Mock state setup (ensures button is not disabled and has text to send)
-//     mockState.chat.currentInput = 'Confusing prompt.';
-//     mockState.view.isLoading = false; // Ensure loading is off for button to be clickable
+    render(<AIChat />);
+    fireEvent.click(screen.getByRole('button', { name: /send message/i }));
 
-//     // ACT 1: Get the button element using its accessible name
-//     const submitButton = screen.getByRole('button', { name: /send message/i });
-
-//     // ACT 2: Simulate clicking the submit button
-//     fireEvent.click(submitButton);
-
-//     // ASSERTION 1 (Synchronous Check): Verify the initial dispatch to start the process
-//     expect(mockDispatch).toHaveBeenCalledTimes(1);
-//     expect(mockDispatch).toHaveBeenCalledWith({ type: 'send_userInput' });
-
-//     await vi.waitFor(() => {
-//       // ASSERTION 2 (Async Check): Verify the API call was made
-//       expect(mockRequestStructure).toHaveBeenCalledTimes(1);
-
-//       // ASSERTION 3 (Final Dispatch Check): Verify the correct final action was dispatched
-//       // We expect the second dispatch to be load_textOnly with the inner payload
-//       expect(mockDispatch).toHaveBeenCalledTimes(2);
-//       expect(mockDispatch).toHaveBeenCalledWith({
-//         type: 'load_textOnly',
-//         // Pass the inner AiPayload from the mock
-//         payload: mockMessageToFrontendText.payload,
-//       });
-//     });
-//   });
-// });
+    await vi.waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'load_textOnly',
+        payload: {
+          message: `${errorMsg} API Error: Failed to connect to the backend.`,
+        },
+      });
+    });
+  });
+});
