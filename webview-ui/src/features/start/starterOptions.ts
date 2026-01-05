@@ -22,10 +22,18 @@ export const STARTER_OPTIONS = [
     prompt:
       'Generate a clean folder architecture for a Flutter mobile application. Focus on the "lib" directory organization, including folders for models, views, controllers (MVC), and common widgets, along with the assets and test structure.',
   },
+
+  {
+    id: 'starter_existing_repo',
+    label: 'Visualize Existing Repo',
+    icon: 'folder-active',
+    prompt: 'Generate a diagram of my current repo structure.',
+  },
 ];
 export const createStarterAction = async (
   prompt: string,
   sessionId: string,
+
   dispatch: React.Dispatch<DiagramAction>
 ) => {
   dispatch({
