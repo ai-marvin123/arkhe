@@ -100,8 +100,8 @@ src/
 
 #### **Dev: Wiring (Integration)**
 
-- [ ] Update `src/handlers/CommandHandler.ts`.
-- [ ] Case `GENERATE_STRUCTURE`:
+- [x] Update `src/handlers/CommandHandler.ts`.
+- [x] Case `GENERATE_STRUCTURE`:
   - Send `PROCESSING_STATUS` (`analyzing` -\> `generating`).
   - Call `AiService.generateStructure`.
   - Send `AI_RESPONSE` (Type: `DIAGRAM`).
