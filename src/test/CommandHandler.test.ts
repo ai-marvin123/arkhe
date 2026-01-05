@@ -320,7 +320,7 @@ describe('CommandHandler Test Suite (Ultimate Coverage)', () => {
     expect(FileService.resolveAbsolutePath).toHaveBeenCalledWith('src');
   });
 
-  it('OPEN_FOLDER: handles folder not found', async () => {
+ it('OPEN_FOLDER: handles folder not found', async () => {
     (FileService.resolveAbsolutePath as jest.Mock).mockReturnValue(null);
     await handler.handle({
       command: 'OPEN_FOLDER',
@@ -328,6 +328,53 @@ describe('CommandHandler Test Suite (Ultimate Coverage)', () => {
     } as any);
     expect(postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ command: 'ERROR' })
+    );
+  });
+
+  it('GENERATE_REPO: scans disk and returns diagram', async () => {
+    (FileService.scanDirectory as jest.Mock).mockResolvedValue({
+      nodes: [{ id: 'root/file.ts', label: 'file.ts', path: '/root/file.ts' }],
+      edges: [{ source: 'root', target: 'root/file.ts' }],
+    });
+    (DriftService.generateDiagramData as jest.Mock).mockReturnValue({
+      mermaidSyntax: 'graph TD',
+      jsonStructure: { nodes: [], edges: [] },
+    });
+
+    await handler.handle({
+      command: 'GENERATE_REPO',
+      payload: { sessionId: 's1' },
+    } as any);
+
+    expect(FileService.scanDirectory).toHaveBeenCalledWith('s1');
+    expect(DriftService.generateDiagramData).toHaveBeenCalled();
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        command: 'AI_RESPONSE',
+        payload: expect.objectContaining({ type: 'DIAGRAM' }),
+      })
+    );
+  });
+
+  it('GENERATE_REPO: handles empty workspace', async () => {
+    (FileService.scanDirectory as jest.Mock).mockResolvedValue({
+      nodes: [],
+      edges: [],
+    });
+
+    await handler.handle({
+      command: 'GENERATE_REPO',
+      payload: { sessionId: 's1' },
+    } as any);
+
+    expect(postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        command: 'AI_RESPONSE',
+        payload: expect.objectContaining({
+          type: 'TEXT',
+          message: expect.stringContaining('Workspace is empty'),
+        }),
+      })
     );
   });
 });

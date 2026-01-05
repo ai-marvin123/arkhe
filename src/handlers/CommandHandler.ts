@@ -37,6 +37,44 @@ export class CommandHandler {
           break;
         }
 
+          case 'GENERATE_REPO': {
+           const { sessionId } = msg.payload;
+
+        const { nodes: actualNodes, edges: actualEdges } =
+          await this.fileService.scanDirectory(sessionId);
+
+        if (!actualNodes.length) {
+          this.panel.webview.postMessage({
+            command: 'AI_RESPONSE',
+            payload: {
+              type: 'TEXT',
+              message: 'Workspace is empty. Cannot generate diagram.',
+            },
+          });
+          break;
+        }
+
+        const cleanNodes = actualNodes.map((n) => ({ ...n}));
+        const responsePayload = {
+          type: 'DIAGRAM',
+          message: 'Repository structure visualized from disk.',
+          data: DriftService.generateDiagramData(cleanNodes, actualEdges),
+        };
+
+        this.panel.webview.postMessage({
+          command: 'AI_RESPONSE',
+          payload: responsePayload as any,
+        });
+
+        await aiService.saveContext(
+          sessionId,
+          'Visualized repository structure from disk.',
+          responsePayload as any
+        );
+
+        break;
+      }
+      
         case 'RESET_SESSION': {
           const { sessionId } = msg.payload;
 
