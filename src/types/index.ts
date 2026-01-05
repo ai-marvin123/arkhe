@@ -122,6 +122,7 @@ export type MessageToBackend =
       payload: { sessionId: string; prompt: string };
     }
   | { command: 'RESET_SESSION'; payload: { sessionId: string } }
+  | { command: 'GENERATE_REPO'; payload: { sessionId: string } }
   | {
       command: 'SAVE_DIAGRAM';
       payload: { sessionId: string; diagramData: any };
