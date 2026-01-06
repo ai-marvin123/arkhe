@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   console.log('Arkhe Extension is active!');
 
-  const disposable = vscode.commands.registerCommand('arkhe.helloWorld', () => {
+  const disposable = vscode.commands.registerCommand('arkhe.openChat', () => {
     const panel = vscode.window.createWebviewPanel(
       'reactWebview',
       'React VS Code Extension',
