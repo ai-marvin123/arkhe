@@ -36,7 +36,7 @@ export default function APIKeyButton() {
       return;
     }
     // quick client-side sanity check before hitting backend
-    const looksLikeOpenAIKey = /^sk-[A-Za-z0-9]{20,}$/.test(apiKeyInput);
+    const looksLikeOpenAIKey = /^sk-[A-Za-z0-9_-]{20,}$/.test(apiKeyInput);
     if (!looksLikeOpenAIKey) {
       setError("Please enter a valid API key");
       return;
@@ -98,7 +98,7 @@ export default function APIKeyButton() {
         onSubmit={handleSubmit}>
         <div className="space-y-1">
           <label
-            className="text-[0.65rem] font-semibold uppercase tracking-widest text-[#9ca3af]"
+            className="text-[0.65rem] font-semibold uppercase tracking-widest text-[#e5e7eb]"
             htmlFor="openai-key">
             OpenAI Key
           </label>
@@ -139,7 +139,7 @@ export default function APIKeyButton() {
         </div>
 
         <div className="mt-4 space-y-2">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-[#9ca3af]">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-[#e5e7eb]">
             Model
           </p>
           {MODEL_OPTIONS.map((option) => (
@@ -153,7 +153,7 @@ export default function APIKeyButton() {
                 defaultChecked={option.value === MODEL_OPTIONS[0].value}
                 className="h-3 w-3 accent-[#a78bfa]"
               />
-              <span className="text-[#e5e7eb]">{option.label}</span>
+              <span className="text-[#9ca3af]">{option.label}</span>
             </label>
           ))}
         </div>
@@ -161,7 +161,7 @@ export default function APIKeyButton() {
         <div className="mt-4 flex items-center justify-end text-[0.65rem] text-[#6b7280]">
           <button
             type="submit"
-            className="rounded-full border border-[#008c6e] bg-[#008c6e] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#ffffff] filter hover:brightness-125 transition duration-150 hover:opacity-90">
+            className="rounded-full border border-[#008c6e] bg-[#008c6e] px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#ffffff] filter hover:brightness-125 transition duration-150 hover:opacity-90 cursor-pointer">
             Save
           </button>
         </div>

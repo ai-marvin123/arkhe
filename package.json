@@ -17,6 +17,51 @@
         "command": "arkhe.helloWorld",
         "title": "Arkhe"
       }
+    ],
+    "walkthroughs": [
+      {
+        "id": "arkheTour",
+        "title": "Getting Started with Arkhe",
+        "description": "Master AI-driven architecture visualization in 4 steps.",
+        "steps": [
+          {
+            "id": "welcome",
+            "title": "Welcome to Arkhe",
+            "description": "Arkhe transforms complex codebases into interactive diagrams. Perfect for mapping legacy code or planning new features.",
+            "media": {
+              "image": "media/hero.png",
+              "altText": "Arkhe Overview"
+            }
+          },
+          {
+            "id": "setup",
+            "title": "Step 1: Connect your AI",
+            "description": "To enable AI-assisted generation, enter your API key and select your preferred model in the settings.",
+            "media": {
+              "image": "media/keygif.gif",
+              "altText": "API Configuration"
+            }
+          },
+          {
+            "id": "create",
+            "title": "Step 2: Choose or Describe Your Architecture",
+            "description": "Begin by selecting a suggested option or by chatting with Arkhe. Scroll and interact with previous diagrams to track how your thinking evolves.",
+            "media": {
+              "image": "media/chat-start.png",
+              "altText": "Arkhe prompt input with starter templates"
+            }
+          },
+          {
+            "id": "align",
+            "title": "Step 3: Save & Align",
+            "description": "Save a diagram as your architectural reference. When you reopen Arkhe, compare your current codebase against the saved blueprint to identify drift and keep your implementation aligned with your intent.",
+            "media": {
+              "image": "media/alignment-check.png",
+              "altText": "Architecture Alignment"
+            }
+          }
+        ]
+      }
     ]
   },
   "scripts": {
