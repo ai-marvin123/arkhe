@@ -12,17 +12,17 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-marvin123/arkhe.git"
+  },
   "contributes": {
     "commands": [
       {
         "command": "arkhe.openChat",
         "title": "Arkhe: Open Chat"
       }
-    ],
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/ai-marvin123/arkhe.git"
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package-ext && npm run build:webview",
