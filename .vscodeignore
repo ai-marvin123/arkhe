@@ -9,4 +9,19 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# --- ADD THESE LINES ---
+.env
+jest.config.js
+tsconfig.tsbuildinfo
+
+# 1. Ignore EVERYTHING in webview-ui
+webview-ui/**
+
+# 2. But bring back ONLY the build folder
 !webview-ui/build/**
+
+# exclude node_modules
+node_modules/**
+
+docs/**

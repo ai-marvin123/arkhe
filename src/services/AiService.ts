@@ -12,10 +12,12 @@ import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
 import { StructureNode } from '../types';
 
 import { ConfigManager } from '../managers/ConfigManager';
+import { FileService } from './FileService';
+import { DriftService } from './DriftService';
 
 const SYSTEM_PROMPT = `
 You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
-Respond strictly in JSON format. MODE A | MODE B.
+Respond strictly in JSON format. MODE A | MODE B | MODE C.
 
 MODE A: SUFFICIENT DATA. Format:
 {
@@ -42,6 +44,15 @@ MODE B: INSUFFICIENT DATA. Format:
 {
   "type": "TEXT",
   "message": "Politely ask for clarification.",
+  "data": null
+}
+
+MODE C: VISUALIZE CURRENT/EXISTING REPO.
+Use this when the user explicitly asks to see, scan, or map the *current* actual file structure on the disk (e.g., "show me the current repo", "visualize my code", "map existing project").
+Format:
+{
+  "type": "TRIGGER_SCAN",
+  "message": "Repository structure visualized from disk.",
   "data": null
 }
 
@@ -177,7 +188,46 @@ class AiService {
         input: userPrompt,
       });
 
-      // console.log('rawJson', rawJson);
+      // --- MODE C (TRIGGER_SCAN) ---
+      if (rawJson?.type === 'TRIGGER_SCAN') {
+        console.log('[AiService] Mode C detected. Scanning disk...');
+
+        // 1. Scan Disk
+        const { nodes: actualNodes, edges: actualEdges } =
+          await FileService.scanDirectory(sessionId);
+
+        // 2. Handle Empty Workspace
+        if (!actualNodes.length) {
+          const emptyPayload: AiPayload = {
+            type: 'TEXT',
+            message: 'Workspace is empty. Cannot generate diagram from disk.',
+            data: undefined,
+          };
+
+          await history.addUserMessage(userPrompt);
+          await history.addAIMessage(this.minifyPayload(emptyPayload));
+          return emptyPayload;
+        }
+
+        // 3. Construct Real Diagram Payload
+        const cleanNodes = actualNodes.map((n) => ({ ...n }));
+        const diagramData = DriftService.generateDiagramData(
+          cleanNodes,
+          actualEdges
+        );
+
+        const realPayload: AiPayload = {
+          type: 'DIAGRAM',
+          message: 'Repository structure visualized from disk.',
+          data: diagramData,
+        };
+
+        // 4. Save Context & Return
+        await history.addUserMessage(userPrompt);
+        await history.addAIMessage(this.minifyPayload(realPayload));
+
+        return realPayload;
+      }
 
       // --- CRITICAL STEP: Inject Mermaid Syntax BEFORE Validation ---
       // We process the raw JSON here. If it's a DIAGRAM type, we calculate the mermaid string
