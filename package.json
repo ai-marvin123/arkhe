@@ -1,8 +1,9 @@
 {
   "name": "arkhe",
-  "displayName": "arkhe",
-  "description": "AI Agent to visualize your idea",
-  "version": "0.0.1",
+  "displayName": "Arkhe",
+  "description": "Visualize. Collaborate. Evolve.",
+  "version": "1.0.0",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -11,23 +12,27 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-marvin123/arkhe.git"
+  },
   "contributes": {
     "commands": [
       {
-        "command": "arkhe.helloWorld",
-        "title": "Arkhe"
+        "command": "arkhe.openChat",
+        "title": "Arkhe: Open Chat"
       }
     ],
     "walkthroughs": [
       {
         "id": "arkheTour",
-        "title": "Getting Started with Arkhe",
-        "description": "Master AI-driven architecture visualization in 4 steps.",
+        "title": "Get Started with Arkhe",
+        "description": "Ideate, visualize, and track your codebase structure.",
         "steps": [
           {
             "id": "welcome",
             "title": "Welcome to Arkhe",
-            "description": "Arkhe transforms complex codebases into interactive diagrams. Perfect for mapping legacy code or planning new features.",
+            "description": "Arkhe is an AI-assisted tool for ideating, visualizing, and tracking codebase structure. It combines conversation and visualization to help you clarify ideas, explore architectural options, and translate intent into a concrete blueprint—whether you’re starting fresh or working from an existing codebase.",
             "media": {
               "image": "media/hero.png",
               "altText": "Arkhe Overview"
@@ -47,7 +52,7 @@
             "title": "Step 2: Choose or Describe Your Architecture",
             "description": "Begin by selecting a suggested option or by chatting with Arkhe. Scroll and interact with previous diagrams to track how your thinking evolves.",
             "media": {
-              "image": "media/chat-start.png",
+              "image": "media/promptingfinal.gif",
               "altText": "Arkhe prompt input with starter templates"
             }
           },
@@ -56,7 +61,7 @@
             "title": "Step 3: Save & Align",
             "description": "Save a diagram as your architectural reference. When you reopen Arkhe, compare your current codebase against the saved blueprint to identify drift and keep your implementation aligned with your intent.",
             "media": {
-              "image": "media/alignment-check.png",
+              "image": "media/driftcheck.gif",
               "altText": "Architecture Alignment"
             }
           }
@@ -65,10 +70,11 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile && npm run build:webview",
+    "vscode:prepublish": "npm run package-ext && npm run build:webview",
+    "package-ext": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "compile": "tsc -b",
     "build:webview": "cd webview-ui && npm run build",
     "watch:webview": "cd webview-ui && npm run build -- --watch",
-    "compile": "tsc -b",
     "watch": "tsc -b -w",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
@@ -82,7 +88,9 @@
     "@types/vscode": "^1.106.1",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.1",
+    "happy-dom": "^20.0.11",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
@@ -91,10 +99,10 @@
   },
   "dependencies": {
     "@langchain/core": "^1.1.1",
-    "@langchain/google-genai": "^2.0.1",
     "@langchain/openai": "^1.1.3",
     "dotenv": "^17.2.3",
     "ignore": "^7.0.5",
+    "jsdom": "^27.3.0",
     "langchain": "^1.1.2",
     "mermaid": "^11.12.2",
     "zod": "^4.1.13"

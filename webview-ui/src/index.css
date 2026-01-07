@@ -22,15 +22,17 @@ body {
   background: #000000; /* optional: VS Code-ish dark bg */
   color: #e5e7eb;
   overflow: hidden; /* prevent page scroll; only middle scrolls */
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
 .fixed-bar {
   flex: 0 0 auto; /* don't grow/shrink */
   width: 100%;
   max-width: 900px; /* center column width */
-  padding: 0.5rem 1rem;
+  padding: 0 1rem;
   box-sizing: border-box;
-  border-bottom: 1px solid #1f1a24;
+  /* border-bottom: 1px solid #1f1a24; */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,7 +62,7 @@ body {
   box-sizing: border-box;
   background: #121212;
   border-radius: 3px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .chat-input form {
