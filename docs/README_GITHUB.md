@@ -30,11 +30,11 @@ Whether you are starting a new project or refactoring an existing one, Arkhe ens
 
 ## ✨ Key Features
 
-- **🧠 AI-Powered Design**: Describe your stack (e.g., "Next.js with Prisma and tRPC") and get a best-practice folder structure generated instantly.
-- **📊 Instant Visualization**: See your architecture as an interactive **Mermaid.js** graph before you write a single line of code.
-- **🔍 Drift Detection**: Arkhe compares your architectural plan (`.repoplan.json`) against your actual file system to highlight missing or untracked files.
-- **🔄 Guided Sync**: A step-by-step wizard to resolve differences—update your plan or scaffold the missing files.
-- **🔒 Secure**: Your keys are stored safely using VS Code's native SecretStorage.
+- **AI-Powered Design**: Describe your stack (e.g., "Next.js with Prisma and tRPC") and get a best-practice folder structure generated instantly.
+- **Instant Visualization**: See your architecture as an interactive **Mermaid.js** graph before you write a single line of code.
+- **Drift Detection**: Arkhe compares your architectural plan (`.repoplan.json`) against your actual file system to highlight missing or untracked files.
+- **Guided Sync**: A step-by-step wizard to resolve differences—update your plan or scaffold the missing files.
+- **Secure**: Your keys are stored safely using VS Code's native SecretStorage.
 
 ## 🛠 Tech Stack
 

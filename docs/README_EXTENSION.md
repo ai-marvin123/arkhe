@@ -6,7 +6,7 @@
 
 **Arkhe** is your intelligent architectural companion living directly inside VS Code. It bridges the gap between conceptual design and physical implementation.
 
-## 🚀 Overview
+## Overview
 
 Arkhe helps you visualize abstract ideas into concrete folder structures using AI, renders them instanly as interactive Mermaid diagrams, and monitors the "drift" between your planned architecture and the actual file system.
 
@@ -19,9 +19,9 @@ Arkhe helps you visualize abstract ideas into concrete folder structures using A
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 1. 🧠 AI-Powered Architecture Design
+### 1. AI-Powered Architecture Design
 
 _Stop drawing boxes manually._
 
@@ -29,7 +29,7 @@ _Stop drawing boxes manually._
 - **Intelligent Generation**: Uses advanced LLMs to generate best-practice folder and file structures.
 - **Structured Output**: Consistent and parsable architecture definitions.
 
-### 2. 📊 Instant Visualization
+### 2. Instant Visualization
 
 _See your code before you write it._
 
@@ -37,7 +37,7 @@ _See your code before you write it._
 - **Interactive Nodes**: Clear differentiation between Folders and Files.
 - **Visual Feedback**: Immediate validation of your architecture.
 
-### 3. 🔍 Drift Detection & Management
+### 3. Drift Detection & Management
 
 _Keep your plan and reality aligned._
 
@@ -48,7 +48,7 @@ _Keep your plan and reality aligned._
   - ⚠️ **UNTRACKED**: On disk but not in plan.
 - **AI Analysis**: Explains _why_ drift occurred and suggests fixes.
 
-### 4. 🔄 Guided Synchronization Flow
+### 4. Guided Synchronization Flow
 
 _Resolve conflicts with confidence._
 
@@ -56,7 +56,7 @@ _Resolve conflicts with confidence._
 - **Sync to Actual**: One-click update to match file system.
 - **Keep Plan**: Preserve your architectural vision.
 
-### 5. 🔒 Secure & Developer-Centric
+### 5. Secure & Developer-Centric
 
 - **Local Execution**: File scanning and rendering happen locally.
 - **Secret Storage**: API keys stored securely via VS Code SecretStorage.
@@ -64,7 +64,7 @@ _Resolve conflicts with confidence._
 
 ---
 
-## 💡 How to Use
+## How to Use
 
 1.  **Open Arkhe**:
 
@@ -83,14 +83,14 @@ _Resolve conflicts with confidence._
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Arkhe uses the VS Code Secret Storage for your API keys to ensure security.
 
 1.  When prompted, enter your OpenAI API Key.
 2.  Arkhe will securely store it for future sessions.
 
-## 🛠 Technical Stack
+## Technical Stack
 
 Arkhe is built with:
 
@@ -99,7 +99,7 @@ Arkhe is built with:
 - **LangChain.js** (AI Orchestration)
 - **Mermaid.js** (Diagramming)
 
-## 🤝 Contributing & Support
+## Contributing & Support
 
 Found a bug or have a feature request? strictly [Open an issue](https://github.com/ai-marvin123/arkhe/issues) on our GitHub repository.
 
