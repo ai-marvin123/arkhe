@@ -114,6 +114,9 @@ body {
   background-color: #332940;
   color: #e5e7eb;
 }
+.view-buttons.active {
+  background-color: #332940;
+}
 
 /* Disabled state */
 .chat-input button:disabled {

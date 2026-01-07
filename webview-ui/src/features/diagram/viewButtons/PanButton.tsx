@@ -1,12 +1,13 @@
 interface PanButtonType {
   clickFunc: () => void;
+  isActive: boolean;
 }
 
-export default function PanButton({ clickFunc }: PanButtonType) {
+export default function PanButton({ clickFunc, isActive }: PanButtonType) {
   console.log('pan button');
   return (
     <button
-      className='view-buttons pan-button'
+      className={`view-buttons pan-button ${isActive ? 'active' : ''}`}
       aria-label='pan-diagram'
       onClick={clickFunc}
     >
