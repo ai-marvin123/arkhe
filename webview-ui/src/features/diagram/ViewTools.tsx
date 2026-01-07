@@ -1,9 +1,9 @@
-import { useDiagramDispatch } from '../../state/diagramContext';
-import type { ViewSettings } from '../../types/diagramTypes';
-import PanButton from './viewButtons/PanButton';
-import ZoomInButton from './viewButtons/ZoomInButton';
-import ZoomOutButton from './viewButtons/ZoomOutButton';
-import FullscreenButton from './viewButtons/FullScreenButton';
+import { useDiagramDispatch } from "../../state/diagramContext";
+import type { ViewSettings } from "../../types/diagramTypes";
+import PanButton from "./viewButtons/PanButton";
+import ZoomInButton from "./viewButtons/ZoomInButton";
+import ZoomOutButton from "./viewButtons/ZoomOutButton";
+import FullscreenButton from "./viewButtons/FullScreenButton";
 // import ViewAiMessageButton from './viewNavigation/ViewAiMessage';
 
 interface ViewToolstype {
@@ -20,33 +20,33 @@ export default function ViewTools({ id, view }: ViewToolstype) {
 
   //logic for pan
   const handlePan = () => {
-    console.log('pan clicked!', view.panX, view.panY);
+    // console.log('pan clicked!', view.panX, view.panY);
     const newIsPanActive = !view.isPanActive;
     dispatch({
-      type: 'update_logEntry',
+      type: "update_logEntry",
       payload: { id: id, isPanActive: newIsPanActive },
     });
   };
 
   //logic for zoom
   const handleZoomIn = () => {
-    console.log('zoom in clicked!');
+    // console.log('zoom in clicked!');
     const newZoom = Math.min(view.zoomLevel + zoomStep, maxZoom);
     dispatch({
-      type: 'update_logEntry',
+      type: "update_logEntry",
       payload: { id: id, zoomLevel: newZoom },
     });
   };
 
   const handleZoomOut = () => {
-    console.log('view level before', view.zoomLevel);
-    console.log('zoom out clicked!');
+    // console.log('view level before', view.zoomLevel);
+    // console.log('zoom out clicked!');
     const newZoom = Math.max(view.zoomLevel - zoomStep, minZoom);
     dispatch({
-      type: 'update_logEntry',
+      type: "update_logEntry",
       payload: { id: id, zoomLevel: newZoom },
     });
-    console.log('view level after', view.zoomLevel);
+    // console.log('view level after', view.zoomLevel);
   };
 
   //logic for fullscreen
@@ -57,13 +57,13 @@ export default function ViewTools({ id, view }: ViewToolstype) {
   const handleFullscreen = () => {
     const newValue = !view.isFullscreen;
     dispatch({
-      type: 'update_logEntry',
+      type: "update_logEntry",
       payload: { id, isFullscreen: newValue },
     });
 
     if (newValue === false) {
       dispatch({
-        type: 'update_logEntry',
+        type: "update_logEntry",
         payload: { id, panX: 0, panY: 0, zoomLevel: 1 },
       });
     }
@@ -79,7 +79,7 @@ export default function ViewTools({ id, view }: ViewToolstype) {
   // };
 
   return (
-    <div className='view-tools-container absolute bottom-2 right-2 flex space-x-2'>
+    <div className="view-tools-container absolute bottom-2 right-2 flex space-x-2">
       <PanButton clickFunc={handlePan} isActive={view.isPanActive} />
       <ZoomInButton clickFunc={handleZoomIn} />
       <ZoomOutButton clickFunc={handleZoomOut} />

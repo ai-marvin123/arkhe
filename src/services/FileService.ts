@@ -1,28 +1,28 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
-import { StructureNode, DiagramData } from '../types';
-import ignore = require('ignore');
-import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
+import { StructureNode, DiagramData } from "../types";
+import ignore = require("ignore");
+import { generateMermaidFromJSON } from "../utils/mermaidGenerator";
 
-const PLAN_FILENAME = '.repoplan.json';
+const PLAN_FILENAME = ".repoplan.json";
 
 export class FileService {
   static getWorkspaceRoot(): string | null {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders || folders.length === 0) {
-      console.warn('[FileService] No workspace folder detected.');
+      console.warn("[FileService] No workspace folder detected.");
       return null;
     }
     return folders[0].uri.fsPath;
   }
-static resolveAbsolutePath(virtualPath: string): string | null {
+  static resolveAbsolutePath(virtualPath: string): string | null {
     const root = this.getWorkspaceRoot();
     if (!root) {
       return null;
     }
 
-    const cleanedPath = virtualPath.replace(/^\/root\/?/, '');
+    const cleanedPath = virtualPath.replace(/^\/root\/?/, "");
     const absolutePath = path.join(root, cleanedPath);
 
     if (!fs.existsSync(absolutePath)) {
@@ -35,7 +35,7 @@ static resolveAbsolutePath(virtualPath: string): string | null {
     const root = this.getWorkspaceRoot();
     if (!root) {
       vscode.window.showWarningMessage(
-        'Arkhe: No workspace is open - cannot perform file operations.'
+        "Arkhe: No workspace is open - cannot perform file operations."
       );
       return null;
     }
@@ -69,7 +69,7 @@ static resolveAbsolutePath(virtualPath: string): string | null {
         },
       };
 
-      console.log('cleanDiagram.jsonStructure: ', cleanDiagram.jsonStructure);
+      // console.log('cleanDiagram.jsonStructure: ', cleanDiagram.jsonStructure);
 
       // 3. RE-GENERATE MERMAID (Based on clean data)
       if (cleanDiagram.jsonStructure) {
@@ -81,15 +81,15 @@ static resolveAbsolutePath(virtualPath: string): string | null {
       await fs.promises.writeFile(
         filePath,
         JSON.stringify(cleanDiagram, null, 2),
-        'utf8'
+        "utf8"
       );
 
-      console.log(`[FileService] Saved .repoplan.json → ${filePath}`);
+      // console.log(`[FileService] Saved .repoplan.json → ${filePath}`);
       return true;
     } catch (err) {
-      console.error('[FileService] Error writing .repoplan.json:', err);
+      console.error("[FileService] Error writing .repoplan.json:", err);
       vscode.window.showErrorMessage(
-        'Arkhe: Failed to save architecture plan.'
+        "Arkhe: Failed to save architecture plan."
       );
       return false;
     }
@@ -105,20 +105,20 @@ static resolveAbsolutePath(virtualPath: string): string | null {
 
     // If file does NOT exist → return null
     if (!fs.existsSync(filePath)) {
-      console.log('[FileService] No saved .repoplan.json found');
+      // console.log('[FileService] No saved .repoplan.json found');
       return null;
     }
 
     try {
-      const fileContent = await fs.promises.readFile(filePath, 'utf8');
+      const fileContent = await fs.promises.readFile(filePath, "utf8");
       const diagram: DiagramData = JSON.parse(fileContent);
 
-      console.log(`[FileService] Loaded saved diagram from ${filePath}`);
+      // console.log(`[FileService] Loaded saved diagram from ${filePath}`);
       return diagram;
     } catch (err) {
-      console.error('[FileService] Failed to load .repoplan.json:', err);
+      console.error("[FileService] Failed to load .repoplan.json:", err);
       vscode.window.showErrorMessage(
-        'Arkhe: Failed to load architecture plan.'
+        "Arkhe: Failed to load architecture plan."
       );
       return null;
     }
@@ -138,36 +138,36 @@ static resolveAbsolutePath(virtualPath: string): string | null {
 
     const nodes: StructureNode[] = [];
     const edges: { source: string; target: string }[] = [];
-    const ROOT_ID = 'root';
-    const ROOT_PATH_PREFIX = '/root';
+    const ROOT_ID = "root";
+    const ROOT_PATH_PREFIX = "/root";
 
     // 1. Setup Ignore Manager & Add SAFETY DEFAULTS
     const ig = ignore();
 
-    ig.add(['.git', 'node_modules', '.DS_Store']);
+    ig.add([".git", "node_modules", ".DS_Store"]);
 
     // 2. Load .gitignore (Dynamic Override)
     try {
-      const gitignorePath = path.join(rootPath, '.gitignore');
-      const content = await fs.promises.readFile(gitignorePath, 'utf8');
+      const gitignorePath = path.join(rootPath, ".gitignore");
+      const content = await fs.promises.readFile(gitignorePath, "utf8");
 
       ig.add(content);
 
-      console.log('[FileService] Loaded rules from .gitignore');
+      // console.log('[FileService] Loaded rules from .gitignore');
     } catch (err) {
       console.warn(
-        '[FileService] No .gitignore found. Using safety defaults only.'
+        "[FileService] No .gitignore found. Using safety defaults only."
       );
     }
 
-    const ARCHITECTURE_WHITELIST = ['!.env', '!.env.*'];
+    const ARCHITECTURE_WHITELIST = ["!.env", "!.env.*"];
     ig.add(ARCHITECTURE_WHITELIST);
 
     nodes.push({
       id: ROOT_ID,
-      label: 'root',
+      label: "root",
       path: ROOT_PATH_PREFIX,
-      type: 'FOLDER',
+      type: "FOLDER",
       level: 0,
       parentId: null,
     });
@@ -200,8 +200,8 @@ static resolveAbsolutePath(virtualPath: string): string | null {
             id: virtualPath,
             label: name,
             path: virtualPath,
-            type: entry.isDirectory() ? 'FOLDER' : 'FILE',
-            level: virtualPath.split('/').length - 1,
+            type: entry.isDirectory() ? "FOLDER" : "FILE",
+            level: virtualPath.split("/").length - 1,
             parentId: parentId,
           };
 
@@ -217,7 +217,7 @@ static resolveAbsolutePath(virtualPath: string): string | null {
       }
     };
 
-    console.log('[FileService] Starting recursive scan...');
+    // console.log('[FileService] Starting recursive scan...');
     await walk(rootPath, ROOT_ID, ROOT_PATH_PREFIX);
 
     return { nodes, edges };

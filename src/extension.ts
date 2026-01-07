@@ -1,21 +1,21 @@
 // import * as dotenv from 'dotenv';
-import * as vscode from 'vscode';
-import * as path from 'path'; // Need path for joinPath
-import * as fs from 'fs'; // Need fs to read the built index.html
-import { MessageToBackend } from './types';
-import { CommandHandler } from './handlers/CommandHandler';
-import { ConfigManager } from './managers/ConfigManager';
+import * as vscode from "vscode";
+import * as path from "path"; // Need path for joinPath
+import * as fs from "fs"; // Need fs to read the built index.html
+import { MessageToBackend } from "./types";
+import { CommandHandler } from "./handlers/CommandHandler";
+import { ConfigManager } from "./managers/ConfigManager";
 
 export function activate(context: vscode.ExtensionContext) {
   ConfigManager.getInstance().initialize(context);
   // dotenv.config({ path: path.join(context.extensionPath, '.env') });
 
-  console.log('Arkhe Extension is active!');
+  // console.log('Arkhe Extension is active!');
 
-  const disposable = vscode.commands.registerCommand('arkhe.openChat', () => {
+  const disposable = vscode.commands.registerCommand("arkhe.openChat", () => {
     const panel = vscode.window.createWebviewPanel(
-      'reactWebview',
-      'React VS Code Extension',
+      "reactWebview",
+      "React VS Code Extension",
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -23,8 +23,8 @@ export function activate(context: vscode.ExtensionContext) {
         retainContextWhenHidden: true,
 
         localResourceRoots: [
-          vscode.Uri.joinPath(context.extensionUri, 'out'),
-          vscode.Uri.joinPath(context.extensionUri, 'webview-ui', 'build'),
+          vscode.Uri.joinPath(context.extensionUri, "out"),
+          vscode.Uri.joinPath(context.extensionUri, "webview-ui", "build"),
           context.extensionUri,
         ],
       }
@@ -49,21 +49,21 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
   // 1. Define the absolute path to the final built index.html
   const buildFolderUri = vscode.Uri.joinPath(
     extensionUri,
-    'webview-ui',
-    'build'
+    "webview-ui",
+    "build"
   );
-  const htmlPath = vscode.Uri.joinPath(buildFolderUri, 'index.html');
+  const htmlPath = vscode.Uri.joinPath(buildFolderUri, "index.html");
 
   // 2. Read the built HTML file content from disk
   // NOTE: This requires @types/node and synchronous reading is safe in activation context
-  let htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf8');
+  let htmlContent = fs.readFileSync(htmlPath.fsPath, "utf8");
 
   // 3. Generate the nonce for security
   const nonce = getNonce();
 
   // 4. Generate SECURE URI FOR BASE ASSETS (e.g., /webview-ui/build/)
   const buildUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(extensionUri, 'webview-ui', 'build')
+    vscode.Uri.joinPath(extensionUri, "webview-ui", "build")
   );
 
   // 5. Inject the secure URI, CSP, and nonce into the HTML content
@@ -71,7 +71,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     // Remove the insecure Mermaid CDN link if present (CRUCIAL)
     .replace(
       '<script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>',
-      ''
+      ""
     )
 
     // Convert asset paths (./assets/*) to VS Code resource URIs so they pass CSP
@@ -79,7 +79,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
       const assetUri = webview.asWebviewUri(
         vscode.Uri.joinPath(
           buildFolderUri,
-          ...originalPath.replace(/^\.\//, '').split('/')
+          ...originalPath.replace(/^\.\//, "").split("/")
         )
       );
       return `${attr}="${assetUri.toString()}"`;
@@ -87,7 +87,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
 
     // Inject the CSP meta tag and set the <base> tag (for relative paths in the built HTML)
     .replace(
-      '</head>',
+      "</head>",
       `
       <base href="${buildUri.toString()}/">
       <meta http-equiv="Content-Security-Policy" content="
@@ -102,16 +102,16 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     )
     // Inject the nonce into the main script tag (assumes Vite generated a single script tag)
     // You might need to adjust the regex depending on your Vite output's script tag format.
-    .replace('<script', `<script nonce="${nonce}"`);
+    .replace("<script", `<script nonce="${nonce}"`);
 
   return htmlContent;
 }
 
 // Helper to generate a random nonce for CSP security
 function getNonce() {
-  let text = '';
+  let text = "";
   const possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

@@ -55,11 +55,11 @@ export class ConfigManager {
   }
 
   public async setApiKey(apiKey: string): Promise<void> {
-  this.assertInitialized();
-  await this.context!.secrets.store(this.SECRET_KEY_API, apiKey.trim());
+    this.assertInitialized();
+    await this.context!.secrets.store(this.SECRET_KEY_API, apiKey.trim());
 
-  console.log('[ConfigManager] API key stored in SecretStorage');
-}
+    // console.log('[ConfigManager] API key stored in SecretStorage');
+  }
 
   // ──────────────────────────────────────────────
   // Non-Secret Config
@@ -80,14 +80,8 @@ export class ConfigManager {
 
   public async saveConfig(provider: string, model: string): Promise<void> {
     this.assertInitialized();
-    await this.context!.globalState.update(
-      this.CONFIG_KEY_PROVIDER,
-      provider
-    );
-    await this.context!.globalState.update(
-      this.CONFIG_KEY_MODEL,
-      model
-    );
+    await this.context!.globalState.update(this.CONFIG_KEY_PROVIDER, provider);
+    await this.context!.globalState.update(this.CONFIG_KEY_MODEL, model);
   }
 
   // ──────────────────────────────────────────────

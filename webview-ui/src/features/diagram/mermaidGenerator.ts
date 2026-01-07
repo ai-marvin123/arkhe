@@ -1,9 +1,9 @@
 //styling function (color by file/folder)
 
-import { simpleDiagramMock } from "../../../src/mocks/diagramMocks";
+// import { simpleDiagramMock } from "../../../src/mocks/diagramMocks";
 
 // src/types/diagram.ts
-console.log(simpleDiagramMock);
+// console.log(simpleDiagramMock);
 
 export interface DiagramNode {
   id: string;

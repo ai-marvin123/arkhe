@@ -3,7 +3,7 @@
   "publisher": "Arkhe",
   "displayName": "Arkhe",
   "description": "Visualize. Collaborate. Evolve.",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.106.1"
@@ -35,8 +35,8 @@
             "title": "Welcome to Arkhe",
             "description": "Arkhe is an AI-assisted tool for ideating, visualizing, and tracking codebase structure. It combines conversation and visualization to help you clarify ideas, explore architectural options, and translate intent into a concrete blueprint—whether you’re starting fresh or working from an existing codebase.",
             "media": {
-              "image": "media/hero.png",
-              "altText": "Arkhe Overview"
+              "image": "media/icon.png",
+              "altText": "API Configuration"
             }
           },
           {

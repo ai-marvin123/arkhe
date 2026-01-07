@@ -196,10 +196,10 @@ export function chatReducer(
     // advances guided flow during drift check
     case "proceed_guidedFlow": {
       const { aiScriptText, nextStep, options } = action.payload;
-      console.log(
-        "✅inside proceed_guidedFlow, shwoing drift step",
-        state.view.driftCheckStep
-      );
+      // console.log(
+      //   "✅inside proceed_guidedFlow, shwoing drift step",
+      //   state.view.driftCheckStep
+      // );
       const aiEntry = {
         id: generateId(),
         role: "assistant",

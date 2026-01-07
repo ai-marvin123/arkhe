@@ -1,16 +1,16 @@
-import { useEffect } from 'react';
-import { useDiagramDispatch } from '../../state/diagramContext';
+import { useEffect } from "react";
+import { useDiagramDispatch } from "../../state/diagramContext";
 import {
   loadSavedDiagram,
   checkUserApiKey,
-} from '../../shared/utils/vsCodeApi';
-import type { DiagramData } from '../../types/diagramTypes';
+} from "../../shared/utils/vsCodeApi";
+import type { DiagramData } from "../../types/diagramTypes";
 import {
   MOCK_ALL_MATCHED,
   MOCK_MISSING_DIAGRAM,
   MOCK_UNTRACKED_DIAGRAM,
-} from '../../../src/mocks/driftMocks';
-import { startGuidedFlowQ1 } from '../drift/guidedFlow';
+} from "../../../src/mocks/driftMocks";
+import { startGuidedFlowQ1 } from "../drift/guidedFlow";
 
 /**
  * DEV ONLY:
@@ -21,7 +21,7 @@ import { startGuidedFlowQ1 } from '../drift/guidedFlow';
 export default function SessionInitializer() {
   const dispatch = useDiagramDispatch();
 
-  console.log('SessionInitializer');
+  // console.log('SessionInitializer');
 
   useEffect(() => {
     //check if user has OpenAI API key saved
@@ -30,33 +30,33 @@ export default function SessionInitializer() {
       try {
         const response = await checkUserApiKey();
 
-        console.log('SessionInitializer - response: ', response);
+        // console.log('SessionInitializer - response: ', response);
 
         if (!response) {
           throw new Error(
-            'No response object returned when inquiring saved user API key'
+            "No response object returned when inquiring saved user API key"
           );
         }
 
-        console.log('response.isConfigured', response.isConfigured);
-        console.log('response.config', response.config);
+        // console.log('response.isConfigured', response.isConfigured);
+        // console.log('response.config', response.config);
 
         if (response.isConfigured === true) {
-          console.log('response.isConfigured === true');
+          // console.log('response.isConfigured === true');
           return true;
         } else {
           dispatch({
-            type: 'load_textOnly',
+            type: "load_textOnly",
             payload: {
               message:
-                'Please enter your OpenAI API key and model by clicking on the green settings icon above.',
+                "Please enter your OpenAI API key and model by clicking on the green settings icon above.",
             },
           });
           return false;
         }
       } catch (error) {
         console.error(
-          'There was an error initializing connection with user API key',
+          "There was an error initializing connection with user API key",
           error
         );
         return false;
@@ -73,7 +73,7 @@ export default function SessionInitializer() {
       const newSessionId = crypto.randomUUID();
 
       dispatch({
-        type: 'initialize_session',
+        type: "initialize_session",
         payload: { sessionId: newSessionId },
       });
 
@@ -86,9 +86,9 @@ export default function SessionInitializer() {
         ];
         mocks.forEach((mock) => {
           const { payload } = mock;
-          if ('data' in payload) {
+          if ("data" in payload) {
             dispatch({
-              type: 'load_newDiagram',
+              type: "load_newDiagram",
               payload: {
                 message: payload.message,
                 data: payload.data as DiagramData,
@@ -96,7 +96,7 @@ export default function SessionInitializer() {
             });
           } else {
             dispatch({
-              type: 'load_textOnly',
+              type: "load_textOnly",
               payload: { message: payload.message },
             });
           }
@@ -106,31 +106,31 @@ export default function SessionInitializer() {
       // ------------------------------------------------
 
       try {
-        console.log('inside sessioninitializer try block');
+        // console.log('inside sessioninitializer try block');
         const response = await loadSavedDiagram(newSessionId);
 
-        if (response.command === 'AI_RESPONSE') {
+        if (response.command === "AI_RESPONSE") {
           const { payload } = response;
 
-          if (payload.type === 'DIAGRAM') {
+          if (payload.type === "DIAGRAM") {
             dispatch({
-              type: 'load_newDiagram',
+              type: "load_newDiagram",
               payload: { message: payload.message, data: payload.data },
             });
 
             startGuidedFlowQ1(dispatch);
-          } else if (payload.type === 'NO_SAVED_DIAGRAM') {
-            dispatch({ type: 'enable_chat' });
-            dispatch({ type: 'show_starterOptions' });
+          } else if (payload.type === "NO_SAVED_DIAGRAM") {
+            dispatch({ type: "enable_chat" });
+            dispatch({ type: "show_starterOptions" });
           }
-        } else if (response.command === 'ERROR') {
+        } else if (response.command === "ERROR") {
           throw new Error(
             `there was an error checking for saved diagram ${response.payload.message}`
           );
         }
       } catch (error) {
-        console.error('Saved diagram check failed:', error);
-        dispatch({ type: 'enable_chat' });
+        console.error("Saved diagram check failed:", error);
+        dispatch({ type: "enable_chat" });
       }
     };
     executeFlow();

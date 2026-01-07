@@ -1,14 +1,14 @@
-import type { DiagramData } from '../../types/diagramTypes';
-import type { Dispatch } from '../../features/drift/guidedFlow';
+import type { DiagramData } from "../../types/diagramTypes";
+import type { Dispatch } from "../../features/drift/guidedFlow";
 import type {
   MessageToFrontend,
   SaveResponse,
   LoadSavedDiagramResponse,
   SavedUserApiKey,
   UserApiKeySuccess,
-} from '../../types/ipcTypes';
-import { handleDriftCheckReport } from '../../features/drift/guidedFlow';
-import type { DriftPayload } from '../../features/drift/guidedFlow';
+} from "../../types/ipcTypes";
+import { handleDriftCheckReport } from "../../features/drift/guidedFlow";
+import type { DriftPayload } from "../../features/drift/guidedFlow";
 
 declare global {
   interface VsCodeApi {
@@ -29,9 +29,9 @@ function getVsCodeApi(): VsCodeApi {
   }
 
   // Check if the global acquisition function exists (guards against ReferenceError in browser)
-  if (typeof acquireVsCodeApi !== 'function') {
+  if (typeof acquireVsCodeApi !== "function") {
     throw new Error(
-      'VSCODE_API_ERROR: Cannot find acquireVsCodeApi. Are you running in a VS Code Webview?'
+      "VSCODE_API_ERROR: Cannot find acquireVsCodeApi. Are you running in a VS Code Webview?"
     );
   }
 
@@ -45,33 +45,33 @@ function getVsCodeApi(): VsCodeApi {
 
 //send command to check for saved OpenAI key
 export function checkUserApiKey(): Promise<SavedUserApiKey> {
-  console.log('checkUserApiKey');
+  // console.log('checkUserApiKey');
 
   const vsCodeApi = getVsCodeApi();
   return new Promise((resolve, reject) => {
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'SETTINGS_STATUS') {
-        window.removeEventListener('message', listener);
+      if (message.command === "SETTINGS_STATUS") {
+        window.removeEventListener("message", listener);
         resolve(message.payload);
         return;
       }
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occurred while checking saved user OpenAI key.'
+              "An unknown error occurred while checking saved user OpenAI key."
           )
         );
         return;
       }
     };
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'GET_SETTINGS',
+      command: "GET_SETTINGS",
     });
   });
 }
@@ -87,36 +87,36 @@ export function sendUserApiKey(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'SETTINGS_SAVED') {
-        window.removeEventListener('message', listener);
+      if (message.command === "SETTINGS_SAVED") {
+        window.removeEventListener("message", listener);
         resolve(message);
         return;
       }
-      if (message.command === 'SETTINGS_ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "SETTINGS_ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload?.message ||
-              'Invalid API key. Please check the key and try again.'
+              "Invalid API key. Please check the key and try again."
           )
         );
         return;
       }
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occurred while saving user OpenAI key.'
+              "An unknown error occurred while saving user OpenAI key."
           )
         );
         return;
       }
     };
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'SAVE_SETTINGS',
+      command: "SAVE_SETTINGS",
       payload: { provider: provider, model: model, apiKey: apiKey },
     });
   });
@@ -133,28 +133,28 @@ export function requestStructure(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
         resolve(message);
         return;
       }
       //ADD REJECT LOGIC
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occured during processing'
+              "An unknown error occured during processing"
           )
         );
         return;
       }
     };
 
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'GENERATE_STRUCTURE',
+      command: "GENERATE_STRUCTURE",
       payload: { sessionId, prompt },
     });
   });
@@ -171,27 +171,27 @@ export function postDiagramToSave(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
         resolve(message);
         return;
       }
 
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occured while attempting to save diagram'
+              "An unknown error occured while attempting to save diagram"
           )
         );
       }
       return;
     };
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'SAVE_DIAGRAM',
+      command: "SAVE_DIAGRAM",
       payload: { sessionId, diagramData },
     });
   });
@@ -211,29 +211,29 @@ export function loadSavedDiagram(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
+      if (message.command === "AI_RESPONSE") {
         // waiting for nam to send data structure
-        window.removeEventListener('message', listener);
+        window.removeEventListener("message", listener);
         resolve(message);
         return;
       }
 
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload.message ||
-              'An unknown error occurred during exisitng diagram check.'
+              "An unknown error occurred during exisitng diagram check."
           )
         );
         return;
       }
     };
 
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'LOAD_DIAGRAM',
+      command: "LOAD_DIAGRAM",
       payload: { sessionId },
     });
   });
@@ -249,28 +249,28 @@ export function requestAlignmentCheck(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
         handleDriftCheckReport(message.payload as DriftPayload, dispatch);
         resolve(message);
         return;
       }
 
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload?.message ||
-              'An unknown error occurred during drift check.'
+              "An unknown error occurred during drift check."
           )
         );
       }
     };
 
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'CHECK_DRIFT',
+      command: "CHECK_DRIFT",
       payload: { sessionId },
     });
   });
@@ -285,27 +285,27 @@ export function requestDiagramSync(
     const listener = (event: MessageEvent) => {
       const message = event.data;
 
-      if (message.command === 'AI_RESPONSE') {
-        window.removeEventListener('message', listener);
+      if (message.command === "AI_RESPONSE") {
+        window.removeEventListener("message", listener);
         resolve(message);
         return;
       }
 
-      if (message.command === 'ERROR') {
-        window.removeEventListener('message', listener);
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
         reject(
           new Error(
             message.payload?.message ||
-              'An unknown error occurred while syncing the diagram.'
+              "An unknown error occurred while syncing the diagram."
           )
         );
       }
     };
 
-    window.addEventListener('message', listener);
+    window.addEventListener("message", listener);
 
     vsCodeApi.postMessage({
-      command: 'SYNC_TO_ACTUAL',
+      command: "SYNC_TO_ACTUAL",
       payload: { sessionId },
     });
   });
@@ -318,7 +318,7 @@ export function requestDiagramSync(
 export function openFileOnClick(path: string) {
   const vsCodeApi = getVsCodeApi();
   vsCodeApi.postMessage({
-    command: 'OPEN_FILE',
+    command: "OPEN_FILE",
     payload: { path },
   });
 }
@@ -326,7 +326,7 @@ export function openFileOnClick(path: string) {
 export function openFolderOnClick(path: string) {
   const vsCodeApi = getVsCodeApi();
   vsCodeApi.postMessage({
-    command: 'OPEN_FOLDER',
+    command: "OPEN_FOLDER",
     payload: { path },
   });
 }

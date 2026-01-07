@@ -1,17 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 import {
   useDiagramState,
   useDiagramDispatch,
-} from '../../state/diagramContext';
-import UserBubble from './UserBubble';
-import AIBubble from './AiBubble';
-import DiagramFrame from '../diagram/DiagramFrame';
-import AiMessageAccordion from './AiMessageAccordion';
-import { startDriftCheck, executeSyncAction } from '../drift/guidedFlow';
-import type { Dispatch } from '../drift/guidedFlow';
-import OptionsButton from '../drift/Options';
-import type { GuidedAction } from '../../types/diagramTypes';
-import { STARTER_OPTIONS, createStarterAction } from '../start/starterOptions';
+} from "../../state/diagramContext";
+import UserBubble from "./UserBubble";
+import AIBubble from "./AiBubble";
+import DiagramFrame from "../diagram/DiagramFrame";
+import AiMessageAccordion from "./AiMessageAccordion";
+import { startDriftCheck, executeSyncAction } from "../drift/guidedFlow";
+import type { Dispatch } from "../drift/guidedFlow";
+import OptionsButton from "../drift/Options";
+import type { GuidedAction } from "../../types/diagramTypes";
+import { STARTER_OPTIONS, createStarterAction } from "../start/starterOptions";
 
 interface GuidedTextEntry {
   id: string;
@@ -38,74 +38,74 @@ export default function ChatLogContainer() {
     action: string,
     text: string
   ) => {
-    console.log('inside handleGuidedChoice');
+    // console.log('inside handleGuidedChoice');
     dispatch({
-      type: 'log_userChoice',
+      type: "log_userChoice",
       payload: { logEntryId: entryId, chosenText: text },
     });
 
-    if (action === 'RUN_CHECK') {
+    if (action === "RUN_CHECK") {
       startDriftCheck(sessionId, dispatch);
-    } else if (action === 'EDIT_EXIT' || action === 'KEEP_OLD_PLAN') {
+    } else if (action === "EDIT_EXIT" || action === "KEEP_OLD_PLAN") {
       dispatch({
-        type: 'proceed_guidedFlow',
+        type: "proceed_guidedFlow",
         payload: {
           aiScriptText:
-            'Chat is now enabled. What changes would you like to make?',
+            "Chat is now enabled. What changes would you like to make?",
           options: [],
-          nextStep: 'IDLE',
+          nextStep: "IDLE",
         },
       });
-      dispatch({ type: 'enable_chat' });
-    } else if (action === 'SYNC_TO_ACTUAL') {
+      dispatch({ type: "enable_chat" });
+    } else if (action === "SYNC_TO_ACTUAL") {
       executeSyncAction(state.session.sessionId, dispatch as Dispatch);
-    } else if (action === 'EDIT_FINAL_YES' || action === 'EDIT_FINAL_NO') {
+    } else if (action === "EDIT_FINAL_YES" || action === "EDIT_FINAL_NO") {
       const finalScript =
-        action === 'EDIT_FINAL_YES'
+        action === "EDIT_FINAL_YES"
           ? "Chat enabled. Let me know what edits you'd like to make."
-          : 'Understood. Alignment check is now complete.';
+          : "Understood. Alignment check is now complete.";
 
       dispatch({
-        type: 'proceed_guidedFlow',
+        type: "proceed_guidedFlow",
         payload: {
           aiScriptText: finalScript,
-          nextStep: 'IDLE',
+          nextStep: "IDLE",
           options: [],
         },
       });
-      dispatch({ type: 'enable_chat' });
+      dispatch({ type: "enable_chat" });
     }
   };
 
   useEffect(() => {
     if (!endOfLogRef.current) return;
-    endOfLogRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    endOfLogRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [log.length, isLoading, showStarterOptions]);
 
   useEffect(() => {
     if (!containerRef.current || !endOfLogRef.current) return;
     const observer = new ResizeObserver(() => {
       endOfLogRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
+        behavior: "smooth",
+        block: "end",
       });
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, []);
   return (
-    <div className='chat-log-container' ref={containerRef}>
+    <div className="chat-log-container" ref={containerRef}>
       {showStarterOptions && log.length === 0 && (
         <>
-          <div className='w-full flex flex-col items-start'>
+          <div className="w-full flex flex-col items-start">
             <AIBubble
-              logKey='welcome-message'
-              text='Select from below to get started, or type your own prompt to generate a repo structure.'
+              logKey="welcome-message"
+              text="Select from below to get started, or type your own prompt to generate a repo structure."
             />
           </div>
           <div
             className={`w-full grid gap-2 mt-2 ${
-              STARTER_OPTIONS.length > 3 ? 'grid-cols-2' : 'grid-cols-3'
+              STARTER_OPTIONS.length > 3 ? "grid-cols-2" : "grid-cols-3"
             }`}
           >
             {STARTER_OPTIONS.map((opt) => (
@@ -115,16 +115,16 @@ export default function ChatLogContainer() {
                 icon={opt.icon}
                 clickFunc={() => handleStarterOptions(opt.prompt)}
               />
-            ))}{' '}
+            ))}{" "}
           </div>
         </>
       )}
 
       {log.map((entry) => {
         const logKey = entry.id;
-        const isUser = entry.role === 'user';
+        const isUser = entry.role === "user";
 
-        const hasOptions = entry.type === 'TEXT_RESPONSE' && 'options' in entry;
+        const hasOptions = entry.type === "TEXT_RESPONSE" && "options" in entry;
         const guidedEntry = hasOptions
           ? (entry as unknown as GuidedTextEntry)
           : null;
@@ -133,12 +133,12 @@ export default function ChatLogContainer() {
           <div
             key={logKey}
             className={`w-full flex mb-2 ${
-              isUser ? 'justify-end' : 'justify-start'
+              isUser ? "justify-end" : "justify-start"
             }`}
           >
             {isUser && <UserBubble logKey={logKey} text={entry.text} />}
-            {entry.type === 'DIAGRAM_CONTENT' && (
-              <div className='w-full flex flex-col'>
+            {entry.type === "DIAGRAM_CONTENT" && (
+              <div className="w-full flex flex-col">
                 <DiagramFrame
                   sessionId={sessionId}
                   logKey={logKey}
@@ -148,13 +148,13 @@ export default function ChatLogContainer() {
               </div>
             )}
 
-            {(entry.type === 'TEXT_RESPONSE' || hasOptions) && !isUser && (
-              <div className='w-full flex flex-col items-start'>
-                {entry.type === 'TEXT_RESPONSE' && (
+            {(entry.type === "TEXT_RESPONSE" || hasOptions) && !isUser && (
+              <div className="w-full flex flex-col items-start">
+                {entry.type === "TEXT_RESPONSE" && (
                   <AIBubble logKey={logKey} text={entry.text} />
                 )}
                 {hasOptions && guidedEntry && (
-                  <div className='w-full flex justify-start mt-2 space-x-2'>
+                  <div className="w-full flex justify-start mt-2 space-x-2">
                     {guidedEntry.options.map((option, index) => (
                       <OptionsButton
                         key={index}
@@ -172,8 +172,8 @@ export default function ChatLogContainer() {
         );
       })}
       {isLoading && (
-        <div className='w-full flex justify-start mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-          <AIBubble logKey='ai-loading' text='AI_LOADING' />
+        <div className="w-full flex justify-start mb-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <AIBubble logKey="ai-loading" text="AI_LOADING" />
         </div>
       )}
       <div ref={endOfLogRef} />
