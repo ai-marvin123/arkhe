@@ -118,6 +118,10 @@ nav {
   color: white;
 }
 
+.logo-img {
+  border-radius: 8px; /* Rounded corners */
+}
+
 .nav-links {
   display: flex;
   gap: 2rem;
