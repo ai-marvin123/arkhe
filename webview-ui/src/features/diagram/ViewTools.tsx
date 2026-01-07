@@ -20,7 +20,7 @@ export default function ViewTools({ id, view }: ViewToolstype) {
 
   //logic for pan
   const handlePan = () => {
-    console.log('pan clicked!');
+    console.log('pan clicked!', view.panX, view.panY);
     const newIsPanActive = !view.isPanActive;
     dispatch({
       type: 'update_logEntry',
@@ -80,7 +80,7 @@ export default function ViewTools({ id, view }: ViewToolstype) {
 
   return (
     <div className='view-tools-container absolute bottom-2 right-2 flex space-x-2'>
-      <PanButton clickFunc={handlePan} />
+      <PanButton clickFunc={handlePan} isActive={view.isPanActive} />
       <ZoomInButton clickFunc={handleZoomIn} />
       <ZoomOutButton clickFunc={handleZoomOut} />
       <FullscreenButton clickFunc={handleFullscreen} />

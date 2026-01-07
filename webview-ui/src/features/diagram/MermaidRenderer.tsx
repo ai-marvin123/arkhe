@@ -12,7 +12,7 @@ interface MermaidRenderResult {
   code: string;
   logKey: string;
   nodes: Node[];
-  bindFunctions?: (element: Element) => void; // <--- The fix is here
+  bindFunctions?: (element: Element) => void;
 }
 
 export default function MermaidRenderer({
@@ -23,16 +23,22 @@ export default function MermaidRenderer({
 }: MermaidRenderResult) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPosition = useRef({ x: 0, y: 0 });
+  const startPanOffset = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDiagramDispatch();
 
-  //styling the diagram according view features
-  const transformStyle = {
-    transform: `translate3d(${view.panX}px, ${view.panY}px, 0) scale(${view.zoomLevel})`,
-    transformOrigin: '0 0',
-  };
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false);
+      }
+    };
 
-  console.log(transformStyle);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging]);
 
   useEffect(() => {
     // 1. Initialize Mermaid
@@ -108,11 +114,13 @@ export default function MermaidRenderer({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!view.isPanActive) return;
     setIsDragging(true);
+
     dragStartPosition.current = {
       x: e.clientX,
       y: e.clientY,
     };
-    console.log('is dragging', isDragging);
+
+    startPanOffset.current = { x: view.panX, y: view.panY };
     e.preventDefault();
   };
 
@@ -122,34 +130,25 @@ export default function MermaidRenderer({
     const svgElement = containerRef.current.querySelector('svg');
     if (!svgElement) return;
 
-    const svgBox = svgElement.getBBox();
+    // const svgBox = svgElement.getBBox();
 
-    const deltaX = e.clientX - dragStartPosition.current.x;
-    const deltaY = e.clientY - dragStartPosition.current.y;
+    const totalDeltaX = e.clientX - dragStartPosition.current.x;
+    const totalDeltaY = e.clientY - dragStartPosition.current.y;
 
-    const newPanX = view.panX + deltaX;
-    const newPanY = view.panY + deltaY;
+    // 2. Ignore micro-movements (prevents the "1.5 inch jump" on simple clicks)
+    if (Math.abs(totalDeltaX) < 3 && Math.abs(totalDeltaY) < 3) return;
 
-    // const frame = containerRef.current.getBoundingClientRect();
-
-    // const limitX = frame.width - 5;
-    // const limitY = frame.height - 5;
-
-    const limitX = svgBox.width + 100;
-    const limitY = svgBox.height + 100;
-
-    const clampedX = Math.max(-limitX, Math.min(limitX, newPanX));
-    const clampedY = Math.max(-limitY, Math.min(limitY, newPanY));
+    // 3. New Pan = Start Position + Total Mouse Travel
+    // No clamping/limits means no snapping bugs!
+    const newPanX = startPanOffset.current.x + totalDeltaX;
+    const newPanY = startPanOffset.current.y + totalDeltaY;
 
     console.log('panX before', view.panX);
     dispatch({
       type: 'update_logEntry',
-      payload: { id: logKey, panX: clampedX, panY: clampedY },
+      payload: { id: logKey, panX: newPanX, panY: newPanY },
     });
-    dragStartPosition.current = {
-      x: e.clientX,
-      y: e.clientY,
-    };
+
     console.log('panX after', view.panX);
   };
 
@@ -163,7 +162,7 @@ export default function MermaidRenderer({
   return (
     <div
       className={`relative w-full h-full overflow-hidden flex items-center justify-center${
-        isDragging ? 'dragging' : ''
+        isDragging ? ' dragging' : ''
       }`}
       style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
       onMouseDown={handleMouseDown}
@@ -175,10 +174,10 @@ export default function MermaidRenderer({
         className='mermaid-container'
         data-panning={view.isPanActive}
         style={{
-          ...transformStyle,
-          display: 'block',
+          transform: `translate(${view.panX}px, ${view.panY}px) scale(${view.zoomLevel})`,
+          transformOrigin: 'center center',
+          transition: 'none',
           width: 'max-content',
-          margin: 'auto',
         }}
       />
     </div>

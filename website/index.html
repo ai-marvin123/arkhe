@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arkhe - AI Architect for VS Code</title>
+    <meta
+      name="description"
+      content="Visualize. Collaborate. Evolve. An AI-powered VS Code extension that turns your ideas into structured architecture diagrams and keeps them in sync with your codebase."
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@300;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="blob-container">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+
+    <nav class="glass-panel">
+      <div class="logo">
+        <img
+          src="icon.png"
+          alt="Arkhe Logo"
+          width="32"
+          height="32"
+          class="logo-img"
+        />
+        <span class="logo-text">Arkhe</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it Works</a>
+        <a
+          href="https://github.com/ai-marvin123/arkhe"
+          target="_blank"
+          class="github-link"
+        >
+          <i data-lucide="github"></i> GitHub
+        </a>
+        <a
+          href="https://marketplace.visualstudio.com/items?itemName=Arkhe.arkhe"
+          target="_blank"
+          class="btn btn-primary"
+          >Install Extension</a
+        >
+      </div>
+      <button class="mobile-menu-btn" aria-label="Toggle Menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <div class="badge">v1.0.0 Now Available</div>
+          <h1 class="hero-title">
+            Visualize. <br />
+            <span class="gradient-text">Collaborate.</span> <br />
+            Evolve.
+          </h1>
+          <p class="hero-subtitle">
+            Turn abstract ideas into concrete architecture. <br />
+            Arkhe uses AI to generate folder structures and Mermaid diagrams
+            that live inside your VS Code.
+          </p>
+          <div class="cta-group">
+            <a
+              href="https://marketplace.visualstudio.com/items?itemName=Arkhe.arkhe"
+              target="_blank"
+              class="btn btn-primary btn-lg"
+            >
+              <i data-lucide="download"></i> Install for VS Code
+            </a>
+            <a href="#how-it-works" class="btn btn-secondary btn-lg">
+              See how it works
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="video-container glass-panel">
+            <video autoplay loop muted playsinline poster="icon.png">
+              <source src="demo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <h2 class="section-title">Architectural Intelligence</h2>
+        <div class="features-grid">
+          <div class="feature-card glass-panel fade-in-up">
+            <div class="icon-box">
+              <i data-lucide="brain-circuit"></i>
+            </div>
+            <h3>AI-Powered Design</h3>
+            <p>
+              Describe your stack (e.g., "Next.js with tRPC") and get a
+              best-practice folder structure generated instantly by OpenAI
+              GPT-4.
+            </p>
+          </div>
+          <div
+            class="feature-card glass-panel fade-in-up"
+            style="animation-delay: 0.1s"
+          >
+            <div class="icon-box">
+              <i data-lucide="layout-template"></i>
+            </div>
+            <h3>Instant Visuals</h3>
+            <p>
+              Don't just read JSON. See your architecture as an interactive
+              Mermaid.js graph before writing a single line of code.
+            </p>
+          </div>
+          <div
+            class="feature-card glass-panel fade-in-up"
+            style="animation-delay: 0.2s"
+          >
+            <div class="icon-box">
+              <i data-lucide="activity"></i>
+            </div>
+            <h3>Drift Detection</h3>
+            <p>
+              Arkhe monitors your file system. If reality deviates from the
+              plan, we'll flag it as "Drift" so you never lose control.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="how-it-works" class="how-it-works">
+        <h2 class="section-title">From Idea to Implementation</h2>
+        <div class="steps-container">
+          <div class="step fade-in-left">
+            <div class="step-content">
+              <span class="step-number">01</span>
+              <h3>Prompt</h3>
+              <p>Tell Arkhe what you want to build. Be vague or specific.</p>
+            </div>
+            <div class="step-visual glass-panel">
+              <p class="chat-bubble">
+                "I need a Python flask app with a React frontend and Redis for
+                caching."
+              </p>
+            </div>
+          </div>
+          <div class="connector centered"><i data-lucide="arrow-down"></i></div>
+          <div class="step fade-in-right">
+            <div class="step-visual glass-panel">
+              <div class="file-tree">
+                <div>📂 backend/</div>
+                <div>&nbsp;&nbsp;📄 app.py</div>
+                <div>📂 frontend/</div>
+                <div>&nbsp;&nbsp;📄 package.json</div>
+                <div>📂 infra/</div>
+                <div>&nbsp;&nbsp;📄 docker-compose.yml</div>
+              </div>
+            </div>
+            <div class="step-content">
+              <span class="step-number">02</span>
+              <h3>Generate</h3>
+              <p>
+                Arkhe creates a structural plan (`.repoplan.json`) tailored to
+                your request.
+              </p>
+            </div>
+          </div>
+          <div class="connector centered"><i data-lucide="arrow-down"></i></div>
+          <div class="step fade-in-left">
+            <div class="step-content">
+              <span class="step-number">03</span>
+              <h3>Sync & Evolve</h3>
+              <p>
+                Use the guided wizard to scaffold files or update the diagram as
+                your code changes.
+              </p>
+            </div>
+            <div class="step-visual glass-panel">
+              <div class="sync-status">
+                <div class="status-item">
+                  <i data-lucide="check-circle" class="text-green"></i> Plan
+                  Synced
+                </div>
+                <div class="status-item">
+                  <i data-lucide="shield-check" class="text-blue"></i> No Drift
+                  Detected
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tech-stack">
+        <h2 class="section-title">Built With</h2>
+        <div class="logos-scroll">
+          <div class="logo-item">TypeScript</div>
+          <div class="logo-item">React</div>
+          <div class="logo-item">Vite</div>
+          <div class="logo-item">LangChain</div>
+          <div class="logo-item">Mermaid.js</div>
+          <div class="logo-item">Tailwind</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-col">
+          <h4>Arkhe</h4>
+          <p>AI Architect for the modern developer.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Links</h4>
+          <a href="https://github.com/ai-marvin123/arkhe">GitHub</a>
+          <a href="https://github.com/ai-marvin123/arkhe/issues">Issues</a>
+          <a
+            href="https://marketplace.visualstudio.com/items?itemName=Arkhe.arkhe"
+            >Marketplace</a
+          >
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="https://github.com/ai-marvin123/arkhe/blob/main/LICENSE"
+            >MIT License</a
+          >
+        </div>
+      </div>
+      <div class="copyright">&copy; 2024-2026 Arkhe Team. Built with ❤️.</div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
