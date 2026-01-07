@@ -1,108 +1,106 @@
-<div align="center">
-  <img src="icon.png" alt="Arkhe Logo" width="128" />
-  <h1>Arkhe - AI Architect</h1>
-  <p><strong>Visualize. Collaborate. Evolve.</strong></p>
-  <p>An AI-powered VS Code extension that turns your ideas into structured architecture diagrams and keeps them in sync with your codebase.</p>
+# Arkhe - AI Architect
 
-  <p>
-    <a href="https://github.com/ai-marvin123/arkhe/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/ai-marvin123/arkhe?style=flat-square" alt="License" />
-    </a>
-    <a href="https://github.com/ai-marvin123/arkhe/issues">
-      <img src="https://img.shields.io/github/issues/ai-marvin123/arkhe?style=flat-square" alt="Open Issues" />
-    </a>
-    <a href="https://github.com/ai-marvin123/arkhe/pulls">
-      <img src="https://img.shields.io/github/issues-pr/ai-marvin123/arkhe?style=flat-square" alt="PRs Welcome" />
-    </a>
-    <a href="https://www.typescriptlang.org/">
-      <img src="https://img.shields.io/badge/Made%20with-TypeScript-blue?style=flat-square&logo=typescript" alt="TypeScript" />
-    </a>
-  </p>
-</div>
+> **Visualize. Collaborate. Evolve.**
+>
+> An AI-powered VS Code extension that turns your ideas into structured architecture diagrams and keeps them in sync with your codebase.
+
+**Arkhe** is your intelligent architectural companion living directly inside VS Code. It bridges the gap between conceptual design and physical implementation.
+
+## 🚀 Overview
+
+Arkhe helps you visualize abstract ideas into concrete folder structures using AI, renders them instanly as interactive Mermaid diagrams, and monitors the "drift" between your planned architecture and the actual file system.
+
+### Why Arkhe?
+
+- **Visualize** abstract ideas immediately.
+- **Render** structures as interactive diagrams.
+- **Monitor** drift between plan and code.
+- **Sync** changes seamlessly.
 
 ---
 
-## 📖 About
+## 🌟 Key Features
 
-**Arkhe** bridges the gap between conceptual design and physical implementation. It lives directly inside VS Code and uses advanced LLMs to help you visualize abstract ideas into concrete folder structures, render them as interactive Mermaid diagrams, and monitor the "drift" between your planned architecture and the actual file system.
+### 1. 🧠 AI-Powered Architecture Design
 
-Whether you are starting a new project or refactoring an existing one, Arkhe ensures your documentation and code never fall out of step.
+_Stop drawing boxes manually._
 
-## ✨ Key Features
+- **Chat Interface**: Describe your project idea in plain English (e.g., "A React app with Redux and a Python Flask backend").
+- **Intelligent Generation**: Uses advanced LLMs to generate best-practice folder and file structures.
+- **Structured Output**: Consistent and parsable architecture definitions.
 
-- **🧠 AI-Powered Design**: Describe your stack (e.g., "Next.js with Prisma and tRPC") and get a best-practice folder structure generated instantly.
-- **📊 Instant Visualization**: See your architecture as an interactive **Mermaid.js** graph before you write a single line of code.
-- **🔍 Drift Detection**: Arkhe compares your architectural plan (`.repoplan.json`) against your actual file system to highlight missing or untracked files.
-- **🔄 Guided Sync**: A step-by-step wizard to resolve differences—update your plan or scaffold the missing files.
-- **🔒 Secure**: Your keys are stored safely using VS Code's native SecretStorage.
+### 2. 📊 Instant Visualization
 
-## 🛠 Tech Stack
+_See your code before you write it._
 
-We use modern web technologies to build a seamless extension experience:
+- **Auto-Rendering**: Instantly renders proposed structure as a Mermaid graph.
+- **Interactive Nodes**: Clear differentiation between Folders and Files.
+- **Visual Feedback**: Immediate validation of your architecture.
 
-- **Extension Host**: TypeScript
-- **UI**: React, Vite, Tailwind CSS (Webview)
-- **AI Orchestration**: LangChain.js
-- **Diagramming**: Mermaid.js
-- **State Management**: Zustand / Context API
+### 3. 🔍 Drift Detection & Management
 
-## � Getting Started (Local Development)
+_Keep your plan and reality aligned._
 
-Want to contribute or build it locally? Follow these steps:
+- **Smart Comparison**: Compares your saved plan (`.repoplan.json`) against actual files.
+- **Status Indicators**:
+  - ✅ **MATCHED**: Files exist in plan and disk.
+  - ❌ **MISSING**: Planned but not created.
+  - ⚠️ **UNTRACKED**: On disk but not in plan.
+- **AI Analysis**: Explains _why_ drift occurred and suggests fixes.
 
-### Prerequisites
+### 4. 🔄 Guided Synchronization Flow
 
-- Node.js (v18+)
-- npm or pnpm
-- VS Code
+_Resolve conflicts with confidence._
 
-### Installation
+- **Interactive Resolution**: Step-by-step wizard for drift resolution.
+- **Sync to Actual**: One-click update to match file system.
+- **Keep Plan**: Preserve your architectural vision.
 
-1.  **Clone the repository**
+### 5. 🔒 Secure & Developer-Centric
 
-    ```bash
-    git clone https://github.com/ai-marvin123/arkhe.git
-    cd arkhe
-    ```
-
-2.  **Install dependencies**
-
-    ```bash
-    npm install
-    # Install webview dependencies
-    cd webview-ui && npm install && cd ..
-    ```
-
-3.  **Run in Debug Mode**
-    - Open the project in VS Code.
-    - Press `F5` to launch the **Extension Development Host**.
-    - In the new window, run the command `Arkhe: Open Chat`.
-
-### Building the VSIX
-
-To create a distributable `.vsix` file:
-
-```bash
-npm run vscode:prepublish
-npx vsce package
-```
-
-## 🤝 Contributing
-
-We love contributions! Whether it's a bug fix, new feature, or documentation improvement.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+- **Local Execution**: File scanning and rendering happen locally.
+- **Secret Storage**: API keys stored securely via VS Code SecretStorage.
+- **Workspace Aware**: Respects `.gitignore`.
 
 ---
 
-<div align="center">
-  <sub>Built with ❤️ by the Arkhe Team.</sub>
-</div>
+## 💡 How to Use
+
+1.  **Open Arkhe**:
+
+    - Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+    - Run **"Arkhe: Open Chat"**.
+
+2.  **Design**:
+
+    - Type your architecture idea (e.g., "Create a DDD-based Node.js API with Auth users").
+    - Watch Arkhe generate the plan and visualize it.
+
+3.  **Manage**:
+    - view the generated Mermaid diagram.
+    - Save the plan to track it.
+    - As you code, check Arkhe to see if your file structure drifts from the plan.
+
+---
+
+## ⚙️ Configuration
+
+Arkhe uses the VS Code Secret Storage for your API keys to ensure security.
+
+1.  When prompted, enter your OpenAI API Key.
+2.  Arkhe will securely store it for future sessions.
+
+## 🛠 Technical Stack
+
+Arkhe is built with:
+
+- **VS Code API** & **TypeScript**
+- **React**, **Vite**, **Tailwind CSS** (Webview)
+- **LangChain.js** (AI Orchestration)
+- **Mermaid.js** (Diagramming)
+
+## 🤝 Contributing & Support
+
+Found a bug or have a feature request? strictly [Open an issue](https://github.com/ai-marvin123/arkhe/issues) on our GitHub repository.
+
+**Enjoy building with Arkhe!**
