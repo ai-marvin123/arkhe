@@ -23,6 +23,51 @@
         "command": "arkhe.openChat",
         "title": "Arkhe: Open Chat"
       }
+    ],
+    "walkthroughs": [
+      {
+        "id": "arkheTour",
+        "title": "Get Started with Arkhe",
+        "description": "Ideate, visualize, and track your codebase structure.",
+        "steps": [
+          {
+            "id": "welcome",
+            "title": "Welcome to Arkhe",
+            "description": "Arkhe is an AI-assisted tool for ideating, visualizing, and tracking codebase structure. It combines conversation and visualization to help you clarify ideas, explore architectural options, and translate intent into a concrete blueprint—whether you’re starting fresh or working from an existing codebase.",
+            "media": {
+              "image": "media/hero.png",
+              "altText": "Arkhe Overview"
+            }
+          },
+          {
+            "id": "setup",
+            "title": "Step 1: Connect your AI",
+            "description": "To enable AI-assisted generation, enter your API key and select your preferred model in the settings.",
+            "media": {
+              "image": "media/keygif.gif",
+              "altText": "API Configuration"
+            }
+          },
+          {
+            "id": "create",
+            "title": "Step 2: Choose or Describe Your Architecture",
+            "description": "Begin by selecting a suggested option or by chatting with Arkhe. Scroll and interact with previous diagrams to track how your thinking evolves.",
+            "media": {
+              "image": "media/promptingfinal.gif",
+              "altText": "Arkhe prompt input with starter templates"
+            }
+          },
+          {
+            "id": "align",
+            "title": "Step 3: Save & Align",
+            "description": "Save a diagram as your architectural reference. When you reopen Arkhe, compare your current codebase against the saved blueprint to identify drift and keep your implementation aligned with your intent.",
+            "media": {
+              "image": "media/driftcheck.gif",
+              "altText": "Architecture Alignment"
+            }
+          }
+        ]
+      }
     ]
   },
   "scripts": {

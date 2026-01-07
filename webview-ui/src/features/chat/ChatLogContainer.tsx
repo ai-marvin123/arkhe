@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   useDiagramState,
   useDiagramDispatch,
@@ -23,6 +24,8 @@ export default function ChatLogContainer() {
   const { log } = state.chat;
   const { sessionId } = state.session;
   const { isLoading, showStarterOptions } = state.view;
+  const endOfLogRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const dispatch = useDiagramDispatch();
 
@@ -73,8 +76,25 @@ export default function ChatLogContainer() {
       dispatch({ type: 'enable_chat' });
     }
   };
+
+  useEffect(() => {
+    if (!endOfLogRef.current) return;
+    endOfLogRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [log.length, isLoading, showStarterOptions]);
+
+  useEffect(() => {
+    if (!containerRef.current || !endOfLogRef.current) return;
+    const observer = new ResizeObserver(() => {
+      endOfLogRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+      });
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
   return (
-    <div className='chat-log-container'>
+    <div className='chat-log-container' ref={containerRef}>
       {showStarterOptions && log.length === 0 && (
         <>
           <div className='w-full flex flex-col items-start'>
@@ -156,6 +176,7 @@ export default function ChatLogContainer() {
           <AIBubble logKey='ai-loading' text='AI_LOADING' />
         </div>
       )}
+      <div ref={endOfLogRef} />
     </div>
   );
 }
