@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from "react";
-import mermaid from "mermaid";
-import type { ViewSettings, Node } from "../../types/diagramTypes";
-import { useDiagramDispatch } from "../../state/diagramContext";
+import { useEffect, useState, useRef } from 'react';
+import mermaid from 'mermaid';
+import type { ViewSettings, Node } from '../../types/diagramTypes';
+import { useDiagramDispatch } from '../../state/diagramContext';
 import {
   openFileOnClick,
   openFolderOnClick,
-} from "../../shared/utils/vsCodeApi";
+} from '../../shared/utils/vsCodeApi';
 
 interface MermaidRenderResult {
   view: ViewSettings;
@@ -34,9 +34,9 @@ export default function MermaidRenderer({
       }
     };
 
-    window.addEventListener("mouseup", handleGlobalMouseUp);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
     return () => {
-      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, [isDragging]);
 
@@ -44,22 +44,23 @@ export default function MermaidRenderer({
     // 1. Initialize Mermaid
     mermaid.initialize({
       startOnLoad: false,
-      securityLevel: "loose",
+      securityLevel: 'loose',
       flowchart: {
         padding: 10,
         useMaxWidth: false,
       },
-      theme: "dark",
+      theme: 'dark',
       themeVariables: {
-        lineColor: "#5B5967",
-        arrowheadColor: "5B5967",
+        lineColor: '#5B5967',
+        arrowheadColor: '5B5967',
       },
+      maxTextSize: 1000000,
     });
 
     if (!containerRef.current) return;
 
     // 2. Generate a unique ID for the Mermaid diagram
-    const id = "mermaid-" + Math.random().toString(36).substring(2);
+    const id = 'mermaid-' + Math.random().toString(36).substring(2);
 
     // 3. Render the Mermaid code
     mermaid
@@ -70,7 +71,7 @@ export default function MermaidRenderer({
         containerRef.current.onclick = (e: MouseEvent) => {
           if (view.isPanActive) return;
 
-          const nodeElement = (e.target as Element).closest(".node");
+          const nodeElement = (e.target as Element).closest('.node');
           if (!nodeElement) return;
 
           const mermaidId = nodeElement.id;
@@ -85,10 +86,10 @@ export default function MermaidRenderer({
             e.preventDefault();
             e.stopPropagation();
 
-            if (matchedNode.type === "FILE") {
+            if (matchedNode.type === 'FILE') {
               // console.log('📗file clicked!');
               openFileOnClick(matchedNode.path);
-            } else if (matchedNode.type === "FOLDER") {
+            } else if (matchedNode.type === 'FOLDER') {
               // console.log('📕 folder clicked!');
               openFolderOnClick(matchedNode.path);
             }
@@ -97,7 +98,7 @@ export default function MermaidRenderer({
       })
       .catch((err: Error) => {
         // Handle rendering errors and display them
-        console.error("MERMAID ERROR:", err);
+        console.error('MERMAID ERROR:', err);
         containerRef.current!.innerHTML = `<pre style="color:red; white-space: pre-wrap; word-break: break-all;">Mermaid Rendering Error: ${String(
           err
         )}</pre>`;
@@ -107,8 +108,8 @@ export default function MermaidRenderer({
   //change cursor to grab if pan is activated
   const cursorStyle = view.isPanActive
     ? isDragging
-      ? "grabbing"
-      : "grab"
+      ? 'grabbing'
+      : 'grab'
     : undefined;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -127,7 +128,7 @@ export default function MermaidRenderer({
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
 
-    const svgElement = containerRef.current.querySelector("svg");
+    const svgElement = containerRef.current.querySelector('svg');
     if (!svgElement) return;
 
     // const svgBox = svgElement.getBBox();
@@ -145,7 +146,7 @@ export default function MermaidRenderer({
 
     // console.log('panX before', view.panX);
     dispatch({
-      type: "update_logEntry",
+      type: 'update_logEntry',
       payload: { id: logKey, panX: newPanX, panY: newPanY },
     });
 
@@ -162,22 +163,22 @@ export default function MermaidRenderer({
   return (
     <div
       className={`relative w-full h-full overflow-hidden flex items-center justify-center${
-        isDragging ? " dragging" : ""
+        isDragging ? ' dragging' : ''
       }`}
-      style={{ cursor: cursorStyle, pointerEvents: "auto" }}
+      style={{ cursor: cursorStyle, pointerEvents: 'auto' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
       <div
         ref={containerRef}
-        className="mermaid-container"
+        className='mermaid-container'
         data-panning={view.isPanActive}
         style={{
           transform: `translate(${view.panX}px, ${view.panY}px) scale(${view.zoomLevel})`,
-          transformOrigin: "center center",
-          transition: "none",
-          width: "max-content",
+          transformOrigin: 'center center',
+          transition: 'none',
+          width: 'max-content',
         }}
       />
     </div>
