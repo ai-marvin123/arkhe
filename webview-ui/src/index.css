@@ -183,6 +183,20 @@ body {
   animation-delay: 0.4s;
 }
 
+@keyframes loading-text {
+  0% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.loading-text {
+  animation: loading-text 0.6s ease-in-out;
+}
+
 @keyframes fillOverlay {
   0% {
     transform: scaleY(0);

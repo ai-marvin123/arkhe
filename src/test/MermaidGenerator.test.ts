@@ -8,13 +8,12 @@ describe('Mermaid Generator Utility', () => {
   it('should generate correct syntax for connected nodes', () => {
     const input: JsonStructure = {
       nodes: [
-        { id: 'root', label: 'root', type: 'FOLDER', path: '/root', level: 0 },
+        { id: 'root', label: 'root', type: 'FOLDER', path: '/root' },
         {
           id: 'src',
           label: 'src',
           type: 'FOLDER',
           path: '/root/src',
-          level: 1,
         },
       ],
       edges: [{ source: 'root', target: 'src' }],
@@ -41,14 +40,12 @@ describe('Mermaid Generator Utility', () => {
           label: 'README.md',
           type: 'FILE',
           path: '/root/README.md',
-          level: 1,
         },
         {
           id: 'LICENSE',
           label: 'LICENSE',
           type: 'FILE',
           path: '/root/LICENSE',
-          level: 1,
         },
       ],
       edges: [], // No edges
@@ -73,14 +70,12 @@ describe('Mermaid Generator Utility', () => {
           label: 'func(args).ts',
           type: 'FILE',
           path: '',
-          level: 1,
         }, // Contains ()
         {
           id: 'file2',
           label: 'config"v2".json',
           type: 'FILE',
           path: '',
-          level: 1,
         }, // Contains "
       ],
       edges: [{ source: 'file1', target: 'file2' }],
@@ -113,9 +108,9 @@ describe('Mermaid Generator Utility', () => {
   it('should handle mixed connected and orphan nodes correctly', () => {
     const input: JsonStructure = {
       nodes: [
-        { id: 'A', label: 'A', type: 'FOLDER', path: '', level: 0 },
-        { id: 'B', label: 'B', type: 'FOLDER', path: '', level: 1 },
-        { id: 'C', label: 'C', type: 'FILE', path: '', level: 1 }, // Orphan
+        { id: 'A', label: 'A', type: 'FOLDER', path: '' },
+        { id: 'B', label: 'B', type: 'FOLDER', path: '' },
+        { id: 'C', label: 'C', type: 'FILE', path: '' }, // Orphan
       ],
       edges: [
         { source: 'A', target: 'B' }, // Only A->B

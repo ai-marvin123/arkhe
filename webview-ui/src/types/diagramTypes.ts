@@ -66,7 +66,6 @@ export type Node = {
   id: string;
   label: string;
   type: 'FILE' | 'FOLDER';
-  level: number;
   path: string;
   parentId?: string;
 };

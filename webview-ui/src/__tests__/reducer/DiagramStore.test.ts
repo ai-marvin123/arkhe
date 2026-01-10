@@ -226,7 +226,6 @@ describe('load_textOnly function', () => {
               id: 'X',
               label: 'Old',
               type: 'FILE' as const,
-              level: 1,
               path: 'old/file.js',
             },
           ],
