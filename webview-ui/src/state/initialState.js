@@ -24,12 +24,12 @@
 //       A-->B;`,
 //       jsonStructure: {
 //         nodes: [
-//           { id: "A", label: "A", type: "FILE", level: 1, path: "A.ts" },
+//           { id: "A", label: "A", type: "FILE", path: "A.ts" },
 //           {
 //             id: "B",
 //             label: "B",
 //             type: "FOLDER",
-//             level: 2,
+//
 //             path: "components/",
 //           },
 //         ],
@@ -70,28 +70,28 @@
 // ];
 //define initalState structure
 export const initialState = {
-    //A. Session id to send to BE
-    session: {
-        sessionId: "",
-    },
-    // B. Current diagram
-    diagram: {
-        jsonStructure: { nodes: [], edges: [] },
-        mermaidSyntax: "",
-    },
-    // C. Current view
-    view: {
-        zoomLevel: 1.0,
-        panX: 0,
-        panY: 0,
-        isFullscreen: false,
-        isLoading: false,
-        lastLLMMessage: "",
-    },
-    // D. AI Chat log
-    chat: {
-        log: [],
-        currentInput: "",
-    },
+  //A. Session id to send to BE
+  session: {
+    sessionId: '',
+  },
+  // B. Current diagram
+  diagram: {
+    jsonStructure: { nodes: [], edges: [] },
+    mermaidSyntax: '',
+  },
+  // C. Current view
+  view: {
+    zoomLevel: 1.0,
+    panX: 0,
+    panY: 0,
+    isFullscreen: false,
+    isLoading: false,
+    lastLLMMessage: '',
+  },
+  // D. AI Chat log
+  chat: {
+    log: [],
+    currentInput: '',
+  },
 };
 //# sourceMappingURL=initialState.js.map

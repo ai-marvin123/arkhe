@@ -7,7 +7,6 @@ const makeNode = (id: string): StructureNode => ({
   label: id.split('/').pop() || id,
   type: 'FILE',
   path: id,
-  level: 1,
   parentId: 'root',
 });
 

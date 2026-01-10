@@ -5,10 +5,9 @@ import { z } from 'zod';
 export const DriftStatusSchema = z.enum(['MATCHED', 'MISSING', 'UNTRACKED']);
 
 export const StructureNodeSchema = z.object({
-  id: z.string(), // Plan: UUID, Actual: RelativePath
+  id: z.string(), // Plan: UUID, Actual: string reflecting node label
   label: z.string(),
   type: z.enum(['FILE', 'FOLDER']),
-  level: z.number(),
   path: z.string(),
   parentId: z.string().nullable().optional(),
   status: DriftStatusSchema.nullable().optional(), // Drift state
@@ -130,9 +129,7 @@ export type MessageToBackend =
   | { command: 'LOAD_DIAGRAM'; payload: { sessionId: string } }
   | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
   | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } }
-
   | { command: 'GET_SETTINGS'; payload: { sessionId: string } }
-
   | {
       command: 'SAVE_SETTINGS';
       payload: {
@@ -142,7 +139,6 @@ export type MessageToBackend =
         model: string;
       };
     }
-
   | { command: 'OPEN_FILE'; payload: { path: string } }
   | { command: 'OPEN_FOLDER'; payload: { path: string } };
 

@@ -15,7 +15,6 @@ Project item schema.
 | `id`       | `string`             | **Plan:** UUID. **Disk:** Relative Path. |
 | `label`    | `string`             | Display name.                            |
 | `type`     | `'FILE' \| 'FOLDER'` | UI Icon.                                 |
-| `level`    | `number`             | Depth.                                   |
 | `path`     | `string`             | Relative path.                           |
 | `parentId` | `string?`            | Parent ID.                               |
 | `status`   | `DriftStatus?`       | **(NEW)** Drift state.                   |
@@ -94,7 +93,6 @@ export interface StructureNode {
   id: string; // Plan: UUID, Actual: RelativePath
   label: string;
   type: 'FILE' | 'FOLDER';
-  level: number;
   path: string;
   parentId?: string;
   status?: DriftStatus;

@@ -25,19 +25,19 @@ export class DriftService {
     // Helper to normalize IDs for comparison.
     // We convert to lowercase to handle case-insensitive file systems (Windows/macOS) correctly.
     // This ensures "User.ts" and "user.ts" are treated as the same file.
-    const normalize = (id: string) => id.replace(/\\/g, '/').toLowerCase();
+    const normalize = (path: string) => path.replace(/\\/g, '/').toLowerCase();
 
     const planMap = new Map<string, StructureNode>();
     const actualMap = new Map<string, StructureNode>();
 
     // Index plan nodes by normalized ID
     for (const node of planNodes) {
-      planMap.set(normalize(node.id), node);
+      planMap.set(normalize(node.path), node);
     }
 
     // Index actual nodes by normalized ID
     for (const node of actualNodes) {
-      actualMap.set(normalize(node.id), node);
+      actualMap.set(normalize(node.path), node);
     }
 
     const matched: StructureNode[] = [];
