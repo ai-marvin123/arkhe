@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import ChatLogContainer from '../../features/chat/ChatLogContainer';
-import { DiagramContext, DiagramDispatchContext } from '../../state/diagramContext';
+import {
+  DiagramContext,
+  DiagramDispatchContext,
+} from '../../state/diagramContext';
 import type { DiagramState } from '../../types/diagramTypes';
 
 /* ----------------------- MOCKS ----------------------- */
@@ -22,12 +25,12 @@ vi.mock('../../features/start/starterOptions', () => ({
 
 vi.mock('../../features/diagram/DiagramFrame', () => ({
   __esModule: true,
-  default: () => <div data-testid="diagram-frame">Diagram Frame</div>,
+  default: () => <div data-testid='diagram-frame'>Diagram Frame</div>,
 }));
 
 vi.mock('../../features/chat/AiMessageAccordion', () => ({
   __esModule: true,
-  default: () => <div data-testid="accordion">Accordion</div>,
+  default: () => <div data-testid='accordion'>Accordion</div>,
 }));
 
 /* ----------------------- HELPERS ----------------------- */
@@ -101,7 +104,6 @@ describe('ChatLogContainer', () => {
                     id: 'A',
                     label: 'A',
                     type: 'FILE',
-                    level: 0,
                     path: 'src/A.ts',
                   },
                 ],
