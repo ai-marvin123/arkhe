@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 
 /**
  * Centralized configuration + secrets manager
@@ -11,13 +11,13 @@ export class ConfigManager {
   private context: vscode.ExtensionContext | null = null;
 
   // 🔑 Storage Keys
-  private readonly SECRET_KEY_API = "arkhe.secrets.apiKey";
-  private readonly CONFIG_KEY_PROVIDER = "arkhe.config.provider";
-  private readonly CONFIG_KEY_MODEL = "arkhe.config.model";
+  private readonly SECRET_KEY_API = 'arkhe.secrets.apiKey';
+  private readonly CONFIG_KEY_PROVIDER = 'arkhe.config.provider';
+  private readonly CONFIG_KEY_MODEL = 'arkhe.config.model';
 
   // ⚙️ Defaults
-  private readonly DEFAULT_PROVIDER = "openai";
-  private readonly DEFAULT_MODEL = "gpt-4o-mini";
+  private readonly DEFAULT_PROVIDER = 'openai';
+  private readonly DEFAULT_MODEL = 'gpt-4o-mini';
 
   private constructor() {}
 
@@ -41,7 +41,7 @@ export class ConfigManager {
   private assertInitialized(): void {
     if (!this.context) {
       throw new Error(
-        "ConfigManager has not been initialized. Call initialize(context) in activate()."
+        'ConfigManager has not been initialized. Call initialize(context) in activate().'
       );
     }
   }
@@ -59,6 +59,12 @@ export class ConfigManager {
     await this.context!.secrets.store(this.SECRET_KEY_API, apiKey.trim());
 
     // console.log('[ConfigManager] API key stored in SecretStorage');
+  }
+
+  public async deleteApiKey(): Promise<void> {
+    this.assertInitialized();
+    await this.context!.secrets.delete(this.SECRET_KEY_API);
+    // console.log('[ConfigManager] API key deleted');
   }
 
   // ──────────────────────────────────────────────
