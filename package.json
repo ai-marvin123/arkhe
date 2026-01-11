@@ -72,7 +72,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package-ext && npm run build:webview",
-    "package-ext": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
+    "package-ext": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --define:__DEV__=false",
     "compile": "tsc -b",
     "build:webview": "cd webview-ui && npm run build",
     "watch:webview": "cd webview-ui && npm run build -- --watch",
