@@ -168,7 +168,17 @@ export class PerformanceLogger {
     return path.join(folders[0].uri.fsPath, ".arkhe-perf.log.json");
   }
 
+  /**
+   * Check if tracking is enabled (disabled in production)
+   */
+  private isEnabled(): boolean {
+    return process.env.NODE_ENV !== "production";
+  }
+
   log(entry: PerformanceLogEntry): void {
+    if (!this.isEnabled()) {
+      return;
+    }
     this.appendToLogArray(entry);
   }
 
@@ -176,6 +186,9 @@ export class PerformanceLogger {
    * Log any raw object (for startup tracking)
    */
   logRaw(entry: object): void {
+    if (!this.isEnabled()) {
+      return;
+    }
     this.appendToLogArray(entry);
   }
 
