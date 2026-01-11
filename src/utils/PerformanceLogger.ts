@@ -2,6 +2,9 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+// Build-time constant injected by esbuild (--define:__DEV__=false)
+declare const __DEV__: boolean | undefined;
+
 export interface PerformanceStep {
   startTime: number;
   duration: number;
@@ -169,10 +172,12 @@ export class PerformanceLogger {
   }
 
   /**
-   * Check if tracking is enabled (disabled in production)
+   * Check if tracking is enabled.
+   * - Production (esbuild): __DEV__ = false (disabled)
+   * - Development (tsc): __DEV__ = undefined (enabled)
    */
   private isEnabled(): boolean {
-    return process.env.NODE_ENV !== "production";
+    return typeof __DEV__ === "undefined" ? true : __DEV__;
   }
 
   log(entry: PerformanceLogEntry): void {
