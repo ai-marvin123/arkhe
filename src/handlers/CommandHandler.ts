@@ -18,7 +18,7 @@ export class CommandHandler {
     // ConfigManager.getInstance()
     //   .deleteApiKey()
     //   .then(() => {
-    //     console.log('🧪 [TEST MODE] API Key has been deleted force testing!');
+    //     console.log("🧪 [TEST MODE] API Key has been deleted force testing!");
     //   });
   }
 
