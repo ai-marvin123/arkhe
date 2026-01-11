@@ -21,18 +21,25 @@ export default function AIChat() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // console.log('✅ submit button has been clicked!');
     if (!prompt || state.view.isLoading) return;
+
+    // Step 1: Frontend submit - capture start time
+    const requestStartTime = performance.now();
+    const requestId = "req_" + Math.random().toString(36).substring(2, 10);
+
     dispatch({ type: "send_userInput" });
     const sessionId = state.session.sessionId;
     try {
-      const response = await requestStructure(sessionId, prompt); //Avo's API fetch request here
+      const response = await requestStructure(
+        sessionId,
+        prompt,
+        requestId,
+        requestStartTime
+      );
       const { payload } = response;
       if (!response) {
         throw new Error("No response object received on submit");
       }
-
-      // console.log('🍎 response object', response);
 
       if (payload.type === "DIAGRAM") {
         dispatch({

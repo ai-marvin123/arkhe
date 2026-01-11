@@ -1,10 +1,14 @@
-import * as vscode from 'vscode';
-import { aiService } from '../services/AiService';
-import { SessionManager } from '../managers/SessionManager';
-import { MessageToFrontend, MessageToBackend, AiPayload } from '../types';
-import { FileService } from '../services/FileService';
-import { DriftService } from '../services/DriftService';
-import { ConfigManager } from '../managers/ConfigManager';
+import * as vscode from "vscode";
+import { aiService } from "../services/AiService";
+import { SessionManager } from "../managers/SessionManager";
+import { MessageToFrontend, MessageToBackend, AiPayload } from "../types";
+import { FileService } from "../services/FileService";
+import { DriftService } from "../services/DriftService";
+import { ConfigManager } from "../managers/ConfigManager";
+import {
+  PerformanceTracker,
+  PerformanceLogger,
+} from "../utils/PerformanceLogger";
 
 export class CommandHandler {
   constructor(
@@ -14,34 +18,54 @@ export class CommandHandler {
     // ConfigManager.getInstance()
     //   .deleteApiKey()
     //   .then(() => {
-    //     console.log('🧪 [TEST MODE] API Key has been deleted force testing!');
+    //     console.log("🧪 [TEST MODE] API Key has been deleted force testing!");
     //   });
   }
 
   async handle(msg: MessageToBackend) {
     try {
       switch (msg.command) {
-        case 'GENERATE_STRUCTURE': {
-          const { sessionId, prompt } = msg.payload;
+        case "GENERATE_STRUCTURE": {
+          const { sessionId, prompt, requestId, requestStartTime } =
+            msg.payload;
 
-          // console.log('sessionId:', sessionId);
-          // console.log('prompt:', prompt);
-
-          const aiResponsePayload = await aiService.generateStructure(
+          // Initialize performance tracker
+          const tracker = new PerformanceTracker(
+            requestId || PerformanceLogger.generateRequestId(),
+            "GENERATE_STRUCTURE",
             sessionId,
-            prompt
+            requestStartTime || performance.now()
           );
 
+          tracker.setPrompt(prompt);
+
+          // Step 2: IPC to backend (time from frontend submit to here)
+          tracker.startStep("2_ipc_to_backend");
+          tracker.endStep("2_ipc_to_backend");
+
+          // Steps 3-10 are handled inside aiService.generateStructure
+          const aiResponsePayload = await aiService.generateStructure(
+            sessionId,
+            prompt,
+            tracker
+          );
+
+          // Step 11: IPC to frontend
+          tracker.startStep("11_ipc_to_frontend");
           const responseMsg: MessageToFrontend = {
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: aiResponsePayload,
           };
 
           this.panel.webview.postMessage(responseMsg);
+          tracker.endStep("11_ipc_to_frontend");
+
+          // Finalize and write log
+          tracker.finalize();
           break;
         }
 
-        case 'GENERATE_REPO': {
+        case "GENERATE_REPO": {
           const { sessionId } = msg.payload;
 
           const { nodes: actualNodes, edges: actualEdges } =
@@ -49,10 +73,10 @@ export class CommandHandler {
 
           if (!actualNodes.length) {
             this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
+              command: "AI_RESPONSE",
               payload: {
-                type: 'TEXT',
-                message: 'Workspace is empty. Cannot generate diagram.',
+                type: "TEXT",
+                message: "Workspace is empty. Cannot generate diagram.",
               },
             });
             break;
@@ -60,34 +84,34 @@ export class CommandHandler {
 
           const cleanNodes = actualNodes.map((n) => ({ ...n }));
           const responsePayload = {
-            type: 'DIAGRAM',
-            message: 'Repository structure visualized from disk.',
+            type: "DIAGRAM",
+            message: "Repository structure visualized from disk.",
             data: DriftService.generateDiagramData(cleanNodes, actualEdges),
           };
 
           this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: responsePayload as any,
           });
 
           await aiService.saveContext(
             sessionId,
-            'Visualized repository structure from disk.',
+            "Visualized repository structure from disk.",
             responsePayload as any
           );
 
           break;
         }
 
-        case 'RESET_SESSION': {
+        case "RESET_SESSION": {
           const { sessionId } = msg.payload;
 
           SessionManager.getInstance().clearSession(sessionId);
 
           this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: {
-              type: 'TEXT',
+              type: "TEXT",
               message: `Session ${sessionId} has been reset. Memory cleared.`,
             },
           });
@@ -95,24 +119,24 @@ export class CommandHandler {
           break;
         }
 
-        case 'SAVE_DIAGRAM': {
+        case "SAVE_DIAGRAM": {
           const { sessionId, diagramData } = msg.payload;
 
           await this.fileService.saveDiagram(sessionId, diagramData);
 
           const successPayload = {
-            type: 'DIAGRAM_SAVED',
-            message: 'Diagram saved successfully.',
+            type: "DIAGRAM_SAVED",
+            message: "Diagram saved successfully.",
           };
 
           this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: successPayload,
           });
 
           await aiService.saveContext(
             sessionId,
-            'User manually saved the current architecture plan to disk.',
+            "User manually saved the current architecture plan to disk.",
             {
               ...successPayload,
               data: diagramData,
@@ -122,7 +146,7 @@ export class CommandHandler {
           break;
         }
 
-        case 'LOAD_DIAGRAM': {
+        case "LOAD_DIAGRAM": {
           const { sessionId } = msg.payload;
           const saved = await this.fileService.loadDiagram(sessionId);
 
@@ -132,13 +156,13 @@ export class CommandHandler {
 
           if (saved) {
             const successPayload: AiPayload = {
-              type: 'DIAGRAM',
-              message: 'Diagram loaded successfully from storage.',
+              type: "DIAGRAM",
+              message: "Diagram loaded successfully from storage.",
               data: saved,
             };
 
             response = {
-              command: 'AI_RESPONSE',
+              command: "AI_RESPONSE",
               payload: successPayload,
             };
 
@@ -146,15 +170,15 @@ export class CommandHandler {
 
             await aiService.saveContext(
               sessionId,
-              'Load the previously saved architecture plan.',
+              "Load the previously saved architecture plan.",
               successPayload as any
             );
           } else {
             response = {
-              command: 'AI_RESPONSE',
+              command: "AI_RESPONSE",
               payload: {
-                type: 'NO_SAVED_DIAGRAM',
-                message: 'No diagram found.',
+                type: "NO_SAVED_DIAGRAM",
+                message: "No diagram found.",
               },
             };
           }
@@ -163,18 +187,18 @@ export class CommandHandler {
           break;
         }
 
-        case 'CHECK_DRIFT': {
+        case "CHECK_DRIFT": {
           const { sessionId } = msg.payload ?? {};
 
           // 1. LOAD PLAN (Nodes + Edges)
           const savedDiagram = await this.fileService.loadDiagram(sessionId);
           if (!savedDiagram) {
             this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
+              command: "AI_RESPONSE",
               payload: {
-                type: 'NO_SAVED_DIAGRAM',
+                type: "NO_SAVED_DIAGRAM",
                 message:
-                  'No saved architecture plan found. Please save a plan first.',
+                  "No saved architecture plan found. Please save a plan first.",
               },
             });
             break;
@@ -199,8 +223,8 @@ export class CommandHandler {
           // --- SCENARIO A: ALL MATCHED ---
           if (missing.length === 0 && untracked.length === 0) {
             responsePayload = {
-              type: 'ALL_MATCHED',
-              message: 'Structure is perfectly synced with the codebase.',
+              type: "ALL_MATCHED",
+              message: "Structure is perfectly synced with the codebase.",
             };
           }
           // --- SCENARIO B: MISSING ONLY ---
@@ -208,7 +232,7 @@ export class CommandHandler {
             const aiMessage = await aiService.analyzeDrift(missing);
             const viewNodes = [...matched, ...missing];
             responsePayload = {
-              type: 'MISSING_DIAGRAM',
+              type: "MISSING_DIAGRAM",
               message: aiMessage,
               data: DriftService.generateDiagramData(viewNodes, planEdges),
             };
@@ -217,8 +241,8 @@ export class CommandHandler {
           else if (missing.length === 0 && untracked.length > 0) {
             const viewNodes = [...matched, ...untracked];
             responsePayload = {
-              type: 'UNTRACKED_DIAGRAM',
-              message: 'Found new untracked files in your repository.',
+              type: "UNTRACKED_DIAGRAM",
+              message: "Found new untracked files in your repository.",
               data: DriftService.generateDiagramData(viewNodes, actualEdges),
             };
           }
@@ -239,7 +263,7 @@ export class CommandHandler {
             );
 
             responsePayload = {
-              type: 'MIXED_DIAGRAM',
+              type: "MIXED_DIAGRAM",
               message: aiMessage,
               missingDiagramData: missingDiagramData,
               untrackedDiagramData: untrackedDiagramData,
@@ -247,20 +271,20 @@ export class CommandHandler {
           }
 
           this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: responsePayload,
           });
 
           await aiService.saveContext(
             sessionId,
-            'Run drift detection check on current codebase.',
+            "Run drift detection check on current codebase.",
             responsePayload
           );
 
           break;
         }
 
-        case 'SYNC_TO_ACTUAL': {
+        case "SYNC_TO_ACTUAL": {
           const { sessionId } = msg.payload;
 
           // 1. Get the "Truth" (Actual Graph)
@@ -269,10 +293,10 @@ export class CommandHandler {
 
           if (actualNodes.length === 0) {
             this.panel.webview.postMessage({
-              command: 'AI_RESPONSE',
+              command: "AI_RESPONSE",
               payload: {
-                type: 'TEXT',
-                message: 'Workspace is empty. Cannot sync.',
+                type: "TEXT",
+                message: "Workspace is empty. Cannot sync.",
               },
             });
             break;
@@ -294,26 +318,26 @@ export class CommandHandler {
           await this.fileService.saveDiagram(sessionId, newDiagramData);
 
           const responsePayload = {
-            type: 'DIAGRAM',
-            message: 'Diagram successfully synced with the actual codebase.',
+            type: "DIAGRAM",
+            message: "Diagram successfully synced with the actual codebase.",
             data: newDiagramData,
           };
 
           this.panel.webview.postMessage({
-            command: 'AI_RESPONSE',
+            command: "AI_RESPONSE",
             payload: responsePayload as any,
           });
 
           await aiService.saveContext(
             sessionId,
-            'Sync architecture plan to match actual codebase files.',
+            "Sync architecture plan to match actual codebase files.",
             responsePayload as any
           );
 
           break;
         }
 
-        case 'GET_SETTINGS': {
+        case "GET_SETTINGS": {
           const configManager = ConfigManager.getInstance();
 
           const isConfigured = await configManager.isConfigured();
@@ -323,20 +347,20 @@ export class CommandHandler {
           // console.log('config: ', config);
 
           this.panel.webview.postMessage({
-            command: 'SETTINGS_STATUS',
+            command: "SETTINGS_STATUS",
             payload: { isConfigured, config },
           });
 
           break;
         }
 
-        case 'SAVE_SETTINGS': {
+        case "SAVE_SETTINGS": {
           // console.log('SAVE_SETTINGS received:', msg.payload);
           const { apiKey, provider, model } = msg.payload ?? {};
 
           // Basic validation
           if (!provider || !model) {
-            this.sendError('SAVE_SETTINGS missing provider or model.');
+            this.sendError("SAVE_SETTINGS missing provider or model.");
             break;
           }
 
@@ -354,7 +378,7 @@ export class CommandHandler {
           // Edge Case: No key provided AND no key in storage (First time setup with empty field)
           if (!keyToVerify) {
             this.panel.webview.postMessage({
-              command: 'SETTINGS_ERROR',
+              command: "SETTINGS_ERROR",
               payload: {
                 success: false,
                 // message: 'API Key is required.',
@@ -370,7 +394,7 @@ export class CommandHandler {
           if (!isValid) {
             // ❌ FAILURE: Send error to Frontend and STOP.
             this.panel.webview.postMessage({
-              command: 'SETTINGS_ERROR',
+              command: "SETTINGS_ERROR",
               payload: {
                 success: false,
                 // message:
@@ -401,14 +425,14 @@ export class CommandHandler {
 
           // ✅ SUCCESS: Tell Frontend everything is good.
           this.panel.webview.postMessage({
-            command: 'SETTINGS_SAVED',
+            command: "SETTINGS_SAVED",
             payload: { success: true },
           });
 
           break;
         }
 
-        case 'OPEN_FILE': {
+        case "OPEN_FILE": {
           try {
             const { path } = msg.payload;
 
@@ -424,12 +448,12 @@ export class CommandHandler {
               preview: false,
             });
           } catch (err) {
-            console.error('[CommandHandler] OPEN_FILE failed!');
-            this.sendError('Failed to open file.');
+            console.error("[CommandHandler] OPEN_FILE failed!");
+            this.sendError("Failed to open file.");
           }
           break;
         }
-        case 'OPEN_FOLDER': {
+        case "OPEN_FOLDER": {
           try {
             const { path } = msg.payload;
 
@@ -440,24 +464,24 @@ export class CommandHandler {
 
             const uri = vscode.Uri.file(absolutePath);
 
-            await vscode.commands.executeCommand('revealInExplorer', uri);
+            await vscode.commands.executeCommand("revealInExplorer", uri);
           } catch (err) {
-            console.error('[CommandHandler] OPEN_FOLDER failed!');
-            this.sendError('Failed to reveal folder in Explorer.');
+            console.error("[CommandHandler] OPEN_FOLDER failed!");
+            this.sendError("Failed to reveal folder in Explorer.");
           }
           break;
         }
       }
     } catch (err: any) {
       this.sendError(
-        `CommandHandler failed: ${err?.message ?? 'Unexpected error'}`
+        `CommandHandler failed: ${err?.message ?? "Unexpected error"}`
       );
     }
   }
 
   private sendError(message: string): void {
     this.panel.webview.postMessage({
-      command: 'ERROR',
+      command: "ERROR",
       payload: { message },
     });
   }

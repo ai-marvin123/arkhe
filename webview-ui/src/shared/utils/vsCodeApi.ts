@@ -125,7 +125,9 @@ export function sendUserApiKey(
 // Send the user prompt + current sessionId to the extension so it can generate a response.
 export function requestStructure(
   sessionId: string,
-  prompt: string
+  prompt: string,
+  requestId?: string,
+  requestStartTime?: number
 ): Promise<MessageToFrontend> {
   const vsCodeApi = getVsCodeApi();
 
@@ -155,7 +157,7 @@ export function requestStructure(
 
     vsCodeApi.postMessage({
       command: "GENERATE_STRUCTURE",
-      payload: { sessionId, prompt },
+      payload: { sessionId, prompt, requestId, requestStartTime },
     });
   });
 }
