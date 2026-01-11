@@ -5,7 +5,7 @@ import {
 } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { SessionManager } from "../managers/SessionManager"; // Ensure this path is correct
-import { AiPayload, AiPayloadSchema } from "../types";
+import { AiPayload, AiPayloadSchema, StructureEdge } from "../types";
 import { SystemMessage } from "langchain";
 import { ChatOpenAI } from "@langchain/openai";
 import { generateMermaidFromJSON } from "../utils/mermaidGenerator";
@@ -16,7 +16,7 @@ import { FileService } from "./FileService";
 import { DriftService } from "./DriftService";
 import { PerformanceTracker } from "../utils/PerformanceLogger";
 
-import { SYSTEM_PROMPT } from "./SystemPrompt";
+import { SYSTEM_PROMPT_V3 } from "./SystemPrompt";
 
 class AiService {
   private chatModelJson: ChatOpenAI | null = null;
@@ -91,11 +91,29 @@ class AiService {
   private minifyPayload(payload: AiPayload): string {
     const clone = JSON.parse(JSON.stringify(payload));
 
+    // Remove mermaidSyntax (can be regenerated)
     if (clone.data?.mermaidSyntax) {
       delete clone.data.mermaidSyntax;
     }
 
+    // Remove edges (can be regenerated from parentId)
+    if (clone.data?.jsonStructure?.edges) {
+      delete clone.data.jsonStructure.edges;
+    }
+
     return JSON.stringify(clone);
+  }
+
+  /**
+   * Generate edges from node parentId relationships
+   */
+  private generateEdgesFromNodes(nodes: StructureNode[]): StructureEdge[] {
+    return nodes
+      .filter((node) => node.parentId !== null && node.parentId !== undefined)
+      .map((node) => ({
+        source: node.parentId!,
+        target: node.id,
+      }));
   }
 
   /**
@@ -119,7 +137,7 @@ class AiService {
       // Step 4: Prompt template build
       tracker?.startStep("4_prompt_template_build");
       const prompt = ChatPromptTemplate.fromMessages([
-        new SystemMessage(SYSTEM_PROMPT),
+        new SystemMessage(SYSTEM_PROMPT_V3),
         new MessagesPlaceholder("chat_history"),
         ["human", "{input}"],
       ]);
@@ -188,16 +206,22 @@ class AiService {
         return realPayload;
       }
 
-      // Step 8: Mermaid generation
+      // Step 8: Auto-generate edges + Mermaid generation
       tracker?.startStep("8_mermaid_generation");
       let nodeCount = 0;
       let edgeCount = 0;
       if (rawJson?.type === "DIAGRAM" && rawJson?.data?.jsonStructure) {
         try {
+          // Auto-generate edges from parentId
+          const nodes = rawJson.data.jsonStructure.nodes || [];
+          const generatedEdges = this.generateEdgesFromNodes(nodes);
+          rawJson.data.jsonStructure.edges = generatedEdges;
+
+          // Generate mermaid syntax
           const syntax = generateMermaidFromJSON(rawJson.data.jsonStructure);
           rawJson.data.mermaidSyntax = syntax;
-          nodeCount = rawJson.data.jsonStructure.nodes?.length || 0;
-          edgeCount = rawJson.data.jsonStructure.edges?.length || 0;
+          nodeCount = nodes.length;
+          edgeCount = generatedEdges.length;
         } catch (err) {
           console.error("[AiService] Failed to generate mermaid syntax:", err);
         }

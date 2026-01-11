@@ -20,7 +20,7 @@ export const EdgeSchema = z.object({
 
 export const JsonStructureSchema = z.object({
   nodes: z.array(StructureNodeSchema),
-  edges: z.array(EdgeSchema),
+  edges: z.array(EdgeSchema).optional().default([]),
 });
 
 export const DiagramDataSchema = z.object({
