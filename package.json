@@ -79,10 +79,10 @@
     "watch": "tsc -b -w",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "test:backend": "vitest run"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
     "@types/mermaid": "^9.1.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.1",
@@ -92,8 +92,6 @@
     "esbuild": "^0.27.2",
     "eslint": "^9.39.1",
     "happy-dom": "^20.0.11",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3",
     "vitest": "^4.0.15"
