@@ -1,21 +1,21 @@
-import "dotenv/config";
+import 'dotenv/config';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
-} from "@langchain/core/prompts";
-import { JsonOutputParser } from "@langchain/core/output_parsers";
-import { SessionManager } from "../managers/SessionManager"; // Ensure this path is correct
-import { AiPayload, AiPayloadSchema } from "../types";
-import { SystemMessage } from "langchain";
-import { ChatOpenAI } from "@langchain/openai";
-import { generateMermaidFromJSON } from "../utils/mermaidGenerator";
-import { StructureNode } from "../types";
+} from '@langchain/core/prompts';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
+import { AiPayload, AiPayloadSchema } from '../types';
+import { SystemMessage } from 'langchain';
+import { ChatOpenAI } from '@langchain/openai';
+import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
+import { StructureNode } from '../types';
 
-import { ConfigManager } from "../managers/ConfigManager";
-import { FileService } from "./FileService";
-import { DriftService } from "./DriftService";
+import { ConfigManager } from '../managers/ConfigManager';
+import { FileService } from './FileService';
+import { DriftService } from './DriftService';
 
-const SYSTEM_PROMPT = `
+const SYSTEM_PROMPT: string = `
 You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
 Respond strictly in JSON format. MODE A | MODE B | MODE C.
 
@@ -73,12 +73,12 @@ class AiService {
   private chatModelJson: ChatOpenAI | null = null;
   private chatModelText: ChatOpenAI | null = null;
 
-  private async getModel(type: "json" | "text"): Promise<ChatOpenAI> {
+  private async getModel(type: 'json' | 'text'): Promise<ChatOpenAI> {
     // Check reset
-    if (type === "json" && this.chatModelJson) {
+    if (type === 'json' && this.chatModelJson) {
       return this.chatModelJson;
     }
-    if (type === "text" && this.chatModelText) {
+    if (type === 'text' && this.chatModelText) {
       return this.chatModelText;
     }
 
@@ -88,23 +88,23 @@ class AiService {
     // console.log('model: ', model);
 
     if (!apiKey) {
-      throw new Error("API Key not configured.");
+      throw new Error('API Key not configured.');
     }
 
     const instance = new ChatOpenAI({
-      modelName: model,
-      temperature: type === "json" ? 0 : 0.7,
+      model: model,
+      temperature: type === 'json' ? 0 : 0.7,
       apiKey: apiKey,
       modelKwargs:
-        type === "json"
-          ? { response_format: { type: "json_object" } }
+        type === 'json'
+          ? { response_format: { type: 'json_object' } }
           : undefined,
     });
 
-    if (type === "json") {
+    if (type === 'json') {
       this.chatModelJson = instance;
     }
-    if (type === "text") {
+    if (type === 'text') {
       this.chatModelText = instance;
     }
 
@@ -122,19 +122,19 @@ class AiService {
       // console.log(`[AiService] Verifying key for model: ${modelName}...`);
 
       const tempModel = new ChatOpenAI({
-        modelName: modelName, // Check if this key has access to this specific model
+        model: modelName, // Check if this key has access to this specific model
         temperature: 0,
         apiKey: apiKey,
         maxTokens: 100, // Keep it minimal to save tokens/latency
       });
 
       // Send a ping message
-      await tempModel.invoke("Ping");
+      await tempModel.invoke('Ping');
 
       // console.log('[AiService] Verification successful.');
       return true;
     } catch (error) {
-      console.error("[AiService] Key verification failed:", error);
+      console.error('[AiService] Key verification failed:', error);
       return false;
     }
   }
@@ -154,7 +154,7 @@ class AiService {
    */
   async generateStructure(
     sessionId: string,
-    userPrompt: string
+    userPrompt: string,
   ): Promise<AiPayload> {
     try {
       // A. Get History Instance (Memory)
@@ -167,8 +167,8 @@ class AiService {
       // B. Create Prompt Template
       const prompt = ChatPromptTemplate.fromMessages([
         new SystemMessage(SYSTEM_PROMPT),
-        new MessagesPlaceholder("chat_history"),
-        ["human", "{input}"],
+        new MessagesPlaceholder('chat_history'),
+        ['human', '{input}'],
       ]);
 
       // console.log('prompt: ', prompt);
@@ -177,7 +177,7 @@ class AiService {
       const parser = new JsonOutputParser();
 
       // D. Define the Chain (The Pipeline)
-      const model = await this.getModel("json");
+      const model = await this.getModel('json');
       const chain = prompt.pipe(model).pipe(parser);
 
       // console.log(`[AiService] Invoking chain for session: ${sessionId}`);
@@ -189,7 +189,7 @@ class AiService {
       });
 
       // --- MODE C (TRIGGER_SCAN) ---
-      if (rawJson?.type === "TRIGGER_SCAN") {
+      if (rawJson?.type === 'TRIGGER_SCAN') {
         // console.log('[AiService] Mode C detected. Scanning disk...');
 
         // 1. Scan Disk
@@ -199,8 +199,8 @@ class AiService {
         // 2. Handle Empty Workspace
         if (!actualNodes.length) {
           const emptyPayload: AiPayload = {
-            type: "TEXT",
-            message: "Workspace is empty. Cannot generate diagram from disk.",
+            type: 'TEXT',
+            message: 'Workspace is empty. Cannot generate diagram from disk.',
             data: undefined,
           };
 
@@ -213,12 +213,12 @@ class AiService {
         const cleanNodes = actualNodes.map((n) => ({ ...n }));
         const diagramData = DriftService.generateDiagramData(
           cleanNodes,
-          actualEdges
+          actualEdges,
         );
 
         const realPayload: AiPayload = {
-          type: "DIAGRAM",
-          message: "Repository structure visualized from disk.",
+          type: 'DIAGRAM',
+          message: 'Repository structure visualized from disk.',
           data: diagramData,
         };
 
@@ -232,14 +232,14 @@ class AiService {
       // --- CRITICAL STEP: Inject Mermaid Syntax BEFORE Validation ---
       // We process the raw JSON here. If it's a DIAGRAM type, we calculate the mermaid string
       // and inject it into the object so that it satisfies the Zod schema in the next step.
-      if (rawJson?.type === "DIAGRAM" && rawJson?.data?.jsonStructure) {
+      if (rawJson?.type === 'DIAGRAM' && rawJson?.data?.jsonStructure) {
         try {
           const syntax = generateMermaidFromJSON(rawJson.data.jsonStructure);
           // Inject mermaidSyntax into the data object
           rawJson.data.mermaidSyntax = syntax;
           // console.log('[AiService] Mermaid syntax generated successfully.');
         } catch (err) {
-          console.error("[AiService] Failed to generate mermaid syntax:", err);
+          console.error('[AiService] Failed to generate mermaid syntax:', err);
           // We can optionally fallback or let Zod fail depending on strategy
         }
       }
@@ -248,9 +248,9 @@ class AiService {
       const validation = AiPayloadSchema.safeParse(rawJson);
 
       if (!validation.success) {
-        console.error("[AiService] Validation Failed:", validation.error);
+        console.error('[AiService] Validation Failed:', validation.error);
         return this.fallbackText(
-          "AI generated invalid structure. Please try again with a clearer description."
+          'AI generated invalid structure. Please try again with a clearer description.',
         );
       }
 
@@ -263,17 +263,17 @@ class AiService {
 
       return validatedData;
     } catch (error) {
-      console.error("[AiService] Error:", error);
-      return this.fallbackText("System error while contacting AI.");
+      console.error('[AiService] Error:', error);
+      return this.fallbackText('System error while contacting AI.');
     }
   }
 
   async analyzeDrift(missingNodes: StructureNode[]): Promise<string> {
     if (!missingNodes || missingNodes.length === 0) {
-      return "No missing files detected.";
+      return 'No missing files detected.';
     }
 
-    const list = missingNodes.map((node) => `- ${node.id}`).join("\n");
+    const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
 
     const prompt = `
 You are a Tech Lead. Analyze these missing files from the repository:
@@ -286,27 +286,27 @@ Do NOT use bullet points, headers, or markdown.
 `.trim();
 
     try {
-      const model = await this.getModel("text");
+      const model = await this.getModel('text');
       const response = await model.invoke(prompt);
 
       // LangChain ChatOpenAI always returns a message object
       if ((response as any)?.content) {
-        return typeof response.content === "string"
+        return typeof response.content === 'string'
           ? response.content
           : JSON.stringify(response.content);
       }
 
-      return "Missing files detected. Review recent changes and update or restore the plan.";
+      return 'Missing files detected. Review recent changes and update or restore the plan.';
     } catch (error) {
-      console.error("[AiService] analyzeDrift error:", error);
-      return "Unable to analyze drift automatically. Please review missing files manually.";
+      console.error('[AiService] analyzeDrift error:', error);
+      return 'Unable to analyze drift automatically. Please review missing files manually.';
     }
   }
 
   async saveContext(
     sessionId: string,
     userAction: string,
-    aiPayload: AiPayload
+    aiPayload: AiPayload,
   ): Promise<void> {
     try {
       const sessionManager = SessionManager.getInstance();
@@ -318,13 +318,13 @@ Do NOT use bullet points, headers, or markdown.
 
       // console.log(`[AiService] Saved context for action: "${userAction}"`);
     } catch (error) {
-      console.error("[AiService] Failed to save context:", error);
+      console.error('[AiService] Failed to save context:', error);
     }
   }
 
   private fallbackText(message: string): AiPayload {
     return {
-      type: "TEXT",
+      type: 'TEXT',
       message,
       data: undefined,
     };
