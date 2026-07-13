@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import mermaid from 'mermaid';
 import type { ViewSettings, Node } from '../../types/diagramTypes';
 import { useDiagramDispatch } from '../../state/diagramContext';
@@ -15,17 +15,25 @@ interface MermaidRenderResult {
   bindFunctions?: (element: Element) => void;
 }
 
-export default function MermaidRenderer({
+export interface MermaidRendererHandle {
+  getSvgElement: () => SVGElement | null;
+}
+
+const MermaidRenderer = forwardRef<MermaidRendererHandle, MermaidRenderResult>(function MermaidRenderer({
   code,
   view,
   logKey,
   nodes,
-}: MermaidRenderResult) {
+}, ref) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPosition = useRef({ x: 0, y: 0 });
   const startPanOffset = useRef({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDiagramDispatch();
+
+  useImperativeHandle(ref, () => ({
+    getSvgElement: () => containerRef.current?.querySelector('svg') ?? null,
+  }));
 
   useEffect(() => {
     const handleGlobalMouseUp = () => {
@@ -183,4 +191,6 @@ export default function MermaidRenderer({
       />
     </div>
   );
-}
+});
+
+export default MermaidRenderer;

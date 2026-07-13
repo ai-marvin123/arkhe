@@ -471,6 +471,43 @@ export class CommandHandler {
           }
           break;
         }
+
+        case "EXPORT_PDF": {
+          try {
+            const { pdfBase64, fileName } = msg.payload;
+
+            const saveUri = await vscode.window.showSaveDialog({
+              defaultUri: vscode.Uri.file(fileName),
+              filters: {
+                "PDF Files": ["pdf"],
+              },
+              title: "Export Diagram as PDF",
+            });
+
+            if (!saveUri) {
+              // User cancelled the save dialog
+              this.panel.webview.postMessage({
+                command: "PDF_EXPORTED",
+                payload: { message: "Export cancelled." },
+              });
+              break;
+            }
+
+            const pdfBytes = Buffer.from(pdfBase64, "base64");
+            await vscode.workspace.fs.writeFile(saveUri, pdfBytes);
+
+            this.panel.webview.postMessage({
+              command: "PDF_EXPORTED",
+              payload: { message: "PDF exported successfully." },
+            });
+          } catch (err: any) {
+            console.error("[CommandHandler] EXPORT_PDF failed!", err);
+            this.sendError(
+              `Failed to export PDF: ${err?.message ?? "Unknown error"}`
+            );
+          }
+          break;
+        }
       }
     } catch (err: any) {
       this.sendError(

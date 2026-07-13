@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MermaidRenderer from "./MermaidRenderer";
+import type { MermaidRendererHandle } from "./MermaidRenderer";
 import type { DiagramEntry } from "../../types/diagramTypes";
 import ViewTools from "./ViewTools";
-import { postDiagramToSave } from "../../shared/utils/vsCodeApi";
+import { postDiagramToSave, exportPdf } from "../../shared/utils/vsCodeApi";
 import SaveButton from "./viewButtons/SaveButton";
+import { jsPDF } from "jspdf";
 
 interface diagramFrameType {
   sessionId: string;
@@ -20,6 +22,8 @@ export default function DiagramFrame({
   const diagram = entry.diagramData?.mermaidSyntax;
   const isFullscreen = entry.viewSettings?.isFullscreen;
   const [saveStatus, setSaveStatus] = useState<string>("idle");
+  const [exportStatus, setExportStatus] = useState<string>("idle");
+  const mermaidRef = useRef<MermaidRendererHandle>(null);
   // console.log('🚀Diagram entry text', entry.id, entry.text);
 
   useEffect(() => {
@@ -87,6 +91,98 @@ export default function DiagramFrame({
     }
   };
 
+  const handleExportPdf = async () => {
+    if (exportStatus === "exporting") return;
+
+    const svgElement = mermaidRef.current?.getSvgElement();
+    if (!svgElement) {
+      console.error("No SVG element found for PDF export.");
+      setExportStatus("error");
+      setTimeout(() => setExportStatus("idle"), 3000);
+      return;
+    }
+
+    setExportStatus("exporting");
+
+    try {
+      // 1. Clone the SVG and ensure it has explicit dimensions
+      const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+      const graphicsEl = svgElement as unknown as SVGGraphicsElement;
+      const bbox = graphicsEl.getBBox();
+      const svgWidth = bbox.width + bbox.x * 2 || svgElement.clientWidth || 800;
+      const svgHeight = bbox.height + bbox.y * 2 || svgElement.clientHeight || 600;
+
+      clonedSvg.setAttribute("width", String(svgWidth));
+      clonedSvg.setAttribute("height", String(svgHeight));
+
+      // 2. Serialize SVG to string
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(clonedSvg);
+
+      // 3. Convert SVG string to a data URL (blob: URLs are blocked by webview CSP)
+      const svgBase64 = btoa(unescape(encodeURIComponent(svgString)));
+      const svgDataUrl = `data:image/svg+xml;base64,${svgBase64}`;
+
+      // 4. Draw SVG onto a canvas
+      const img = new Image();
+      img.onload = async () => {
+        try {
+          const scale = 2; // High DPI for crisp PDF output
+          const canvas = document.createElement("canvas");
+          canvas.width = svgWidth * scale;
+          canvas.height = svgHeight * scale;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            throw new Error("Could not get canvas 2D context.");
+          }
+
+          // Fill with dark background to match the diagram panel
+          ctx.fillStyle = "#1f1a24";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.scale(scale, scale);
+          ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
+
+          // 5. Create PDF with jsPDF
+          const isLandscape = svgWidth > svgHeight;
+          const pdf = new jsPDF({
+            orientation: isLandscape ? "landscape" : "portrait",
+            unit: "px",
+            format: [svgWidth + 40, svgHeight + 40], // 20px padding on each side
+          });
+
+          const pngDataUrl = canvas.toDataURL("image/png");
+          pdf.addImage(pngDataUrl, "PNG", 20, 20, svgWidth, svgHeight);
+
+          // 6. Get PDF as base64 and send to extension
+          const pdfBase64 = pdf.output("datauristring").split(",")[1];
+          const fileName = `arkhe-diagram-${Date.now()}.pdf`;
+
+          await exportPdf(pdfBase64, fileName);
+
+          setExportStatus("done");
+          setTimeout(() => setExportStatus("idle"), 3000);
+        } catch (err) {
+          console.error("PDF generation failed:", err);
+          setExportStatus("error");
+          setTimeout(() => setExportStatus("idle"), 3000);
+        }
+      };
+
+      img.onerror = () => {
+        console.error("Failed to load SVG as image for PDF export.");
+        setExportStatus("error");
+        setTimeout(() => setExportStatus("idle"), 3000);
+      };
+
+      img.src = svgDataUrl;
+    } catch (error) {
+      console.error("PDF export failed:", error);
+      setExportStatus("error");
+      setTimeout(() => setExportStatus("idle"), 3000);
+    }
+  };
+
   const nodes = entry.diagramData?.jsonStructure.nodes ?? [];
 
   const content = (
@@ -99,13 +195,19 @@ export default function DiagramFrame({
         <SaveButton clickFunc={handleSave} status={saveStatus} />
       </div>
       <MermaidRenderer
+        ref={mermaidRef}
         logKey={logKey}
         code={diagram}
         view={entry.viewSettings}
         nodes={nodes}
       />
 
-      <ViewTools id={entry.id} view={entry.viewSettings} />
+      <ViewTools
+        id={entry.id}
+        view={entry.viewSettings}
+        onExportPdf={handleExportPdf}
+        exportStatus={exportStatus}
+      />
     </div>
   );
   if (!isFullscreen) {
@@ -118,3 +220,4 @@ export default function DiagramFrame({
     </div>
   );
 }
+

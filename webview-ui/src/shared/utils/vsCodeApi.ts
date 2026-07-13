@@ -332,3 +332,47 @@ export function openFolderOnClick(path: string) {
     payload: { path },
   });
 }
+
+//********************************//
+//      EXPORT PDF FEATURE        //
+//********************************//
+
+export type ExportPdfResponse =
+  | { command: "PDF_EXPORTED"; payload: { message: string } }
+  | { command: "ERROR"; payload: { message: string } };
+
+export function exportPdf(
+  pdfBase64: string,
+  fileName: string
+): Promise<ExportPdfResponse> {
+  const vsCodeApi = getVsCodeApi();
+
+  return new Promise((resolve, reject) => {
+    const listener = (event: MessageEvent) => {
+      const message = event.data;
+
+      if (message.command === "PDF_EXPORTED") {
+        window.removeEventListener("message", listener);
+        resolve(message);
+        return;
+      }
+
+      if (message.command === "ERROR") {
+        window.removeEventListener("message", listener);
+        reject(
+          new Error(
+            message.payload.message ||
+              "An unknown error occurred while exporting PDF."
+          )
+        );
+      }
+      return;
+    };
+    window.addEventListener("message", listener);
+
+    vsCodeApi.postMessage({
+      command: "EXPORT_PDF",
+      payload: { pdfBase64, fileName },
+    });
+  });
+}

@@ -145,7 +145,11 @@ export type MessageToBackend =
       };
     }
   | { command: "OPEN_FILE"; payload: { path: string } }
-  | { command: "OPEN_FOLDER"; payload: { path: string } };
+  | { command: "OPEN_FOLDER"; payload: { path: string } }
+  | {
+      command: "EXPORT_PDF";
+      payload: { pdfBase64: string; fileName: string };
+    };
 
 export type MessageToFrontend = // Renamed from BackendMessage
 
@@ -170,5 +174,9 @@ export type MessageToFrontend = // Renamed from BackendMessage
       }
     | {
         command: "ERROR";
+        payload: { message: string };
+      }
+    | {
+        command: "PDF_EXPORTED";
         payload: { message: string };
       };
