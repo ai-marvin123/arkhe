@@ -21,7 +21,7 @@ export const generateMermaidFromJSON = (structure: JsonStructure): string => {
 
   structure.nodes.forEach((node) => {
     // Sanitize label: remove parentheses or quotes to prevent Mermaid syntax errors
-    const cleanLabel = node.label.replace(/["()]/g, '');
+    const cleanLabel = node.label.replace(/["()\[\]]/g, '');
     nodeMap.set(node.id, cleanLabel);
   });
 
