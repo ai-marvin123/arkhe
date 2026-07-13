@@ -13,6 +13,7 @@ interface MermaidRenderResult {
   logKey: string;
   nodes: Node[];
   bindFunctions?: (element: Element) => void;
+  panelRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function MermaidRenderer({
@@ -20,6 +21,7 @@ export default function MermaidRenderer({
   view,
   logKey,
   nodes,
+  panelRef,
 }: MermaidRenderResult) {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPosition = useRef({ x: 0, y: 0 });
@@ -66,8 +68,26 @@ export default function MermaidRenderer({
     mermaid
       .render(id, code)
       .then(({ svg }) => {
-        if (!containerRef.current) return;
         containerRef.current!.innerHTML = svg;
+
+        requestAnimationFrame(() => {
+          if (!panelRef.current || !containerRef.current) return;
+          const svgElement: SVGSVGElement | null =
+            containerRef.current.querySelector('svg');
+          const panelRect: DOMRect = panelRef.current!.getBoundingClientRect();
+          const svgBBox: SVGRect = svgElement!.getBBox();
+          const zoom: number = Math.min(
+            panelRect.height / svgBBox.height,
+            panelRect.width / svgBBox.width,
+          );
+
+          dispatch({
+            type: 'update_logEntry',
+            payload: { id: logKey, zoomLevel: zoom },
+          });
+        });
+
+        if (!containerRef.current) return;
         containerRef.current.onclick = (e: MouseEvent) => {
           if (view.isPanActive) return;
 
@@ -79,7 +99,7 @@ export default function MermaidRenderer({
             (node) =>
               mermaidId === node.id ||
               mermaidId.includes(`-${node.id}-`) ||
-              mermaidId.startsWith(`-${node.id}-`)
+              mermaidId.startsWith(`-${node.id}-`),
           );
 
           if (matchedNode?.path) {
@@ -100,7 +120,7 @@ export default function MermaidRenderer({
         // Handle rendering errors and display them
         console.error('MERMAID ERROR:', err);
         containerRef.current!.innerHTML = `<pre style="color:red; white-space: pre-wrap; word-break: break-all;">Mermaid Rendering Error: ${String(
-          err
+          err,
         )}</pre>`;
       });
   }, [code, view.isPanActive, nodes]);

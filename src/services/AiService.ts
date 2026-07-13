@@ -1,4 +1,4 @@
-import "dotenv/config";
+import 'dotenv/config';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -22,12 +22,12 @@ class AiService {
   private chatModelJson: ChatOpenAI | null = null;
   private chatModelText: ChatOpenAI | null = null;
 
-  private async getModel(type: "json" | "text"): Promise<ChatOpenAI> {
+  private async getModel(type: 'json' | 'text'): Promise<ChatOpenAI> {
     // Check reset
-    if (type === "json" && this.chatModelJson) {
+    if (type === 'json' && this.chatModelJson) {
       return this.chatModelJson;
     }
-    if (type === "text" && this.chatModelText) {
+    if (type === 'text' && this.chatModelText) {
       return this.chatModelText;
     }
 
@@ -37,23 +37,23 @@ class AiService {
     // console.log('model: ', model);
 
     if (!apiKey) {
-      throw new Error("API Key not configured.");
+      throw new Error('API Key not configured.');
     }
 
     const instance = new ChatOpenAI({
-      modelName: model,
-      temperature: type === "json" ? 0 : 0.7,
+      model: model,
+      temperature: type === 'json' ? 0 : 0.7,
       apiKey: apiKey,
       modelKwargs:
-        type === "json"
-          ? { response_format: { type: "json_object" } }
+        type === 'json'
+          ? { response_format: { type: 'json_object' } }
           : undefined,
     });
 
-    if (type === "json") {
+    if (type === 'json') {
       this.chatModelJson = instance;
     }
-    if (type === "text") {
+    if (type === 'text') {
       this.chatModelText = instance;
     }
 
@@ -71,19 +71,19 @@ class AiService {
       // console.log(`[AiService] Verifying key for model: ${modelName}...`);
 
       const tempModel = new ChatOpenAI({
-        modelName: modelName, // Check if this key has access to this specific model
+        model: modelName, // Check if this key has access to this specific model
         temperature: 0,
         apiKey: apiKey,
         maxTokens: 100, // Keep it minimal to save tokens/latency
       });
 
       // Send a ping message
-      await tempModel.invoke("Ping");
+      await tempModel.invoke('Ping');
 
       // console.log('[AiService] Verification successful.');
       return true;
     } catch (error) {
-      console.error("[AiService] Key verification failed:", error);
+      console.error('[AiService] Key verification failed:', error);
       return false;
     }
   }
@@ -166,7 +166,7 @@ class AiService {
       tracker?.endStep("7_api_call");
 
       // --- MODE C (TRIGGER_SCAN) ---
-      if (rawJson?.type === "TRIGGER_SCAN") {
+      if (rawJson?.type === 'TRIGGER_SCAN') {
         // console.log('[AiService] Mode C detected. Scanning disk...');
 
         // 1. Scan Disk
@@ -176,8 +176,8 @@ class AiService {
         // 2. Handle Empty Workspace
         if (!actualNodes.length) {
           const emptyPayload: AiPayload = {
-            type: "TEXT",
-            message: "Workspace is empty. Cannot generate diagram from disk.",
+            type: 'TEXT',
+            message: 'Workspace is empty. Cannot generate diagram from disk.',
             data: undefined,
           };
 
@@ -190,12 +190,12 @@ class AiService {
         const cleanNodes = actualNodes.map((n) => ({ ...n }));
         const diagramData = DriftService.generateDiagramData(
           cleanNodes,
-          actualEdges
+          actualEdges,
         );
 
         const realPayload: AiPayload = {
-          type: "DIAGRAM",
-          message: "Repository structure visualized from disk.",
+          type: 'DIAGRAM',
+          message: 'Repository structure visualized from disk.',
           data: diagramData,
         };
 
@@ -234,9 +234,9 @@ class AiService {
       tracker?.endStep("9_zod_validation");
 
       if (!validation.success) {
-        console.error("[AiService] Validation Failed:", validation.error);
+        console.error('[AiService] Validation Failed:', validation.error);
         return this.fallbackText(
-          "AI generated invalid structure. Please try again with a clearer description."
+          'AI generated invalid structure. Please try again with a clearer description.',
         );
       }
 
@@ -258,10 +258,10 @@ class AiService {
 
   async analyzeDrift(missingNodes: StructureNode[]): Promise<string> {
     if (!missingNodes || missingNodes.length === 0) {
-      return "No missing files detected.";
+      return 'No missing files detected.';
     }
 
-    const list = missingNodes.map((node) => `- ${node.id}`).join("\n");
+    const list = missingNodes.map((node) => `- ${node.id}`).join('\n');
 
     const prompt = `
 You are a Tech Lead. Analyze these missing files from the repository:
@@ -274,27 +274,27 @@ Do NOT use bullet points, headers, or markdown.
 `.trim();
 
     try {
-      const model = await this.getModel("text");
+      const model = await this.getModel('text');
       const response = await model.invoke(prompt);
 
       // LangChain ChatOpenAI always returns a message object
       if ((response as any)?.content) {
-        return typeof response.content === "string"
+        return typeof response.content === 'string'
           ? response.content
           : JSON.stringify(response.content);
       }
 
-      return "Missing files detected. Review recent changes and update or restore the plan.";
+      return 'Missing files detected. Review recent changes and update or restore the plan.';
     } catch (error) {
-      console.error("[AiService] analyzeDrift error:", error);
-      return "Unable to analyze drift automatically. Please review missing files manually.";
+      console.error('[AiService] analyzeDrift error:', error);
+      return 'Unable to analyze drift automatically. Please review missing files manually.';
     }
   }
 
   async saveContext(
     sessionId: string,
     userAction: string,
-    aiPayload: AiPayload
+    aiPayload: AiPayload,
   ): Promise<void> {
     try {
       const sessionManager = SessionManager.getInstance();
@@ -306,13 +306,13 @@ Do NOT use bullet points, headers, or markdown.
 
       // console.log(`[AiService] Saved context for action: "${userAction}"`);
     } catch (error) {
-      console.error("[AiService] Failed to save context:", error);
+      console.error('[AiService] Failed to save context:', error);
     }
   }
 
   private fallbackText(message: string): AiPayload {
     return {
-      type: "TEXT",
+      type: 'TEXT',
       message,
       data: undefined,
     };
