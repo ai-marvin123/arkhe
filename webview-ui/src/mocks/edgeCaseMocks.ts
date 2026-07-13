@@ -8,7 +8,6 @@ export const missingNodeTypeMock = {
         {
           id: 'X',
           label: 'X',
-          level: 1,
           path: 'X.ts',
           // ❌ type missing on purpose
         },

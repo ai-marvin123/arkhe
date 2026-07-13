@@ -2,72 +2,21 @@ import 'dotenv/config';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
-} from '@langchain/core/prompts';
-import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { SessionManager } from '../managers/SessionManager'; // Ensure this path is correct
-import { AiPayload, AiPayloadSchema } from '../types';
-import { SystemMessage } from 'langchain';
-import { ChatOpenAI } from '@langchain/openai';
-import { generateMermaidFromJSON } from '../utils/mermaidGenerator';
-import { StructureNode } from '../types';
+} from "@langchain/core/prompts";
+import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { SessionManager } from "../managers/SessionManager"; // Ensure this path is correct
+import { AiPayload, AiPayloadSchema, StructureEdge } from "../types";
+import { SystemMessage } from "langchain";
+import { ChatOpenAI } from "@langchain/openai";
+import { generateMermaidFromJSON } from "../utils/mermaidGenerator";
+import { StructureNode } from "../types";
 
-import { ConfigManager } from '../managers/ConfigManager';
-import { FileService } from './FileService';
-import { DriftService } from './DriftService';
+import { ConfigManager } from "../managers/ConfigManager";
+import { FileService } from "./FileService";
+import { DriftService } from "./DriftService";
+import { PerformanceTracker } from "../utils/PerformanceLogger";
 
-const SYSTEM_PROMPT: string = `
-You are an expert AI Software Architect. Visualize project folder structures based on user descriptions.
-Respond strictly in JSON format. MODE A | MODE B | MODE C.
-
-MODE A: SUFFICIENT DATA. Format:
-{
-  "type": "DIAGRAM",
-  "message": "(Brief architecture explanation)",
-  "data": {
-    "jsonStructure": {
-      "nodes": [
-        {
-          "id": "root",
-          "label": "root",
-          "type": "FOLDER",
-          "level": 0,
-          "path": "/root",
-          "parentId": null
-        }
-      ],
-      "edges": [{ "source": "parent-id", "target": "child-id" }]
-    }
-  }
-}
-
-MODE B: INSUFFICIENT DATA. Format:
-{
-  "type": "TEXT",
-  "message": "Politely ask for clarification.",
-  "data": null
-}
-
-MODE C: VISUALIZE CURRENT/EXISTING REPO.
-Use this when the user explicitly asks to see, scan, or map the *current* actual file structure on the disk (e.g., "show me the current repo", "visualize my code", "map existing project").
-Format:
-{
-  "type": "TRIGGER_SCAN",
-  "message": "Repository structure visualized from disk.",
-  "data": null
-}
-
-RULES:
-1. You MUST wrap the JSON output in markdown code blocks (e.g., \`\`\`json ... \`\`\`). Do NOT output plain text without the markdown wrapper.
-2. Node "type" must be exactly "FILE" or "FOLDER" (Uppercase).
-3. IDs must be unique.
-4. ROOT NODE RULE: There must be EXACTLY ONE root node. Its "id" must be "root". Its "label" must be "root". Its "parentId" must be null. Its "level" is 0. Its "path" must be "/root".
-5. PATH CONVENTION: 
-   - Root node path is "/root".
-   - All child paths MUST start with "/root/" (e.g., "/root/src", "/root/package.json").
-   - IDs of children should generally match their full path (e.g. "/root/src/app.ts") to ensure uniqueness.
-6. Always include file extensions.
-7. Don't need include "FILE" or "FOLDER" in label of node.
-`;
+import { SYSTEM_PROMPT_V3 } from "./SystemPrompt";
 
 class AiService {
   private chatModelJson: ChatOpenAI | null = null;
@@ -142,11 +91,29 @@ class AiService {
   private minifyPayload(payload: AiPayload): string {
     const clone = JSON.parse(JSON.stringify(payload));
 
+    // Remove mermaidSyntax (can be regenerated)
     if (clone.data?.mermaidSyntax) {
       delete clone.data.mermaidSyntax;
     }
 
+    // Remove edges (can be regenerated from parentId)
+    if (clone.data?.jsonStructure?.edges) {
+      delete clone.data.jsonStructure.edges;
+    }
+
     return JSON.stringify(clone);
+  }
+
+  /**
+   * Generate edges from node parentId relationships
+   */
+  private generateEdgesFromNodes(nodes: StructureNode[]): StructureEdge[] {
+    return nodes
+      .filter((node) => node.parentId !== null && node.parentId !== undefined)
+      .map((node) => ({
+        source: node.parentId!,
+        target: node.id,
+      }));
   }
 
   /**
@@ -155,38 +122,48 @@ class AiService {
   async generateStructure(
     sessionId: string,
     userPrompt: string,
+    tracker?: PerformanceTracker
   ): Promise<AiPayload> {
     try {
-      // A. Get History Instance (Memory)
+      // Step 3: Session history load
+      tracker?.startStep("3_session_history_load");
       const sessionManager = SessionManager.getInstance();
       const history = sessionManager.getSession(sessionId);
       const historyMessages = await history.getMessages();
+      tracker?.endStep("3_session_history_load", {
+        messageCount: historyMessages.length,
+      });
 
-      // console.log('historyMessages', historyMessages);
-
-      // B. Create Prompt Template
+      // Step 4: Prompt template build
+      tracker?.startStep("4_prompt_template_build");
       const prompt = ChatPromptTemplate.fromMessages([
-        new SystemMessage(SYSTEM_PROMPT),
-        new MessagesPlaceholder('chat_history'),
-        ['human', '{input}'],
+        new SystemMessage(SYSTEM_PROMPT_V3),
+        new MessagesPlaceholder("chat_history"),
+        ["human", "{input}"],
       ]);
+      tracker?.endStep("4_prompt_template_build");
 
-      // console.log('prompt: ', prompt);
+      // Step 5: Model init
+      tracker?.startStep("5_model_init");
+      const model = await this.getModel("json");
+      tracker?.setModel(ConfigManager.getInstance().getConfig().model);
+      tracker?.endStep("5_model_init", {
+        wasCached: this.chatModelJson !== null,
+      });
 
-      // C. Create Output Parser
+      // Step 6: Chain build
+      tracker?.startStep("6_chain_build");
       const parser = new JsonOutputParser();
-
-      // D. Define the Chain (The Pipeline)
-      const model = await this.getModel('json');
       const chain = prompt.pipe(model).pipe(parser);
+      tracker?.endStep("6_chain_build");
 
-      // console.log(`[AiService] Invoking chain for session: ${sessionId}`);
-
-      // E. Execute Chain
+      // Step 7: API call (main bottleneck)
+      tracker?.startStep("7_api_call");
       const rawJson = await chain.invoke({
         chat_history: historyMessages,
         input: userPrompt,
       });
+      tracker?.endStep("7_api_call");
 
       // --- MODE C (TRIGGER_SCAN) ---
       if (rawJson?.type === 'TRIGGER_SCAN') {
@@ -229,23 +206,32 @@ class AiService {
         return realPayload;
       }
 
-      // --- CRITICAL STEP: Inject Mermaid Syntax BEFORE Validation ---
-      // We process the raw JSON here. If it's a DIAGRAM type, we calculate the mermaid string
-      // and inject it into the object so that it satisfies the Zod schema in the next step.
-      if (rawJson?.type === 'DIAGRAM' && rawJson?.data?.jsonStructure) {
+      // Step 8: Auto-generate edges + Mermaid generation
+      tracker?.startStep("8_mermaid_generation");
+      let nodeCount = 0;
+      let edgeCount = 0;
+      if (rawJson?.type === "DIAGRAM" && rawJson?.data?.jsonStructure) {
         try {
+          // Auto-generate edges from parentId
+          const nodes = rawJson.data.jsonStructure.nodes || [];
+          const generatedEdges = this.generateEdgesFromNodes(nodes);
+          rawJson.data.jsonStructure.edges = generatedEdges;
+
+          // Generate mermaid syntax
           const syntax = generateMermaidFromJSON(rawJson.data.jsonStructure);
-          // Inject mermaidSyntax into the data object
           rawJson.data.mermaidSyntax = syntax;
-          // console.log('[AiService] Mermaid syntax generated successfully.');
+          nodeCount = nodes.length;
+          edgeCount = generatedEdges.length;
         } catch (err) {
-          console.error('[AiService] Failed to generate mermaid syntax:', err);
-          // We can optionally fallback or let Zod fail depending on strategy
+          console.error("[AiService] Failed to generate mermaid syntax:", err);
         }
       }
+      tracker?.endStep("8_mermaid_generation", { nodeCount, edgeCount });
 
-      // F. Validate with Zod (Gatekeeper)
+      // Step 9: Zod validation
+      tracker?.startStep("9_zod_validation");
       const validation = AiPayloadSchema.safeParse(rawJson);
+      tracker?.endStep("9_zod_validation");
 
       if (!validation.success) {
         console.error('[AiService] Validation Failed:', validation.error);
@@ -256,15 +242,17 @@ class AiService {
 
       const validatedData = validation.data;
 
-      // G. Update Memory (Manually add this turn)
+      // Step 10: History save
+      tracker?.startStep("10_history_save");
       await history.addUserMessage(userPrompt);
-
       await history.addAIMessage(this.minifyPayload(validatedData));
+      tracker?.endStep("10_history_save");
 
       return validatedData;
     } catch (error) {
-      console.error('[AiService] Error:', error);
-      return this.fallbackText('System error while contacting AI.');
+      console.error("[AiService] Error:", error);
+      tracker?.setError(error instanceof Error ? error.message : String(error));
+      return this.fallbackText("System error while contacting AI.");
     }
   }
 

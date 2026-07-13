@@ -1,23 +1,55 @@
-// // src/test/__mocks__/vscode.ts
-// export const window = {
-//   showErrorMessage: jest.fn(),
-//   showInformationMessage: jest.fn(),
-//   createWebviewPanel: jest.fn(),
-//   showTextDocument: jest.fn(),
-// };
+// Mock for vscode module in tests
+// Provides minimal stubs for VS Code API
 
-// export const workspace = {
-//   workspaceFolders: [{ uri: { fsPath: '/mock/root' } }],
-//   getConfiguration: jest.fn(),
-// };
+import { vi } from "vitest";
 
-// export const commands = {
-//   executeCommand: jest.fn(),
-// };
+export const workspace = {
+  workspaceFolders: [{ uri: { fsPath: "/mock/workspace" } }],
+  getConfiguration: vi.fn(() => ({
+    get: vi.fn(),
+    update: vi.fn(),
+  })),
+};
 
-// export const Uri = {
-//   file: (path: string) => ({ fsPath: path, scheme: 'file' }),
-//   parse: (path: string) => ({ fsPath: path, scheme: 'file' }),
-// };
+export const window = {
+  createWebviewPanel: vi.fn(() => ({
+    webview: {
+      html: "",
+      postMessage: vi.fn().mockResolvedValue(undefined),
+      onDidReceiveMessage: vi.fn(() => ({ dispose: vi.fn() })),
+      asWebviewUri: vi.fn((uri) => uri),
+    },
+    onDidDispose: vi.fn(() => ({ dispose: vi.fn() })),
+    dispose: vi.fn(),
+  })),
+  showInformationMessage: vi.fn(),
+  showErrorMessage: vi.fn(),
+  showWarningMessage: vi.fn(),
+};
 
-// export const ViewColumn = { Beside: 1 };
+export const commands = {
+  registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+  executeCommand: vi.fn(),
+};
+
+export const Uri = {
+  file: (path: string) => ({ fsPath: path, scheme: "file" }),
+  parse: (path: string) => ({ fsPath: path, scheme: "file" }),
+  joinPath: (...args: { fsPath: string }[]) => ({
+    fsPath: args.map((a) => a.fsPath || a).join("/"),
+  }),
+};
+
+export const ViewColumn = {
+  One: 1,
+  Two: 2,
+  Beside: 1,
+};
+
+export default {
+  workspace,
+  window,
+  commands,
+  Uri,
+  ViewColumn,
+};

@@ -5,6 +5,7 @@ import * as fs from "fs"; // Need fs to read the built index.html
 import { MessageToBackend } from "./types";
 import { CommandHandler } from "./handlers/CommandHandler";
 import { ConfigManager } from "./managers/ConfigManager";
+import { StartupTracker } from "./utils/PerformanceLogger";
 
 export function activate(context: vscode.ExtensionContext) {
   ConfigManager.getInstance().initialize(context);
@@ -13,6 +14,9 @@ export function activate(context: vscode.ExtensionContext) {
   // console.log('Arkhe Extension is active!');
 
   const disposable = vscode.commands.registerCommand("arkhe.openChat", () => {
+    // Startup performance tracking
+    const startup = new StartupTracker();
+
     const panel = vscode.window.createWebviewPanel(
       "reactWebview",
       "React VS Code Extension",
@@ -29,14 +33,23 @@ export function activate(context: vscode.ExtensionContext) {
         ],
       }
     );
+    startup.markStep("1_panel_create");
 
     panel.webview.html = getWebviewContent(panel.webview, context.extensionUri);
+    startup.markStep("2_html_inject");
 
-    // ⭐ Instantiate your command handler
+    // Instantiate command handler
     const handler = new CommandHandler(panel);
+    startup.markStep("3_handler_setup");
 
-    // ⭐ Correctly typed message receiver
+    // Message receiver - finalize startup timing on first message
+    let startupFinalized = false;
     panel.webview.onDidReceiveMessage(async (message: MessageToBackend) => {
+      if (!startupFinalized) {
+        startup.markStep("4_first_message");
+        startup.finalize();
+        startupFinalized = true;
+      }
       await handler.handle(message);
     });
   });

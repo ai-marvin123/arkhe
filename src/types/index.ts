@@ -1,14 +1,13 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // --- 1. Core Data Structures ---
 
-export const DriftStatusSchema = z.enum(['MATCHED', 'MISSING', 'UNTRACKED']);
+export const DriftStatusSchema = z.enum(["MATCHED", "MISSING", "UNTRACKED"]);
 
 export const StructureNodeSchema = z.object({
-  id: z.string(), // Plan: UUID, Actual: RelativePath
+  id: z.string(), // Plan: UUID, Actual: string reflecting node label
   label: z.string(),
-  type: z.enum(['FILE', 'FOLDER']),
-  level: z.number(),
+  type: z.enum(["FILE", "FOLDER"]),
   path: z.string(),
   parentId: z.string().nullable().optional(),
   status: DriftStatusSchema.nullable().optional(), // Drift state
@@ -21,7 +20,7 @@ export const EdgeSchema = z.object({
 
 export const JsonStructureSchema = z.object({
   nodes: z.array(StructureNodeSchema),
-  edges: z.array(EdgeSchema),
+  edges: z.array(EdgeSchema).optional().default([]),
 });
 
 export const DiagramDataSchema = z.object({
@@ -31,11 +30,11 @@ export const DiagramDataSchema = z.object({
 
 // --- 2. AI Payload Wrapper (Renamed from AiResponseSchema) ---
 
-export const AiPayloadSchema = z.discriminatedUnion('type', [
+export const AiPayloadSchema = z.discriminatedUnion("type", [
   // A. Standard Chat/Text
   z
     .object({
-      type: z.literal('TEXT'),
+      type: z.literal("TEXT"),
       message: z.string(),
       data: z.undefined().nullable().optional(),
     })
@@ -44,7 +43,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // B. Standard Diagram (Generation / Load Success / Sync Success)
   z
     .object({
-      type: z.literal('DIAGRAM'),
+      type: z.literal("DIAGRAM"),
       message: z.string(),
       data: DiagramDataSchema,
     })
@@ -53,7 +52,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // C. Save Success
   z
     .object({
-      type: z.literal('DIAGRAM_SAVED'),
+      type: z.literal("DIAGRAM_SAVED"),
       message: z.string(),
     })
     .strict(),
@@ -61,7 +60,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // D. Load Failed / No File
   z
     .object({
-      type: z.literal('NO_SAVED_DIAGRAM'),
+      type: z.literal("NO_SAVED_DIAGRAM"),
       message: z.string(),
     })
     .strict(),
@@ -71,7 +70,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // E1. All Matched
   z
     .object({
-      type: z.literal('ALL_MATCHED'),
+      type: z.literal("ALL_MATCHED"),
       message: z.string(),
     })
     .strict(),
@@ -79,7 +78,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // E2. Missing Only
   z
     .object({
-      type: z.literal('MISSING_DIAGRAM'),
+      type: z.literal("MISSING_DIAGRAM"),
       message: z.string(),
       data: DiagramDataSchema,
     })
@@ -88,7 +87,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // E3. Untracked Only
   z
     .object({
-      type: z.literal('UNTRACKED_DIAGRAM'),
+      type: z.literal("UNTRACKED_DIAGRAM"),
       message: z.string(),
       data: DiagramDataSchema,
     })
@@ -97,7 +96,7 @@ export const AiPayloadSchema = z.discriminatedUnion('type', [
   // E4. Mixed (Both Missing & Untracked) - NEW 🔥
   z
     .object({
-      type: z.literal('MIXED_DIAGRAM'),
+      type: z.literal("MIXED_DIAGRAM"),
       message: z.string(), // AI Message
       missingDiagramData: DiagramDataSchema,
       untrackedDiagramData: DiagramDataSchema,
@@ -118,23 +117,26 @@ export type AiPayload = z.infer<typeof AiPayloadSchema>; // Renamed from AiRespo
 
 export type MessageToBackend =
   | {
-      command: 'GENERATE_STRUCTURE';
-      payload: { sessionId: string; prompt: string };
+      command: "GENERATE_STRUCTURE";
+      payload: {
+        sessionId: string;
+        prompt: string;
+        requestId?: string;
+        requestStartTime?: number;
+      };
     }
-  | { command: 'RESET_SESSION'; payload: { sessionId: string } }
-  | { command: 'GENERATE_REPO'; payload: { sessionId: string } }
+  | { command: "RESET_SESSION"; payload: { sessionId: string } }
+  | { command: "GENERATE_REPO"; payload: { sessionId: string } }
   | {
-      command: 'SAVE_DIAGRAM';
+      command: "SAVE_DIAGRAM";
       payload: { sessionId: string; diagramData: any };
     }
-  | { command: 'LOAD_DIAGRAM'; payload: { sessionId: string } }
-  | { command: 'CHECK_DRIFT'; payload: { sessionId: string } }
-  | { command: 'SYNC_TO_ACTUAL'; payload: { sessionId: string } }
-
-  | { command: 'GET_SETTINGS'; payload: { sessionId: string } }
-
+  | { command: "LOAD_DIAGRAM"; payload: { sessionId: string } }
+  | { command: "CHECK_DRIFT"; payload: { sessionId: string } }
+  | { command: "SYNC_TO_ACTUAL"; payload: { sessionId: string } }
+  | { command: "GET_SETTINGS"; payload: { sessionId: string } }
   | {
-      command: 'SAVE_SETTINGS';
+      command: "SAVE_SETTINGS";
       payload: {
         sessionId: string;
         apiKey?: string;
@@ -142,32 +144,31 @@ export type MessageToBackend =
         model: string;
       };
     }
-
-  | { command: 'OPEN_FILE'; payload: { path: string } }
-  | { command: 'OPEN_FOLDER'; payload: { path: string } };
+  | { command: "OPEN_FILE"; payload: { path: string } }
+  | { command: "OPEN_FOLDER"; payload: { path: string } };
 
 export type MessageToFrontend = // Renamed from BackendMessage
 
     | {
-        command: 'AI_RESPONSE';
+        command: "AI_RESPONSE";
         payload: AiPayload;
       }
     | {
-        command: 'SETTINGS_STATUS';
+        command: "SETTINGS_STATUS";
         payload: { isConfigured: boolean; config: any };
       }
     | {
-        command: 'SETTINGS_SAVED';
+        command: "SETTINGS_SAVED";
         payload: { success: boolean };
       }
     | {
-        command: 'SETTINGS_ERROR';
+        command: "SETTINGS_ERROR";
         payload: {
           success: boolean;
           message?: string;
         };
       }
     | {
-        command: 'ERROR';
+        command: "ERROR";
         payload: { message: string };
       };

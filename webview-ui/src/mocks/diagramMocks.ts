@@ -8,8 +8,8 @@ export const simpleDiagramMock: AiPayload = {
       A-->B;`,
     jsonStructure: {
       nodes: [
-        { id: 'A', label: 'A', type: 'FILE', level: 1, path: 'A.ts' },
-        { id: 'B', label: 'B', type: 'FOLDER', level: 2, path: 'components/' },
+        { id: 'A', label: 'A', type: 'FILE', path: 'A.ts' },
+        { id: 'B', label: 'B', type: 'FOLDER', path: 'components/' },
       ],
       edges: [{ source: 'A', target: 'B' }],
     },

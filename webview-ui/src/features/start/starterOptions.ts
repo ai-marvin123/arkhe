@@ -6,23 +6,22 @@ export const STARTER_OPTIONS = [
     label: 'Full-Stack Web App',
     icon: 'globe',
     prompt:
-      'Generate a simple repository structure for a full-stack web application. Include a React frontend (TypeScript), a Node.js Express backend, and a Dockerized PostgreSQL setup. Show the folder hierarchy for components, routes, and middleware.',
+      'Create a full-stack web app structure with a React frontend and Node.js Express backend. Frontend should have a src folder with components, index.tsx, and package.json. Backend should have a src folder with routes and middleware folders, server.ts, and package.json. Include docker-compose.yml and Dockerfile for PostgreSQL at the root.',
   },
   {
     id: 'starter_data_science',
     label: 'Data Science Project',
     icon: 'graph',
     prompt:
-      'Create a standard project directory for a Data Science and ML workflow in Python. Include folders for raw and processed data, Jupyter notebooks, source code modules, requirements.txt, and a folder for saved model pickles.',
+      'Build a Data Science project with a data folder (containing raw and processed subfolders), notebooks folder for Jupyter files, src folder with a modules subfolder for Python code, models folder for saved pickles, and requirements.txt.',
   },
   {
     id: 'starter_mobile',
     label: 'Mobile Application',
     icon: 'device-mobile',
     prompt:
-      'Generate a clean folder architecture for a Flutter mobile application. Focus on the "lib" directory organization, including folders for models, views, controllers (MVC), and common widgets, along with the assets and test structure.',
+      'Generate a Flutter app with a lib folder containing models, views, controllers, and widgets subfolders. Include assets and test folders at the root, plus pubspec.yaml.',
   },
-
   {
     id: 'starter_existing_repo',
     label: 'Visualize Existing Repo',
