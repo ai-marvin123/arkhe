@@ -4,18 +4,21 @@ import PanButton from "./viewButtons/PanButton";
 import ZoomInButton from "./viewButtons/ZoomInButton";
 import ZoomOutButton from "./viewButtons/ZoomOutButton";
 import FullscreenButton from "./viewButtons/FullScreenButton";
+import ExportPdfButton from "./viewButtons/ExportPdfButton";
 // import ViewAiMessageButton from './viewNavigation/ViewAiMessage';
 
 interface ViewToolstype {
   id: string;
   view: ViewSettings;
+  onExportPdf: () => void;
+  exportStatus: string;
 }
 
 const zoomStep = 0.1;
 const maxZoom = 10.0;
 const minZoom = 0.1;
 
-export default function ViewTools({ id, view }: ViewToolstype) {
+export default function ViewTools({ id, view, onExportPdf, exportStatus }: ViewToolstype) {
   const dispatch = useDiagramDispatch();
 
   //logic for pan
@@ -80,6 +83,7 @@ export default function ViewTools({ id, view }: ViewToolstype) {
 
   return (
     <div className="view-tools-container absolute bottom-2 right-2 flex space-x-2">
+      <ExportPdfButton clickFunc={onExportPdf} status={exportStatus} />
       <PanButton clickFunc={handlePan} isActive={view.isPanActive} />
       <ZoomInButton clickFunc={handleZoomIn} />
       <ZoomOutButton clickFunc={handleZoomOut} />
